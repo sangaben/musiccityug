@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%')
 DEBUG = True
-ALLOWED_HOSTS = ['musiccityug.com', 'www.musiccityug.com', '72.61.200.13']
+ALLOWED_HOSTS = ['musiccityug.com', 'www.musiccityug.com', '72.61.200.13', '.onrender']
 
 INSTALLED_APPS = [
     'jazzmin',
