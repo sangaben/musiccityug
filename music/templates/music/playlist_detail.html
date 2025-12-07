@@ -1,812 +1,147 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ playlist.name }} - Sangabiz{% endblock %}
+{% block title %}Recently Played - MusicCityUg{% endblock %}
 
 {% block content %}
-<div class="playlist-detail-container">
-    <!-- Playlist Header -->
-    <div class="playlist-header">
-        <div class="playlist-cover">
-            <div class="cover-image" style="background-image: url('{% static 'images/playlist-cover.png' %}');">
-                <div class="cover-overlay">
-                    <i class="fas fa-music"></i>
-                </div>
+<div class="container">
+    <!-- Header Section -->
+    <div class="hero" style="background: linear-gradient(135deg, #405DE6, #191414); padding: 60px 0; border-radius: 15px; margin-bottom: 40px;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🕒</div>
+            <h1 style="font-size: 48px; margin-bottom: 20px; color: white; font-weight: 900;">Recently Played</h1>
+            <p style="font-size: 18px; color: white; opacity: 0.9;">
+                Your recently listened tracks
+            </p>
+            <div style="margin-top: 20px; color: var(--gray);">
+                {{ recent_songs|length }} songs
             </div>
-        </div>
-        
-        <div class="playlist-info">
-            <p class="playlist-label">PLAYLIST</p>
-            <h1 class="playlist-title">{{ playlist.name }}</h1>
-            
-            <div class="playlist-meta">
-                <span class="creator">Created by {{ playlist.user.username }}</span>
-                <span class="dot">•</span>
-                <span class="song-count">{{ playlist.songs.count }} songs</span>
-                <span class="dot">•</span>
-                <span class="duration">{{ total_duration }}</span>
-            </div>
-            
-            <div class="playlist-actions">
-                <button class="play-btn-large" onclick="playPlaylist({{ playlist.id }})">
-                    <i class="fas fa-play"></i>
-                    Play
-                </button>
-                <button class="like-btn" id="likePlaylistBtn">
-                    <i class="far fa-heart"></i>
-                </button>
-                <button class="more-btn" id="moreActionsBtn">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Songs Section -->
-    <div class="add-songs-section">
-        <h3>Add Songs to Playlist</h3>
-        <div class="search-songs">
-            <input type="text" id="songSearch" placeholder="Search songs to add..." class="search-input">
-            <button class="search-btn">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        
-        <div class="search-results" id="searchResults" style="display: none;">
-            <!-- Search results will appear here -->
         </div>
     </div>
 
     <!-- Songs List -->
-    <div class="songs-list-container">
-        <div class="list-header">
-            <div class="header-number">#</div>
-            <div class="header-title">TITLE</div>
-            <div class="header-artist">ARTIST</div>
-            <div class="header-album">ALBUM</div>
-            <div class="header-date">DATE ADDED</div>
-            <div class="header-duration">
-                <i class="far fa-clock"></i>
+    <div class="song-list">
+        {% if recent_songs %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title">Recently Played</h2>
+                <button class="download-btn" onclick="playAllRecentSongs()">
+                    <i class="fas fa-play"></i>
+                    Play All
+                </button>
             </div>
-            <div class="header-actions"></div>
-        </div>
-        
-        <div class="songs-list" id="songsList">
-            {% for song in playlist.songs.all %}
-            <div class="song-row" data-song-id="{{ song.id }}">
-                <div class="song-number">
-                    <span class="track-number">{{ forloop.counter }}</span>
-                    <button class="play-song-btn" onclick="playSong({{ song.id }})" style="display: none;">
-                        <i class="fas fa-play"></i>
+
+            {% for song in recent_songs %}
+            <div class="song-item" data-song-id="{{ song.id }}" data-audio-url="{{ song.audio_file.url }}" data-cover-url="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}">
+                <div class="song-number">{{ forloop.counter }}</div>
+                <div class="play-icon" onclick="playThisSong({{ song.id }})">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="song-info-small">
+                    <div class="song-title">{{ song.title }}</div>
+                    <div class="song-artist">{{ song.artist.name }}</div>
+                </div>
+                <div class="song-duration">{{ song.formatted_duration }}</div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="nav-btn" onclick="likeSong({{ song.id }})" title="{% if song.is_liked %}Remove from Liked Songs{% else %}Add to Liked Songs{% endif %}">
+                        <i class="fas fa-heart {% if song.is_liked %}active{% endif %}" style="{% if song.is_liked %}color: var(--primary);{% endif %}"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadWithWatermark('{{ song.audio_file.url }}', '{{ song.title }}', '{{ song.artist.name }}')">
+                        <i class="fas fa-download"></i>
                     </button>
                 </div>
-                
-                <div class="song-info">
-                    <div class="song-cover">
-                        <img src="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}" 
-                             alt="{{ song.title }}">
-                    </div>
-                    <div class="song-details">
-                        <div class="song-title">{{ song.title }}</div>
-                        <div class="song-artist">{{ song.artist.name }}</div>
-                    </div>
-                </div>
-                
-                <div class="song-album">{{ song.album|default:"Single" }}</div>
-                
-                <div class="song-date">{{ playlist.created_at|date:"M d, Y" }}</div>
-                
-                <div class="song-duration">{{ song.duration|default:"3:45" }}</div>
-                
-                <div class="song-actions">
-                    <button class="like-btn" onclick="likeSong({{ song.id }})">
-                        <i class="far fa-heart"></i>
-                    </button>
-                    <button class="remove-btn" onclick="removeFromPlaylist({{ playlist.id }}, {{ song.id }})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            {% empty %}
-            <div class="empty-playlist">
-                <i class="fas fa-music"></i>
-                <h3>This playlist is empty</h3>
-                <p>Add some songs to get started</p>
             </div>
             {% endfor %}
-        </div>
-    </div>
-</div>
-
-<!-- Add to Playlist Modal -->
-<div class="modal" id="addToPlaylistModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Add to Playlist</h3>
-            <button class="close-modal" onclick="closeModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="playlists-list" id="playlistsList">
-                <!-- Playlists will be populated here -->
+        {% else %}
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px; color: var(--gray);">🎵</div>
+                <h2 style="color: var(--light); margin-bottom: 16px;">No recent plays</h2>
+                <p style="color: var(--gray); margin-bottom: 30px;">
+                    Start listening to music to see your recently played tracks here.
+                </p>
+                <button class="primary-btn" onclick="window.location.href='{% url 'discover' %}'">
+                    <i class="fas fa-search"></i>
+                    Discover Music
+                </button>
             </div>
-            <button class="create-new-playlist-btn" onclick="createNewPlaylist()">
-                <i class="fas fa-plus"></i>
-                Create New Playlist
-            </button>
-        </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-:root {
-    --spotify-green: #1db954;
-    --spotify-black: #191414;
-    --spotify-dark-gray: #282828;
-    --spotify-light-gray: #b3b3b3;
-    --spotify-white: #ffffff;
-}
-
-.playlist-detail-container {
-    background: linear-gradient(180deg, #2d1b69 0%, var(--spotify-black) 300px);
-    min-height: 100vh;
-    color: var(--spotify-white);
-    padding-bottom: 100px;
-}
-
-/* Playlist Header */
-.playlist-header {
-    display: flex;
-    padding: 40px 32px;
-    background: linear-gradient(180deg, rgba(45, 27, 105, 0.8) 0%, transparent 100%);
-    gap: 24px;
-    align-items: flex-end;
-}
-
-.playlist-cover {
-    flex-shrink: 0;
-}
-
-.cover-image {
-    width: 232px;
-    height: 232px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 4px;
-    box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.cover-overlay {
-    background: rgba(0, 0, 0, 0.7);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-}
-
-.cover-overlay i {
-    font-size: 48px;
-    color: var(--spotify-light-gray);
-}
-
-.playlist-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.playlist-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    color: var(--spotify-white);
-}
-
-.playlist-title {
-    font-size: 48px;
-    font-weight: 900;
-    margin: 0 0 16px 0;
-    line-height: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.playlist-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--spotify-light-gray);
-    margin-bottom: 24px;
-}
-
-.creator {
-    font-weight: 700;
-    color: var(--spotify-white);
-}
-
-.dot {
-    font-size: 8px;
-}
-
-.playlist-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.play-btn-large {
-    background: var(--spotify-green);
-    color: black;
-    border: none;
-    border-radius: 500px;
-    padding: 12px 32px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.play-btn-large:hover {
-    transform: scale(1.04);
-    background: #1ed760;
-}
-
-.like-btn, .more-btn {
-    background: transparent;
-    border: none;
-    color: var(--spotify-light-gray);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.like-btn:hover, .more-btn:hover {
-    color: var(--spotify-white);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Add Songs Section */
-.add-songs-section {
-    padding: 0 32px 24px;
-}
-
-.add-songs-section h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.search-songs {
-    display: flex;
-    gap: 12px;
-    max-width: 400px;
-}
-
-.search-input {
-    flex: 1;
-    padding: 12px 16px;
-    border-radius: 4px;
-    border: none;
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--spotify-white);
-    font-size: 14px;
-}
-
-.search-input::placeholder {
-    color: var(--spotify-light-gray);
-}
-
-.search-input:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.search-btn {
-    background: var(--spotify-green);
-    border: none;
-    border-radius: 4px;
-    padding: 12px 20px;
-    color: black;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.search-results {
-    margin-top: 16px;
-    background: var(--spotify-dark-gray);
-    border-radius: 4px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* Songs List */
-.songs-list-container {
-    padding: 0 32px;
-}
-
-.list-header {
-    display: grid;
-    grid-template-columns: 40px 4fr 2fr 2fr 1fr 60px 80px;
-    gap: 16px;
-    padding: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--spotify-light-gray);
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.header-number {
-    text-align: center;
-}
-
-.songs-list {
-    margin-top: 16px;
-}
-
-.song-row {
-    display: grid;
-    grid-template-columns: 40px 4fr 2fr 2fr 1fr 60px 80px;
-    gap: 16px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    align-items: center;
-    transition: background-color 0.2s ease;
-}
-
-.song-row:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.song-row:hover .track-number {
-    display: none;
-}
-
-.song-row:hover .play-song-btn {
-    display: flex !important;
-}
-
-.song-number {
-    position: relative;
-    text-align: center;
-    color: var(--spotify-light-gray);
-}
-
-.track-number {
-    font-size: 14px;
-}
-
-.play-song-btn {
-    background: transparent;
-    border: none;
-    color: var(--spotify-white);
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-}
-
-.song-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.song-cover {
-    width: 40px;
-    height: 40px;
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.song-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.song-details {
-    min-width: 0;
-}
-
-.song-title {
-    font-size: 16px;
-    color: var(--spotify-white);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.song-artist {
-    font-size: 14px;
-    color: var(--spotify-light-gray);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.song-album, .song-date, .song-duration {
-    font-size: 14px;
-    color: var(--spotify-light-gray);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.song-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.remove-btn {
-    background: transparent;
-    border: none;
-    color: var(--spotify-light-gray);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 2px;
-    transition: all 0.2s ease;
-}
-
-.remove-btn:hover {
-    color: #ff4757;
-    background: rgba(255, 71, 87, 0.1);
-}
-
-/* Empty State */
-.empty-playlist {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--spotify-light-gray);
-}
-
-.empty-playlist i {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-.empty-playlist h3 {
-    font-size: 24px;
-    margin-bottom: 8px;
-    color: var(--spotify-white);
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: var(--spotify-dark-gray);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 400px;
-    max-height: 80vh;
-    overflow: hidden;
-}
-
-.modal-header {
-    padding: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: 18px;
-}
-
-.close-modal {
-    background: transparent;
-    border: none;
-    color: var(--spotify-light-gray);
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.modal-body {
-    padding: 24px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.playlists-list {
-    margin-bottom: 16px;
-}
-
-.create-new-playlist-btn {
-    width: 100%;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: var(--spotify-white);
-    padding: 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.create-new-playlist-btn:hover {
-    border-color: var(--spotify-white);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .playlist-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 24px 16px;
-    }
-    
-    .cover-image {
-        width: 180px;
-        height: 180px;
-    }
-    
-    .playlist-title {
-        font-size: 32px;
-    }
-    
-    .list-header, .song-row {
-        grid-template-columns: 40px 1fr 80px;
-        gap: 12px;
-    }
-    
-    .header-album, .header-date, .header-duration,
-    .song-album, .song-date, .song-duration {
-        display: none;
-    }
-    
-    .songs-list-container, .add-songs-section {
-        padding: 0 16px;
-    }
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Search songs functionality
-document.getElementById('songSearch').addEventListener('input', function(e) {
-    const query = e.target.value.trim();
-    if (query.length > 2) {
-        searchSongs(query);
-    } else {
-        document.getElementById('searchResults').style.display = 'none';
-    }
-});
-
-function searchSongs(query) {
-    fetch(`/api/search-songs/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-            displaySearchResults(data.songs);
-        })
-        .catch(error => {
-            console.error('Error searching songs:', error);
+    function playAllRecentSongs() {
+        const songs = document.querySelectorAll('.song-item');
+        const playlist = [];
+        
+        songs.forEach((songElement, index) => {
+            const songData = {
+                id: songElement.dataset.songId,
+                title: songElement.querySelector('.song-title').textContent,
+                artist: songElement.querySelector('.song-artist').textContent,
+                audio: songElement.dataset.audioUrl,
+                cover: songElement.dataset.coverUrl
+            };
+            playlist.push(songData);
         });
-}
-
-function displaySearchResults(songs) {
-    const resultsContainer = document.getElementById('searchResults');
-    
-    if (songs.length === 0) {
-        resultsContainer.innerHTML = '<div class="no-results">No songs found</div>';
-        resultsContainer.style.display = 'block';
-        return;
+        
+        if (playlist.length > 0) {
+            playSong(playlist[0], playlist, 0);
+        }
     }
     
-    let html = '';
-    songs.forEach(song => {
-        html += `
-            <div class="search-result-item" data-song-id="${song.id}">
-                <div class="result-song-info">
-                    <img src="${song.cover_image || '/static/images/default-cover.jpg'}" 
-                         alt="${song.title}" class="result-song-cover">
-                    <div class="result-song-details">
-                        <div class="result-song-title">${song.title}</div>
-                        <div class="result-song-artist">${song.artist_name}</div>
-                    </div>
-                </div>
-                <button class="add-to-playlist-btn" onclick="addSongToPlaylist(${song.id})">
-                    <i class="fas fa-plus"></i>
-                    Add
-                </button>
-            </div>
-        `;
-    });
-    
-    resultsContainer.innerHTML = html;
-    resultsContainer.style.display = 'block';
-}
-
-// Add song to playlist
-function addSongToPlaylist(songId) {
-    const playlistId = {{ playlist.id }};
-    
-    fetch(`/api/playlists/${playlistId}/add-song/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCSRFToken(),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ song_id: songId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('Song added to playlist', 'success');
-            // Reload the page to show the new song
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            showNotification('Error adding song to playlist', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error adding song:', error);
-        showNotification('Error adding song to playlist', 'error');
-    });
-}
-
-// Remove song from playlist
-function removeFromPlaylist(playlistId, songId) {
-    if (confirm('Remove this song from the playlist?')) {
-        fetch(`/api/playlists/${playlistId}/remove-song/`, {
+    function likeSong(songId) {
+        fetch(`/like-song/${songId}/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCSRFToken(),
+                'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ song_id: songId })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                const songRow = document.querySelector(`[data-song-id="${songId}"]`);
-                if (songRow) {
-                    songRow.style.opacity = '0';
-                    setTimeout(() => {
-                        songRow.remove();
-                        updateSongCount();
-                    }, 300);
+            if (data.status === 'success') {
+                // Update heart icon
+                const heartIcon = document.querySelector(`[data-song-id="${songId}"] .fa-heart`);
+                if (data.action === 'liked') {
+                    heartIcon.style.color = 'var(--primary)';
+                    heartIcon.title = 'Remove from Liked Songs';
+                } else {
+                    heartIcon.style.color = '';
+                    heartIcon.title = 'Add to Liked Songs';
                 }
-                showNotification('Song removed from playlist', 'success');
-            } else {
-                showNotification('Error removing song', 'error');
+                
+                showMessage(data.message, 'success');
             }
         })
         .catch(error => {
-            console.error('Error removing song:', error);
-            showNotification('Error removing song', 'error');
+            console.error('Error:', error);
+            showMessage('Error updating like status', 'error');
         });
     }
-}
-
-// Play song
-function playSong(songId) {
-    fetch(`/play/${songId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCSRFToken(),
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.id) {
-            // Update your audio player here
-            console.log('Now playing:', data.title);
-        }
-    })
-    .catch(error => {
-        console.error('Error playing song:', error);
-    });
-}
-
-// Play playlist
-function playPlaylist(playlistId) {
-    fetch(`/play-playlist/${playlistId}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.songs.length > 0) {
-                // Play the first song in the playlist
-                playSong(data.songs[0].id);
-            }
-        })
-        .catch(error => {
-            console.error('Error playing playlist:', error);
-        });
-}
-
-// Utility functions
-function getCSRFToken() {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function showNotification(message, type = 'info') {
-    // Implement your notification system
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#1db954' : '#e74c3c'};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 4px;
-        z-index: 1000;
-    `;
-    document.body.appendChild(notification);
     
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-function updateSongCount() {
-    // Update song count in the header if needed
-    const songCount = document.querySelectorAll('.song-row').length;
-    const countElement = document.querySelector('.song-count');
-    if (countElement) {
-        countElement.textContent = `${songCount} songs`;
+    function showMessage(message, type) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            background: ${type === 'success' ? 'var(--primary)' : '#dc3545'};
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        messageDiv.textContent = message;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
     }
-}
-
-// Make functions globally available
-window.addSongToPlaylist = addSongToPlaylist;
-window.removeFromPlaylist = removeFromPlaylist;
-window.playSong = playSong;
-window.playPlaylist = playPlaylist;
 </script>
 {% endblock %}

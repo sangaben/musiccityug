@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Top Artists | Sangabiz Charts{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">Top Artists</h1>
+                    <p class="page-subtitle">Most popular artists based on plays and downloads</p>
+                </div>
+                <div class="time-filter">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="time" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                            <option value="weekly" {% if current_time_filter == 'weekly' %}selected{% endif %}>Weekly</option>
+                            <option value="monthly" {% if current_time_filter == 'monthly' %}selected{% endif %}>Monthly</option>
+                            <option value="all" {% if current_time_filter == 'all' %}selected{% endif %}>All Time</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Artists List -->
+            <div class="artists-grid">
+                {% for artist in artists %}
+                <div class="artist-card">
+                    <a href="{% url 'artist_detail' artist.id %}" class="artist-link">
+                        <div class="artist-image">
+                            {% if artist.profile_image %}
+                            <img src="{{ artist.profile_image.url }}" alt="{{ artist.name }}" loading="lazy">
+                            {% else %}
+                            <div class="default-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="artist-info">
+                            <h3 class="artist-name">{{ artist.name }}</h3>
+                            <div class="artist-stats">
+                                <div class="stat">
+                                    <i class="fas fa-music"></i>
+                                    <span>{{ artist.song_count }} songs</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-play"></i>
+                                    <span>{{ artist.total_plays|default:0 }} plays</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-download"></i>
+                                    <span>{{ artist.total_downloads|default:0 }} downloads</span>
+                                </div>
+                            </div>
+                            <div class="artist-rank">
+                                <span class="rank-badge">#{{ forloop.counter }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="no-results">
+                    <i class="fas fa-users"></i>
+                    <h3>No artists found</h3>
+                    <p>Check back later for artist rankings</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if artists.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if artists.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ artists.previous_page_number }}&time={{ current_time_filter }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in artists.paginator.page_range %}
+                        {% if artists.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > artists.number|add:'-3' and num < artists.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&time={{ current_time_filter }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if artists.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ artists.next_page_number }}&time={{ current_time_filter }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--gray);
+    font-size: 1.1rem;
+}
+
+.time-filter .form-select {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--light);
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.time-filter .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.artist-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: var(--transition);
+}
+
+.artist-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.artist-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.artist-image {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.artist-card:hover .artist-image img {
+    transform: scale(1.05);
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), #5f27cd);
+}
+
+.default-avatar i {
+    font-size: 4rem;
+    color: white;
+}
+
+.artist-info {
+    padding: 20px;
+    position: relative;
+}
+
+.artist-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--light);
+    margin-bottom: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.stat i {
+    width: 20px;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.artist-rank {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.rank-badge {
+    background: var(--primary);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-results i {
+    font-size: 4rem;
+    color: var(--gray);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.no-results h3 {
+    color: var(--light);
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.no-results p {
+    color: var(--gray);
+}
+
+/* Pagination */
+.pagination .page-link {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--light);
+    margin: 0 5px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.pagination .page-link:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .artists-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .artist-image {
+        height: 180px;
+    }
+}
+
+@media (max-width: 576px) {
+    .artists-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .artist-image {
+        height: 160px;
+    }
+    
+    .artist-name {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %}

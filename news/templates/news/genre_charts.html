@@ -1,0 +1,492 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ genre.name }} Charts | Sangabiz{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Genre Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="genre-header">
+                <div class="genre-banner" style="background: linear-gradient(135deg, {{ genre.color|default:'#6c5ce7' }}, #5f27cd);">
+                    <div class="genre-info">
+                        <h1 class="genre-title">{{ genre.name }}</h1>
+                        <p class="genre-description">{{ genre.description|default:"Top songs in this genre" }}</p>
+                    </div>
+                    <div class="genre-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-music"></i>
+                            <span>{{ songs.paginator.count }} songs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Time Filter -->
+            <div class="time-filter-card mt-4">
+                <form method="get" class="time-filter-form">
+                    <select name="time" class="form-select" onchange="this.form.submit()">
+                        <option value="weekly" {% if current_time_filter == 'weekly' %}selected{% endif %}>This Week</option>
+                        <option value="monthly" {% if current_time_filter == 'monthly' %}selected{% endif %}>This Month</option>
+                        <option value="all" {% if current_time_filter == 'all' %}selected{% endif %}>All Time</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Genre Songs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="section-header mb-4">
+                <h2 class="section-title">Top {{ genre.name }} Songs</h2>
+            </div>
+            
+            <div class="genre-songs-list">
+                {% for song in songs %}
+                <div class="genre-song-item">
+                    <div class="song-rank">#{{ forloop.counter0|add:songs.start_index|default:forloop.counter }}</div>
+                    <div class="song-image">
+                        <img src="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}" 
+                             alt="{{ song.title }}"
+                             loading="lazy">
+                    </div>
+                    <div class="song-details">
+                        <h3 class="song-title">{{ song.title }}</h3>
+                        <p class="song-artist">{{ song.artist.name }}</p>
+                        <div class="song-meta">
+                            <span class="song-plays"><i class="fas fa-play"></i> {{ song.plays }}</span>
+                            <span class="song-downloads"><i class="fas fa-download"></i> {{ song.downloads }}</span>
+                            <span class="song-duration">{{ song.duration|time:"i:s" }}</span>
+                        </div>
+                    </div>
+                    <div class="song-actions">
+                        <button class="play-btn" onclick="playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="download-btn" onclick="downloadSong({{ song.id }}, this)">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-songs">
+                    <i class="fas fa-music"></i>
+                    <h3>No songs found</h3>
+                    <p>There are no {{ genre.name }} songs available</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if songs.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if songs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ songs.previous_page_number }}&time={{ current_time_filter }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in songs.paginator.page_range %}
+                        {% if songs.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > songs.number|add:'-3' and num < songs.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&time={{ current_time_filter }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if songs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ songs.next_page_number }}&time={{ current_time_filter }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Other Genres -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="section-title mb-4">Browse Other Genres</h2>
+            <div class="other-genres-grid">
+                {% for other_genre in genres %}
+                {% if other_genre.id != genre.id %}
+                <a href="{% url 'genre_charts' other_genre.id %}" class="other-genre-card">
+                    <div class="genre-icon" style="background: {{ other_genre.color|default:'#6c5ce7' }};">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <h4>{{ other_genre.name }}</h4>
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.genre-header {
+    margin-bottom: 30px;
+}
+
+.genre-banner {
+    border-radius: 20px;
+    padding: 40px 30px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.genre-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+}
+
+.genre-info {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+}
+
+.genre-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.genre-description {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+}
+
+.genre-stats {
+    position: relative;
+    z-index: 1;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    background: rgba(255,255,255,0.2);
+    padding: 10px 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-item i {
+    font-size: 1.5rem;
+}
+
+.time-filter-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.time-filter-form .form-select {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--light);
+    border-radius: 10px;
+    padding: 12px 15px;
+    max-width: 200px;
+}
+
+.time-filter-form .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+.genre-songs-list {
+    background: var(--card-bg);
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+.genre-song-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: var(--transition);
+    gap: 20px;
+}
+
+.genre-song-item:last-child {
+    border-bottom: none;
+}
+
+.genre-song-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.song-rank {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 50px;
+    text-align: center;
+}
+
+.song-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid var(--primary);
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.song-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--light);
+    margin: 0 0 5px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-artist {
+    color: var(--primary);
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+}
+
+.song-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.song-meta i {
+    margin-right: 5px;
+}
+
+.song-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.play-btn, .download-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1.1rem;
+}
+
+.play-btn {
+    background: var(--primary);
+    color: white;
+}
+
+.play-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+
+.download-btn {
+    background: rgba(255,255,255,0.1);
+    color: var(--light);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.download-btn:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+.no-songs {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-songs i {
+    font-size: 4rem;
+    color: var(--gray);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.no-songs h3 {
+    color: var(--light);
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+}
+
+.no-songs p {
+    color: var(--gray);
+    font-size: 1.1rem;
+}
+
+.other-genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.other-genre-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: var(--transition);
+}
+
+.other-genre-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.genre-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.other-genre-card h4 {
+    color: var(--light);
+    font-size: 1.1rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pagination */
+.pagination .page-link {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--light);
+    margin: 0 5px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.pagination .page-link:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .genre-title {
+        font-size: 2.5rem;
+    }
+    
+    .genre-banner {
+        padding: 30px 20px;
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .genre-song-item {
+        padding: 15px;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .song-rank {
+        min-width: 40px;
+        font-size: 1.5rem;
+    }
+    
+    .song-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .song-actions {
+        margin-left: auto;
+    }
+    
+    .song-meta {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .genre-title {
+        font-size: 2rem;
+    }
+    
+    .genre-song-item {
+        padding: 12px;
+    }
+    
+    .song-title {
+        font-size: 1.1rem;
+    }
+    
+    .play-btn, .download-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .other-genres-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+}
+</style>
+{% endblock %}

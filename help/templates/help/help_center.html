@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Help Center - Sangabiz{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="hero" style="background: linear-gradient(135deg, #405DE6, #191414); padding: 60px 0; border-radius: 15px; margin-bottom: 40px;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">❓</div>
+            <h1 style="font-size: 48px; margin-bottom: 20px; color: white; font-weight: 900;">Help Center</h1>
+            <p style="font-size: 18px; color: white; opacity: 0.9;">
+                Get help with using Sangabiz Music Platform
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Help Sections -->
+    <div class="charts-grid" style="margin-bottom: 50px;">
+        <div class="chart-section" style="text-align: center; cursor: pointer;" onclick="scrollToSection('uploading')">
+            <div style="font-size: 48px; margin-bottom: 20px;">🎵</div>
+            <h3 style="color: var(--light); margin-bottom: 10px;">Uploading Music</h3>
+            <p style="color: var(--gray);">Learn how to upload your songs</p>
+        </div>
+
+        <div class="chart-section" style="text-align: center; cursor: pointer;" onclick="scrollToSection('account')">
+            <div style="font-size: 48px; margin-bottom: 20px;">👤</div>
+            <h3 style="color: var(--light); margin-bottom: 10px;">Account Help</h3>
+            <p style="color: var(--gray);">Manage your account settings</p>
+        </div>
+
+        <div class="chart-section" style="text-align: center; cursor: pointer;" onclick="scrollToSection('premium')">
+            <div style="font-size: 48px; margin-bottom: 20px;">⭐</div>
+            <h3 style="color: var(--light); margin-bottom: 10px;">Premium Features</h3>
+            <p style="color: var(--gray);">About premium subscriptions</p>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="chart-section" style="margin-bottom: 40px;">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        
+        <div class="faq-list">
+            {% for faq in faqs %}
+            <div class="faq-item" style="margin-bottom: 20px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h3 style="color: var(--light); margin-bottom: 10px; font-size: 18px;">
+                    {{ faq.question }}
+                </h3>
+                <p style="color: var(--gray); line-height: 1.6;">
+                    {{ faq.answer }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Detailed Help Sections -->
+    <div id="uploading" class="chart-section" style="margin-bottom: 40px;">
+        <h2 class="section-title">🎵 Uploading Music</h2>
+        
+        <div style="color: var(--gray); line-height: 1.7;">
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">How to Upload Your Music:</h3>
+            <ol style="margin-left: 20px; margin-bottom: 20px;">
+                <li>Go to your Artist Dashboard</li>
+                <li>Click on "Upload Music"</li>
+                <li>Fill in the song details (title, genre, etc.)</li>
+                <li>Select your audio file (MP3, WAV, OGG, M4A)</li>
+                <li>Add a cover image (optional but recommended)</li>
+                <li>Click "Upload" and wait for approval</li>
+            </ol>
+
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">File Requirements:</h3>
+            <ul style="margin-left: 20px; margin-bottom: 20px;">
+                <li><strong>Audio Formats:</strong> MP3, WAV, OGG, M4A</li>
+                <li><strong>Max File Size:</strong> 10MB</li>
+                <li><strong>Cover Image:</strong> JPG, PNG (recommended: 1000x1000px)</li>
+                <li><strong>Audio Quality:</strong> Minimum 128kbps, recommended 320kbps</li>
+            </ul>
+
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">Approval Process:</h3>
+            <p>All uploaded songs go through a review process to ensure quality and copyright compliance. This usually takes 24-48 hours.</p>
+        </div>
+    </div>
+
+    <div id="account" class="chart-section" style="margin-bottom: 40px;">
+        <h2 class="section-title">👤 Account Help</h2>
+        
+        <div style="color: var(--gray); line-height: 1.7;">
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">Managing Your Account:</h3>
+            <ul style="margin-left: 20px; margin-bottom: 20px;">
+                <li><strong>Update Profile:</strong> Go to Settings to change your personal information</li>
+                <li><strong>Change Password:</strong> Use the password reset feature if needed</li>
+                <li><strong>Artist Account:</strong> Contact support to upgrade to an artist account</li>
+                <li><strong>Privacy Settings:</strong> Control what information is visible to others</li>
+            </ul>
+
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">Troubleshooting:</h3>
+            <ul style="margin-left: 20px; margin-bottom: 20px;">
+                <li><strong>Login Issues:</strong> Use the "Forgot Password" feature</li>
+                <strong>Email Not Received:</strong> Check spam folder or contact support</li>
+                <li><strong>Account Verification:</strong> Allow 24-48 hours for artist verification</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="premium" class="chart-section" style="margin-bottom: 40px;">
+        <h2 class="section-title">⭐ Premium Features</h2>
+        
+        <div style="color: var(--gray); line-height: 1.7;">
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">What You Get with Premium:</h3>
+            <ul style="margin-left: 20px; margin-bottom: 20px;">
+                <li><strong>Offline Downloads:</strong> Download songs and listen without internet</li>
+                <li><strong>High Quality Audio:</strong> 320kbps streaming quality</li>
+                <li><strong>Ad-Free Experience:</strong> No interruptions while listening</li>
+                <li><strong>Unlimited Skips:</strong> Skip as many songs as you want</li>
+                <li><strong>Early Access:</strong> Get new releases before free users</li>
+                <li><strong>Exclusive Content:</strong> Access to special tracks and content</li>
+            </ul>
+
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">How to Subscribe:</h3>
+            <ol style="margin-left: 20px; margin-bottom: 20px;">
+                <li>Go to the Premium page</li>
+                <li>Choose your plan (Premium or Premium Plus)</li>
+                <li>Select payment method (Mobile Money or Card)</li>
+                <li>Complete the payment process</li>
+                <li>Enjoy premium features immediately</li>
+            </ol>
+
+            <h3 style="color: var(--light); margin: 20px 0 10px 0;">Payment Methods:</h3>
+            <ul style="margin-left: 20px; margin-bottom: 20px;">
+                <li><strong>MTN Mobile Money</strong> (Uganda)</li>
+                <li><strong>Airtel Money</strong> (Uganda)</li>
+                <li><strong>Credit/Debit Cards</strong> (International)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contact Support Section -->
+    <div class="chart-section" style="background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(64, 93, 230, 0.1)); border: 1px solid rgba(29, 185, 84, 0.3);">
+        <h2 class="section-title">📞 Need More Help?</h2>
+        <p style="color: var(--gray); margin-bottom: 25px; font-size: 16px;">
+            Our support team is here to help you with any issues or questions you might have.
+        </p>
+
+        <div class="help-contacts">
+            <a href="https://wa.me/256766670007?text=Hello%20Sangabiz%20Support,%20I%20need%20help%20with:" 
+               target="_blank" 
+               class="contact-item whatsapp">
+                <div class="contact-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <div class="contact-details">
+                    <div class="contact-title">WhatsApp Support</div>
+                    <div class="contact-info">+256 7666 70007</div>
+                    <div class="contact-description">Get instant help with any issues</div>
+                    <div class="quick-response">
+                        <i class="fas fa-bolt"></i>
+                        Quick Response
+                    </div>
+                </div>
+                <div class="contact-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="mailto:sangaben07@gmail.com?subject=Sangabiz%20Support%20Request&body=Hello%20Sangabiz%20Team,%0A%0AI%20need%20help%20with:%0A%0A-" 
+               class="contact-item email">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-details">
+                    <div class="contact-title">Email Support</div>
+                    <div class="contact-info">sangaben07@gmail.com</div>
+                    <div class="contact-description">Detailed assistance for complex issues</div>
+                </div>
+                <div class="contact-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function scrollToSection(sectionId) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Add smooth scrolling for all internal links
+    document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('a[href^="#"]');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                scrollToSection(targetId);
+            });
+        });
+    });
+</script>
+
+<style>
+    .faq-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .faq-item:hover {
+        background: rgba(255,255,255,0.08);
+        border-left-color: var(--primary);
+        transform: translateX(5px);
+    }
+
+    .help-contacts {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .contact-item:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover .contact-icon {
+        transform: scale(1.1);
+    }
+
+    .whatsapp .contact-icon {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+    }
+
+    .email .contact-icon {
+        background: linear-gradient(135deg, #EA4335, #D14836);
+        color: white;
+    }
+
+    .contact-details {
+        flex: 1;
+    }
+
+    .contact-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--light);
+        margin-bottom: 4px;
+    }
+
+    .contact-info {
+        font-size: 14px;
+        color: var(--gray);
+        margin-bottom: 6px;
+    }
+
+    .contact-description {
+        font-size: 12px;
+        color: var(--dark-gray);
+        line-height: 1.4;
+    }
+
+    .contact-arrow {
+        color: var(--gray);
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover .contact-arrow {
+        color: var(--primary);
+        transform: translateX(4px);
+    }
+
+    .quick-response {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(37, 211, 102, 0.2);
+        color: #25D366;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .quick-response i {
+        font-size: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+</style>
+{% endblock %}

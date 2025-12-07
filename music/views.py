@@ -1,24 +1,25 @@
+# music/views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from django.db.models import Count, Sum, Q
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.models import User
+from django.http import JsonResponse, HttpResponse, FileResponse
+from django.db.models import Q, Count, Sum, Avg, F
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.core.paginator import Paginator
+from django.conf import settings
+from django.db import transaction
+from datetime import timedelta
 import json
 import os
-from datetime import timedelta
+import tempfile
+import shutil
+import re
 
-from .models import Song, Genre, Playlist, UserProfile, SongPlay, SongDownload, Artist, Like, Follow
+from .models import Song, Genre, SongPlay, SongDownload
 from .forms import SongUploadForm
 
-
-
-# ===== UTILITY FUNCTIONS =====
+# Utility function to get client IP
 def get_client_ip(request):
-    """Get client IP address"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
@@ -26,1317 +27,1088 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-
-# ===== AUTHENTICATION VIEWS =====
-def login_view(request):
-    """User login view"""
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
+# ========== COMPLETE HELPER FUNCTIONS ==========
+def create_branded_cover(song, logo_path, output_path):
+    """Create branded cover art with ONLY MusicCityUg logo (replaces song cover)"""
+    try:
+        from PIL import Image, ImageDraw, ImageFont, ImageFilter
         
-        if user is not None:
-            login(request, user)
-            messages.success(request, f'Welcome back, {username}!')
-            return redirect('home')
+        print(f"🎨 Creating branded cover for: {song.title}")
+        print(f"🏷️ Using logo: {logo_path}")
+        
+        # Create base image (600x600 for good quality)
+        img = Image.new('RGB', (600, 600), color='#121212')
+        draw = ImageDraw.Draw(img)
+        
+        # Add gradient background (dark to slightly lighter)
+        for i in range(600):
+            r = int(18 + (i / 600) * 30)
+            g = int(18 + (i / 600) * 30)
+            b = int(18 + (i / 600) * 30)
+            draw.line([(0, i), (600, i)], fill=(r, g, b))
+        
+        # Add Sangabiz logo as the MAIN element
+        if logo_path and os.path.exists(logo_path):
+            try:
+                print(f"🏷️ Loading logo: {logo_path}")
+                logo = Image.open(logo_path)
+                
+                # Convert to RGBA if not already
+                if logo.mode != 'RGBA':
+                    logo = logo.convert('RGBA')
+                
+                # Resize logo to be large and centered (400x400)
+                logo = logo.resize((400, 400), Image.Resampling.LANCZOS)
+                
+                # Create circular mask for logo
+                mask = Image.new('L', (400, 400), 0)
+                draw_mask = ImageDraw.Draw(mask)
+                draw_mask.ellipse([(0, 0), (400, 400)], fill=255)
+                
+                # Apply slight blur to edges for smooth look
+                mask = mask.filter(ImageFilter.GaussianBlur(2))
+                
+                # Paste logo in the center
+                img.paste(logo, (100, 100), mask)
+                
+                # Add glow effect around logo
+                for i in range(1, 5):
+                    draw.ellipse([(100-i, 100-i), (500+i, 500+i)], 
+                                outline='rgba(29, 185, 84, 0.2)', width=1)
+                
+                print("✅ Logo added as main cover element")
+                
+            except Exception as e:
+                print(f"⚠️ Error loading logo: {e}")
+                # Fallback: Create music note design
+                draw.ellipse([(150, 150), (450, 450)], 
+                           outline='#1DB954', width=10)
+                try:
+                    font = ImageFont.truetype("arial.ttf", 120)
+                except:
+                    font = ImageFont.load_default()
+                draw.text((300, 300), "♪", fill='#1DB954', font=font, anchor="mm")
         else:
-            messages.error(request, 'Invalid username or password.')
+            print("⚠️ No logo found, creating default design")
+            # Create default music note design
+            draw.ellipse([(150, 150), (450, 450)], 
+                       outline='#1DB954', width=10)
+            try:
+                font = ImageFont.truetype("arial.ttf", 120)
+            except:
+                font = ImageFont.load_default()
+            draw.text((300, 300), "♪", fill='#1DB954', font=font, anchor="mm")
+        
+        # Add branding text at the bottom
+        try:
+            font_brand = ImageFont.truetype("arial.ttf", 28)
+        except:
+            font_brand = ImageFont.load_default()
+        
+        # Add "Downloaded from" text
+        draw.text((300, 550), "Downloaded from", 
+                 fill='#FFFFFF', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
+        
+        # Add "Sangabiz" in green
+        draw.text((300, 580), "MusicCityUg", 
+                 fill='#1DB954', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
+        
+        # Add song info at the top
+        try:
+            font_info = ImageFont.truetype("arial.ttf", 20)
+        except:
+            font_info = ImageFont.load_default()
+        
+        # Song title (truncate if too long)
+        title = song.title
+        if len(title) > 25:
+            title = title[:22] + "..."
+        draw.text((300, 40), title, 
+                 fill='white', font=font_info, anchor="mm", stroke_width=1, stroke_fill='black')
+        
+        # Artist name
+        artist = song.artist.name
+        if len(artist) > 25:
+            artist = artist[:22] + "..."
+        draw.text((300, 65), f"by {artist}", 
+                 fill='#1DB954', font=font_info, anchor="mm", stroke_width=1, stroke_fill='black')
+        
+        # Save the image
+        img.save(output_path, 'JPEG', quality=95)
+        print(f"✅ Branded cover saved to: {output_path}")
+        print(f"📏 Cover size: {os.path.getsize(output_path)} bytes")
+        
+    except Exception as e:
+        print(f"❌ Error creating branded cover: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Create ultra-simple fallback cover
+        from PIL import Image, ImageDraw
+        img = Image.new('RGB', (600, 600), color='#1DB954')
+        draw = ImageDraw.Draw(img)
+        draw.text((300, 250), "MusicCityUg", 
+                 fill='white', font=ImageFont.load_default(), anchor="mm")
+        draw.text((300, 300), song.title[:20], 
+                 fill='white', font=ImageFont.load_default(), anchor="mm")
+        img.save(output_path, 'JPEG')
+        print(f"⚠️ Created fallback cover: {output_path}")
+
+def add_metadata_to_audio(audio_path, song, cover_path, logo_path):
+    """Add metadata and branding to audio file"""
+    try:
+        print(f"🎵 Adding metadata to audio: {audio_path}")
+        
+        # Ensure the audio file exists
+        if not os.path.exists(audio_path):
+            print(f"❌ Audio file not found: {audio_path}")
+            return False
+        
+        # Try using mutagen (for MP3 files)
+        try:
+            import mutagen
+            from mutagen.id3 import ID3, APIC, TIT2, TPE1, TALB, TCON, TDRC, COMM, TPE2
+            from mutagen.mp3 import MP3
+            
+            # Load audio file
+            audio = MP3(audio_path, ID3=ID3)
+            
+            # Remove existing ID3 tags to start fresh
+            try:
+                audio.delete()
+            except:
+                pass
+            
+            # Create new ID3 tags if they don't exist
+            if audio.tags is None:
+                audio.add_tags()
+            
+            # Add basic metadata
+            audio['TIT2'] = TIT2(encoding=3, text=[song.title])  # Title
+            audio['TPE1'] = TPE1(encoding=3, text=[song.artist.name])  # Artist
+            
+            # Album/Artist (use artist name if no album)
+            if hasattr(song, 'album') and song.album:
+                audio['TALB'] = TALB(encoding=3, text=[song.album.name])
+                audio['TPE2'] = TPE2(encoding=3, text=[song.artist.name])  # Album artist
+            else:
+                audio['TALB'] = TALB(encoding=3, text=[f"{song.artist.name} - Singles"])
+                audio['TPE2'] = TPE2(encoding=3, text=[song.artist.name])
+            
+            # Genre
+            audio['TCON'] = TCON(encoding=3, text=[song.genre.name])
+            
+            # Year/Date
+            if song.upload_date:
+                year = song.upload_date.strftime("%Y")
+                audio['TDRC'] = TDRC(encoding=3, text=[year])
+            
+            # Add cover art if available
+            if cover_path and os.path.exists(cover_path):
+                try:
+                    with open(cover_path, 'rb') as cover_file:
+                        cover_data = cover_file.read()
+                    
+                    audio.tags.add(
+                        APIC(
+                            encoding=3,  # UTF-8
+                            mime='image/jpeg',
+                            type=3,  # Cover (front)
+                            desc='Cover',
+                            data=cover_data
+                        )
+                    )
+                    print(f"✅ Added cover art: {cover_path}")
+                except Exception as e:
+                    print(f"⚠️ Error adding cover art: {e}")
+            else:
+                print("ℹ️ No cover art to add")
+            
+            # Add branding comment
+            comment_text = f"Downloaded from MusicCityUg - Uganda's Music Hub\n{song.artist.name} - {song.title}"
+            audio['COMM'] = COMM(encoding=3, lang='eng', desc='', text=[comment_text])
+            
+            # Save metadata
+            audio.save(v2_version=3)  # Use ID3v2.3 for better compatibility
+            print(f"✅ Metadata added successfully using mutagen")
+            
+            return True
+            
+        except ImportError:
+            print("⚠️ mutagen not installed, trying eyed3")
+            # Fallback to eyed3 if mutagen fails
+            try:
+                import eyed3
+                
+                audiofile = eyed3.load(audio_path)
+                if audiofile.tag is None:
+                    audiofile.initTag()
+                
+                # Set basic metadata
+                audiofile.tag.title = song.title
+                audiofile.tag.artist = song.artist.name
+                audiofile.tag.album = f"{song.artist.name} - Singles"
+                audiofile.tag.album_artist = song.artist.name
+                audiofile.tag.genre = song.genre.name
+                
+                if song.upload_date:
+                    audiofile.tag.year = song.upload_date.year
+                
+                # Add cover art
+                if cover_path and os.path.exists(cover_path):
+                    with open(cover_path, 'rb') as img_file:
+                        audiofile.tag.images.set(3, img_file.read(), 'image/jpeg')
+                
+                # Add comment
+                audiofile.tag.comments.set("Downloaded from MusicCityUg - Uganda's Music Hub\n")
+                
+                audiofile.tag.save()
+                print(f"✅ Metadata added using eyed3")
+                return True
+                
+            except ImportError:
+                print("⚠️ eyed3 not installed, using simple metadata")
+                # If both libraries fail, at least we tried
+                return False
+            except Exception as e:
+                print(f"⚠️ Error with eyed3: {e}")
+                return False
+        
+    except Exception as e:
+        print(f"❌ Error adding metadata: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+# ========== CHECK PREMIUM STATUS ==========
+def check_premium_access(request, song_id):
+    """Check if user can download a song"""
+    if request.method == 'GET':
+        try:
+            song = get_object_or_404(Song, id=song_id)
+            
+            can_access = song.can_be_accessed_by(request.user)
+            
+            return JsonResponse({
+                'success': True,
+                'song_id': song_id,
+                'title': song.title,
+                'is_premium': song.is_premium_only,
+                'can_access': can_access,
+                'is_authenticated': request.user.is_authenticated,
+                'message': 'Premium song - login required' if song.is_premium_only and not can_access else 'Download available'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
     
-    return render(request, 'login.html')
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
 
-
-def signup(request):
-    """User registration view"""
-    genres = Genre.objects.all()
+def home(request):
+    """Home page with featured content and news"""
+    print("🔄 Home view called")
     
-    if request.method == 'POST':
-        # Get form data
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        is_artist = request.POST.get('is_artist') == 'on'  # This handles the checkbox
-        artist_name = request.POST.get('artist_name')
-        bio = request.POST.get('bio')
-        genre_id = request.POST.get('genre')
-        terms = request.POST.get('terms') == 'on'
+    try:
+        # Get featured songs (most played + recently uploaded)
+        featured_songs = Song.objects.filter(
+            is_approved=True
+        ).select_related('artist', 'genre').order_by('-plays', '-upload_date')[:12]
+        print(f"🎵 Found {len(featured_songs)} featured songs")
 
-        # Debug print to see what's being received
-        print(f"is_artist value: {request.POST.get('is_artist')}")
-        print(f"Artist checkbox checked: {is_artist}")
+        # Most played songs (for top charts)
+        most_played = Song.objects.filter(is_approved=True).select_related('artist', 'genre').order_by('-plays')[:10]
+        print(f"🔥 Found {len(most_played)} most played songs")
 
-        # Basic validation
-        errors = []
-        
-        # Required fields validation
-        if not all([username, email, password1, password2, first_name, last_name]):
-            errors.append('All required fields must be filled.')
-        
-        if not terms:
-            errors.append('You must agree to the Terms of Service.')
-        
-        if password1 != password2:
-            errors.append('Passwords do not match.')
-        
-        if User.objects.filter(username=username).exists():
-            errors.append('Username already exists.')
-        
-        if User.objects.filter(email=email).exists():
-            errors.append('Email already exists.')
-        
-        # Password strength validation
-        if len(password1) < 8:
-            errors.append('Password must be at least 8 characters long.')
-        
-        # Artist-specific validation
-        if is_artist:
-            if not artist_name:
-                errors.append('Artist name is required when signing up as an artist.')
-            elif len(artist_name) < 2:
-                errors.append('Artist name must be at least 2 characters long.')
-        
-        if errors:
-            for error in errors:
-                messages.error(request, error)
-            # Return with POST data preserved (your template uses request.POST directly)
-            return render(request, 'signup.html', {'genres': genres})
+        # Most downloaded songs (for top charts)
+        most_downloaded = Song.objects.filter(is_approved=True).select_related('artist', 'genre').order_by('-downloads')[:10]
+        print(f"📥 Found {len(most_downloaded)} most downloaded songs")
+
+        # New artists
+        from artists.models import Artist
+        new_artists = Artist.objects.annotate(
+            total_songs=Count('songs', filter=Q(songs__is_approved=True)),
+            total_plays=Sum('songs__plays')
+        ).order_by('-created_at')[:8]
+        print(f"👤 Found {len(new_artists)} new artists")
+
+        # Trending artists (based on recent plays)
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        trending_artists = Artist.objects.annotate(
+            weekly_plays=Count('songs__play_history', filter=Q(songs__play_history__played_at__gte=seven_days_ago)),
+            followers_count=Count('followers')
+        ).order_by('-weekly_plays')[:8]
+        print(f"📈 Found {len(trending_artists)} trending artists")
+
+        # Get stats for the homepage
+        total_songs = Song.objects.filter(is_approved=True).count()
+        total_plays = SongPlay.objects.count()
+        total_downloads = SongDownload.objects.count()
+        total_artists = Artist.objects.count()
+        print(f"📊 Stats - Songs: {total_songs}, Plays: {total_plays}, Downloads: {total_downloads}, Artists: {total_artists}")
+
+        # News data - handle cases where news app might not be available
+        featured_news = []
+        trending_news = []
         
         try:
-            # Create user
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password1,
-                first_name=first_name,
-                last_name=last_name
-            )
+            from news.models import NewsArticle
+            featured_news = NewsArticle.objects.filter(
+                is_featured=True, 
+                is_published=True
+            ).order_by('-published_date')[:2]
             
-            # Create UserProfile
-            user_profile, created = UserProfile.objects.get_or_create(user=user)
-            if is_artist:
-                user_profile.user_type = 'artist'
-                user_profile.save()
+            trending_news = NewsArticle.objects.filter(
+                is_published=True
+            ).order_by('-views', '-published_date')[:6]
             
-            # Create artist profile if user is artist
-            if is_artist:
-                genre = None
-                if genre_id:
-                    try:
-                        genre = Genre.objects.get(id=genre_id)
-                    except Genre.DoesNotExist:
-                        pass
-                
-                # Create artist
-                artist = Artist.objects.create(
-                    user=user,
-                    name=artist_name.strip(),
-                    bio=bio.strip() if bio else '',
-                    genre=genre
-                )
-                
-                messages.success(request, f'Artist account "{artist_name}" created successfully! You can now upload your music.')
-            else:
-                messages.success(request, 'Account created successfully! Welcome to Sangabiz.')
+            print(f"📰 Found {len(featured_news)} featured news and {len(trending_news)} trending news")
             
-            # Login user
-            from django.contrib.auth import login
-            login(request, user)
-            
-            # Redirect based on user type
-            if is_artist:
-                return redirect('artist_dashboard')  # Make sure this URL exists
-            else:
-                return redirect('home')
-            
-        except Exception as e:
-            messages.error(request, f'Error creating account: {str(e)}')
-            # If user was created but failed later, delete it
-            if 'user' in locals() and user.id:
-                user.delete()
-            
-            return render(request, 'signup.html', {'genres': genres})
-    
-    # GET request - show empty form
-    return render(request, 'signup.html', {'genres': genres})
+        except ImportError:
+            print("ℹ️ News app not available")
+        except Exception as news_error:
+            print(f"⚠️ News data error: {news_error}")
 
-
-def logout_view(request):
-    """User logout view"""
-    logout(request)
-    messages.info(request, 'You have been successfully logged out.')
-    return redirect('home')
-
-
-# ===== MAIN PAGES VIEWS =====
-def home(request):
-    """Home page with featured content"""
-    # Get featured songs (most played)
-    featured_songs = Song.objects.all().order_by('-plays')[:8]
-    
-    # Get most played songs for charts
-    most_played = Song.objects.all().order_by('-plays')[:5]
-    most_downloaded = Song.objects.all().order_by('-downloads')[:5]
-    
-    # Get genres with song counts
-    genres = Genre.objects.annotate(song_count=Count('song'))
-
-    genres = Genre.objects.annotate(song_count=Count('song')).filter(song_count__gt=0)
-    
-    # Get total stats
-    total_songs = Song.objects.count()
-    total_plays = Song.objects.aggregate(total=Sum('plays'))['total'] or 0
-    total_downloads = Song.objects.aggregate(total=Sum('downloads'))['total'] or 0
-    total_artists = Artist.objects.filter(is_verified=True).count()
-    
-    # Get recent plays for authenticated users
-    recent_plays = []
-    if request.user.is_authenticated:
-        recent_plays = SongPlay.objects.filter(user=request.user).select_related('song').order_by('-played_at')[:5]
-    
-    # Get new artists (last 30 days) - Using existing properties instead of annotations
-    thirty_days_ago = timezone.now() - timedelta(days=30)
-    new_artists = Artist.objects.filter(
-        created_at__gte=thirty_days_ago,
-        is_verified=True
-    ).order_by('-created_at')[:8]
-    
-    # Get trending artists (most plays in last 7 days)
-    seven_days_ago = timezone.now() - timedelta(days=7)
-    trending_artists = Artist.objects.filter(
-        is_verified=True
-    ).annotate(
-        weekly_plays=Sum(
-            'songs__plays',
-            filter=Q(songs__upload_date__gte=seven_days_ago)
-        ),
-        followers_count=Count('followers')
-    ).filter(
-        weekly_plays__isnull=False
-    ).order_by('-weekly_plays')[:8]
-    
-    context = {
-        'featured_songs': featured_songs,
-        'most_played': most_played,
-        'most_downloaded': most_downloaded,
-        'genres': genres,
-        'total_songs': total_songs,
-        'total_plays': total_plays,
-        'total_downloads': total_downloads,
-        'total_artists': total_artists,
-        'recent_plays': recent_plays,
-        'new_artists': new_artists,
-        'trending_artists': trending_artists,
-    }
-    return render(request, 'home.html', context)
-
+        context = {
+            'featured_songs': featured_songs,
+            'most_played': most_played,
+            'most_downloaded': most_downloaded,
+            'new_artists': new_artists,
+            'trending_artists': trending_artists,
+            'total_songs': total_songs,
+            'total_plays': total_plays,
+            'total_downloads': total_downloads,
+            'total_artists': total_artists,
+            'featured_news': featured_news,
+            'trending_news': trending_news,
+            'current_date': timezone.now(),
+        }
+        
+        print("✅ Home view context prepared successfully")
+        return render(request, 'music/home.html', context)
+        
+    except Exception as e:
+        print(f"❌ Home view error: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        context = {
+            'featured_songs': [],
+            'most_played': [],
+            'most_downloaded': [],
+            'new_artists': [],
+            'trending_artists': [],
+            'total_songs': 0,
+            'total_plays': 0,
+            'total_downloads': 0,
+            'total_artists': 0,
+            'featured_news': [],
+            'trending_news': [],
+            'current_date': timezone.now(),
+        }
+        return render(request, 'music/home.html', context)
 
 def discover(request):
     """Discover page with all songs"""
-    songs = Song.objects.all().order_by('-upload_date')
+    songs_list = Song.objects.filter(is_approved=True).select_related('artist', 'genre').order_by('-upload_date')
     genres = Genre.objects.all()
+    
+    # Filtering
+    genre_filter = request.GET.get('genre')
+    if genre_filter:
+        songs_list = songs_list.filter(genre_id=genre_filter)
+    
+    search_query = request.GET.get('q')
+    if search_query:
+        songs_list = songs_list.filter(
+            Q(title__icontains=search_query) |
+            Q(artist__name__icontains=search_query) |
+            Q(genre__name__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(songs_list, 20)
+    page_number = request.GET.get('page')
+    songs = paginator.get_page(page_number)
     
     context = {
         'songs': songs,
         'genres': genres,
+        'selected_genre': genre_filter,
+        'search_query': search_query or '',
     }
-    return render(request, 'discover.html', context)
+    return render(request, 'music/discover.html', context)
 
-
-def search(request):
-    """Search functionality"""
-    query = request.GET.get('q', '')
-    songs = Song.objects.filter(
-        title__icontains=query, 
+def song_detail(request, song_id):
+    """Individual song detail page"""
+    song = get_object_or_404(
+        Song.objects.select_related('artist', 'genre'), 
+        id=song_id, 
         is_approved=True
-    ) | Song.objects.filter(
-        artist__name__icontains=query
+    )
+    
+    # Check if user can access premium content
+    can_access = song.can_be_accessed_by(request.user)
+    
+    # Get similar songs (same genre and artist)
+    similar_songs = Song.objects.filter(
+        genre=song.genre,
+        is_approved=True
+    ).exclude(id=song.id).select_related('artist', 'genre').order_by('-plays')[:6]
+    
+    # Get play statistics
+    play_stats = SongPlay.objects.filter(song=song).aggregate(
+        total_plays=Count('id'),
+        avg_duration=Avg('duration_played')
     )
     
     context = {
+        'song': song,
+        'similar_songs': similar_songs,
+        'can_access': can_access,
+        'play_stats': play_stats,
+    }
+    return render(request, 'music/song_detail.html', context)
+
+def search(request):
+    """Search functionality"""
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return redirect('discover')
+    
+    # Search songs
+    songs = Song.objects.filter(
+        Q(title__icontains=query) | 
+        Q(artist__name__icontains=query) |
+        Q(genre__name__icontains=query) |
+        Q(lyrics__icontains=query),
+        is_approved=True
+    ).select_related('artist', 'genre').distinct().order_by('-plays')[:50]
+    
+    # Get related artists
+    from artists.models import Artist
+    related_artists = Artist.objects.filter(
+        Q(name__icontains=query) |
+        Q(bio__icontains=query) |
+        Q(songs__title__icontains=query)
+    ).distinct().annotate(
+        song_count=Count('songs', filter=Q(songs__is_approved=True))
+    ).filter(song_count__gt=0).order_by('-song_count')[:10]
+    
+    # Get related genres
+    related_genres = Genre.objects.filter(
+        Q(name__icontains=query) |
+        Q(description__icontains=query) |
+        Q(songs__title__icontains=query)
+    ).distinct().annotate(
+        song_count=Count('songs', filter=Q(songs__is_approved=True))
+    ).filter(song_count__gt=0).order_by('-song_count')[:8]
+    
+    context = {
         'songs': songs,
+        'related_artists': related_artists,
+        'related_genres': related_genres,
         'query': query,
+        'results_count': len(songs) + len(related_artists) + len(related_genres),
     }
-    return render(request, 'search.html', context)
+    return render(request, 'music/search.html', context)
 
-
-# ===== ARTIST-RELATED VIEWS =====
-def artists(request):
-    """All artists page"""
-    artists_list = Artist.objects.filter(is_verified=True).order_by('-created_at')
-    
-    context = {
-        'artists': artists_list,
-        'title': 'All Artists'
-    }
-    return render(request, 'artists.html', context)
-
-
-def trending_artists(request):
-    """Trending artists page"""
-    seven_days_ago = timezone.now() - timedelta(days=7)
-    trending_artists_list = Artist.objects.filter(
-        is_verified=True
-    ).annotate(
-        weekly_plays=Sum(
-            'songs__plays',
-            filter=Q(songs__upload_date__gte=seven_days_ago)
-        ),
-        followers_count=Count('followers')
-    ).filter(
-        weekly_plays__isnull=False
-    ).order_by('-weekly_plays')
-    
-    context = {
-        'artists': trending_artists_list,
-        'title': 'Trending Artists'
-    }
-    return render(request, 'artists.html', context)
-def artist_detail(request, artist_id):
-    """Artist profile page"""
-    artist = get_object_or_404(Artist, id=artist_id, is_verified=True)
-    
-    # Show ALL songs (both approved and unapproved) to everyone
-    songs = Song.objects.filter(artist=artist).order_by('-upload_date')
-    
-    # Check if current user follows this artist
-    is_following = False
-    if request.user.is_authenticated:
-        is_following = Follow.objects.filter(
-            follower=request.user, 
-            artist=artist
-        ).exists()
-    
-    context = {
-        'artist': artist,
-        'songs': songs,
-        'is_following': is_following,
-        'songs_count': songs.count(),
-        'total_plays': sum(song.plays for song in songs),
-        'total_downloads': sum(song.downloads for song in songs),
-        'followers_count': artist.followers.count(),
-    }
-    return render(request, 'artist_detail.html', context)
-
-@login_required
-def artist_dashboard(request):
-    """Artist dashboard"""
-    try:
-        artist = request.user.artist_profile
-    except Artist.DoesNotExist:
-        messages.error(request, "You need to be an artist to access the dashboard.")
-        return redirect('home')
-
-    # Get artist stats
-    total_plays = artist.songs.aggregate(total=Sum('plays'))['total'] or 0
-    total_downloads = artist.songs.aggregate(total=Sum('downloads'))['total'] or 0
-    total_likes = Like.objects.filter(song__artist=artist).count()
-    total_followers = Follow.objects.filter(artist=artist).count()
-
-    # Get recent songs
-    recent_songs = artist.songs.all().order_by('-upload_date')[:6]
-
-    # Get top songs
-    top_songs = artist.songs.all().order_by('-plays')[:5]
-
-    # Get genres for upload form
-    genres = Genre.objects.all()
-
-    # Mock recent activity
-    recent_activity = [
-        {'icon': 'play', 'message': 'Your song "Summer Vibes" got 15 new plays', 'time': '2 hours ago'},
-        {'icon': 'heart', 'message': 'Someone liked your song "Night Dreams"', 'time': '5 hours ago'},
-        {'icon': 'user-plus', 'message': 'You gained 3 new followers', 'time': '1 day ago'},
-        {'icon': 'download', 'message': 'Your song "Ocean Waves" was downloaded 8 times', 'time': '2 days ago'},
-    ]
-
-    context = {
-        'artist': artist,
-        'total_plays': total_plays,
-        'total_downloads': total_downloads,
-        'total_likes': total_likes,
-        'total_followers': total_followers,
-        'recent_songs': recent_songs,
-        'top_songs': top_songs,
-        'genres': genres,
-        'recent_activity': recent_activity,
-    }
-
-    return render(request, 'artist_dashboard.html', context)
-
-
-# ===== GENRE VIEWS =====
 def genres(request):
     """All genres page"""
-    genres = Genre.objects.all()
+    genres = Genre.objects.annotate(
+        song_count=Count('songs', filter=Q(songs__is_approved=True)),
+        total_plays=Sum('songs__plays'),
+        total_downloads=Sum('songs__downloads')
+    ).filter(song_count__gt=0).order_by('name')
     
     context = {
         'genres': genres,
     }
-    return render(request, 'genres.html', context)
-
+    return render(request, 'music/genres.html', context)
 
 def genre_songs(request, genre_id):
     """Songs by specific genre"""
     genre = get_object_or_404(Genre, id=genre_id)
-    songs = Song.objects.filter(genre=genre)
+    songs = Song.objects.filter(
+        genre=genre, 
+        is_approved=True
+    ).select_related('artist', 'genre').order_by('-upload_date')
+    
+    # Get genre statistics
+    genre_stats = songs.aggregate(
+        total_songs=Count('id'),
+        total_plays=Sum('plays'),
+        total_downloads=Sum('downloads')
+    )
     
     context = {
         'genre': genre,
         'songs': songs,
+        'genre_stats': genre_stats,
     }
-    return render(request, 'genre_songs.html', context)
+    return render(request, 'music/genre_songs.html', context)
 
-
-# ===== LIBRARY & PLAYLIST VIEWS =====
-@login_required
-def library(request):
-    """User library with liked songs and playlists"""
-    user_profile = UserProfile.objects.get(user=request.user)
-    liked_songs = user_profile.liked_songs.all()
-    playlists = Playlist.objects.filter(user=request.user)
-    
-    context = {
-        'liked_songs': liked_songs,
-        'playlists': playlists,
-    }
-    return render(request, 'library.html', context)
-
-
-@login_required
-def playlists(request):
-    """User playlists management"""
-    playlists = Playlist.objects.filter(user=request.user)
-    
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        if name:
-            Playlist.objects.create(name=name, user=request.user)
-            messages.success(request, 'Playlist created successfully!')
-            return redirect('playlists')
-    
-    context = {
-        'playlists': playlists,
-    }
-    return render(request, 'playlists.html', context)
-
-
-@login_required
-def playlist_detail(request, playlist_id):
-    """Individual playlist detail"""
-    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-    
-    if request.method == 'POST':
-        song_id = request.POST.get('song_id')
-        if song_id:
-            song = get_object_or_404(Song, id=song_id)
-            playlist.songs.add(song)
-            messages.success(request, 'Song added to playlist!')
-    
-    context = {
-        'playlist': playlist,
-    }
-    return render(request, 'playlist_detail.html', context)
-
-
-@login_required
-def upload_music(request):
-    """Song upload for artists"""
-    # Check if user is an artist
-    try:
-        artist_profile = Artist.objects.get(user=request.user)
-    except Artist.DoesNotExist:
-        messages.error(request, "You need to be an artist to upload music.")
-        return redirect('discover')
-    
-    if request.method == 'POST':
-        print("POST request received")  # Debug
-        print("Files in request:", request.FILES)  # Debug
-        print("POST data:", request.POST)  # Debug
-        
-        form = SongUploadForm(request.POST, request.FILES)
-        print("Form is valid:", form.is_valid())  # Debug
-        print("Form errors:", form.errors)  # Debug
-        
-        if form.is_valid():
-            try:
-                song = form.save(commit=False)
-                song.artist = artist_profile
-                song.plays = 0
-                song.downloads = 0
-                song.is_approved = False
-                
-                # Handle file validation manually
-                if 'audio_file' in request.FILES:
-                    audio_file = request.FILES['audio_file']
-                    print(f"Audio file: {audio_file.name}, size: {audio_file.size}")  # Debug
-                    
-                    # Check file size (10MB limit)
-                    if audio_file.size > 10 * 1024 * 1024:
-                        messages.error(request, "Audio file must be less than 10MB")
-                        return render(request, 'upload_music.html', {
-                            'form': form,
-                            'genres': Genre.objects.all()
-                        })
-                    
-                    # Check file extension
-                    allowed_extensions = ['mp3', 'wav', 'ogg', 'm4a']
-                    file_extension = audio_file.name.split('.')[-1].lower()
-                    if file_extension not in allowed_extensions:
-                        messages.error(request, f"File type not supported. Allowed: {', '.join(allowed_extensions)}")
-                        return render(request, 'upload_music.html', {
-                            'form': form,
-                            'genres': Genre.objects.all()
-                        })
-                
-                song.save()
-                messages.success(request, "Your song has been uploaded successfully and is pending review!")
-                return redirect('my_uploads')
-                
-            except Exception as e:
-                messages.error(request, f"Error saving song: {str(e)}")
-                print(f"Save error: {e}")  # Debug
-        else:
-            messages.error(request, "Please correct the errors below.")
-            print("Form validation failed")  # Debug
-    else:
-        form = SongUploadForm()
-    
-    # Get all genres to pass to template
-    genres = Genre.objects.all()
-    
-    context = {
-        'form': form,
-        'genres': genres,
-    }
-    return render(request, 'upload_music.html', context)
-
-
-@login_required
-def my_uploads(request):
-    """Artist's uploaded songs"""
-    # Check if user is an artist
-    if not hasattr(request.user, 'userprofile') or not request.user.userprofile.is_artist:
-        messages.error(request, "You need to be an artist to view uploads.")
-        return redirect('discover')
-    
-    try:
-        artist_profile = Artist.objects.get(user=request.user)
-        songs = Song.objects.filter(artist=artist_profile).order_by('-upload_date')
-    except Artist.DoesNotExist:
-        messages.error(request, "Artist profile not found.")
-        songs = []
-    
-    context = {
-        'songs': songs,
-    }
-    return render(request, 'my_uploads.html', context)
-
-
-# ===== SONG ACTIONS (API ENDPOINTS) =====
-@csrf_exempt
+# ========== PLAY SONG FUNCTION ==========
 def play_song(request, song_id):
-    """Play song and increment play count"""
-    song = get_object_or_404(Song, id=song_id)
-    
-    # Increment play count
-    song.increment_plays()
-    
-    # Record play in SongPlay model
-    SongPlay.objects.create(
-        song=song,
-        user=request.user if request.user.is_authenticated else None,
-        ip_address=get_client_ip(request)
-    )
-    
-    return JsonResponse({
-        'id': song.id,
-        'title': song.title,
-        'artist': song.artist.name,
-        'cover': song.cover_image.url if song.cover_image else '/static/images/default-cover.jpg',
-        'audio': song.audio_file.url,
-        'duration': song.duration,
-        'plays': song.plays
-    })
+    """Play song and increment play count - ALLOW ANONYMOUS USERS"""
+    try:
+        song = get_object_or_404(Song, id=song_id)
+        
+        print(f"🎵 Play song request: {song.title} (ID: {song_id})")
+        print(f"📊 Current plays before: {song.plays}")
+        
+        # Check access for premium content
+        if not song.can_be_accessed_by(request.user):
+            print("🔒 Premium content restriction")
+            return JsonResponse({
+                'error': 'Premium content requires subscription',
+                'can_preview': song.preview_duration > 0,
+                'preview_duration': song.preview_duration,
+                'success': False
+            }, status=403)
+        
+        # Use atomic update to prevent race conditions
+        with transaction.atomic():
+            # Increment play count atomically
+            song = Song.objects.filter(id=song_id).select_for_update().first()
+            if not song:
+                return JsonResponse({'error': 'Song not found', 'success': False}, status=404)
+            
+            current_plays = song.plays
+            song.plays = F('plays') + 1
+            song.save()
+            
+            # Refresh to get updated count
+            song.refresh_from_db()
+            
+            print(f"📈 Plays incremented atomically: {current_plays} → {song.plays}")
+            
+        # Record play in SongPlay model
+        try:
+            # For authenticated users, store user info
+            if request.user.is_authenticated:
+                audio_quality = 'high' if hasattr(request.user, 'userprofile') and request.user.userprofile.is_premium else 'standard'
+                user = request.user
+            else:
+                # For anonymous users
+                audio_quality = 'standard'
+                user = None
+            
+            SongPlay.objects.create(
+                song=song,
+                user=user,
+                ip_address=get_client_ip(request),
+                duration_played=0,
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                audio_quality=audio_quality,
+            )
+            print("📝 SongPlay record created successfully")
+        except Exception as e:
+            print(f"⚠️ Error creating SongPlay record: {e}")
+            # Don't fail the entire request if recording fails
+        
+        print(f"🎯 Final confirmed plays count: {song.plays}")
+        
+        return JsonResponse({
+            'id': song.id,
+            'title': song.title,
+            'artist': song.artist.name,
+            'cover': song.cover_image.url if song.cover_image else '/static/images/default-cover.jpg',
+            'audio': song.audio_file.url,
+            'duration': song.duration,
+            'plays': song.plays,
+            'is_premium': song.is_premium_only,
+            'success': True,
+            'message': 'Play counted successfully'
+        })
+        
+    except Exception as e:
+        print(f"❌ Error in play_song: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'error': 'Internal server error',
+            'success': False
+        }, status=500)
 
+# ========== DIRECT PLAYS ENDPOINT ==========
+def increment_plays_direct(request, song_id):
+    """Direct endpoint to increment plays (useful for testing)"""
+    if request.method == 'POST':
+        try:
+            song = get_object_or_404(Song, id=song_id)
+            
+            # Get current plays
+            current_plays = song.plays
+            
+            # Increment using atomic transaction
+            with transaction.atomic():
+                song.plays = F('plays') + 1
+                song.save()
+                song.refresh_from_db()
+            
+            return JsonResponse({
+                'success': True,
+                'song_id': song_id,
+                'title': song.title,
+                'previous_plays': current_plays,
+                'new_plays': song.plays,
+                'incremented_by': 1
+            })
+        except Exception as e:
+            print(f"❌ Error in increment_plays_direct: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
 
+# ========== TRACK PLAY ENDPOINT ==========
+def track_play(request, song_id):
+    """Simple endpoint to track plays without audio streaming"""
+    if request.method == 'POST':
+        try:
+            song = get_object_or_404(Song, id=song_id)
+            
+            print(f"🎵 Track play request: {song.title} (ID: {song_id})")
+            print(f"📊 Current plays before: {song.plays}")
+            
+            # Check access for premium content
+            if not song.can_be_accessed_by(request.user):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Premium content requires subscription'
+                }, status=403)
+            
+            # Get current plays before increment
+            current_plays = song.plays
+            
+            # Use atomic update
+            with transaction.atomic():
+                # Use F() expression for atomic increment
+                Song.objects.filter(id=song_id).update(plays=F('plays') + 1)
+                song.refresh_from_db()
+                print(f"✅ Database update successful: {current_plays} → {song.plays}")
+            
+            # Record play in SongPlay model (optional)
+            try:
+                SongPlay.objects.create(
+                    song=song,
+                    user=request.user if request.user.is_authenticated else None,
+                    ip_address=get_client_ip(request),
+                    duration_played=0,
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    audio_quality='standard',
+                )
+                print("📝 SongPlay record created")
+            except Exception as e:
+                print(f"⚠️ Error creating SongPlay record: {e}")
+                # Don't fail the entire request
+            
+            return JsonResponse({
+                'success': True,
+                'song_id': song_id,
+                'title': song.title,
+                'previous_plays': current_plays,
+                'new_plays': song.plays,
+                'message': 'Play tracked successfully'
+            })
+            
+        except Exception as e:
+            print(f"❌ Error in track_play: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+# ========== DOWNLOAD SONG WITH BRANDING ==========
+def download_song(request, song_id):
+    """Download song with Sangabiz branding - FREE FOR ALL USERS"""
+    song = get_object_or_404(Song, id=song_id, is_approved=True)
+    
+    print(f"⬇️ Download request: {song.title} (ID: {song_id})")
+    print(f"📊 Current downloads before: {song.downloads}")
+    
+    # Check premium access
+    if song.is_premium_only and not song.can_be_accessed_by(request.user):
+        if not request.user.is_authenticated:
+            messages.error(request, 'This is a premium song. Please log in and subscribe to download.')
+        else:
+            messages.error(request, 'This is a premium song. Please subscribe to download.')
+        return redirect('song_detail', song_id=song_id)
+    
+    try:
+        # Create temporary file for the branded audio
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_audio:
+            temp_audio_path = temp_audio.name
+        
+        # Copy original audio to temp location
+        print(f"📁 Copying audio from: {song.audio_file.path}")
+        shutil.copy2(song.audio_file.path, temp_audio_path)
+        print(f"✅ Copied audio to temp file: {temp_audio_path}")
+        
+        # Prepare branding
+        cover_path = None
+        logo_path = None
+        
+        # Try to find Sangabiz logo (check multiple locations)
+        possible_logo_paths = [
+            # First priority: logo.jpeg in various locations
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo.jpeg'),
+            os.path.join(settings.MEDIA_ROOT, 'logos', 'logo.jpeg'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.jpeg'),
+            # Fallback: other image formats
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo.png'),
+            os.path.join(settings.STATIC_ROOT, 'images', 'logo.jpg'),
+            os.path.join(settings.MEDIA_ROOT, 'logos', 'logo.png'),
+            os.path.join(settings.MEDIA_ROOT, 'logos', 'logo.jpg'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.png'),
+            os.path.join(settings.BASE_DIR, 'static', 'images', 'logo.jpg'),
+        ]
+        
+        for possible_path in possible_logo_paths:
+            if os.path.exists(possible_path):
+                logo_path = possible_path
+                print(f"✅ Found logo: {logo_path}")
+                break
+        
+        if not logo_path:
+            print("ℹ️ No logo found, will create text-only branding")
+        
+        # Create branded cover (logo replaces song cover)
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_cover:
+                cover_path = temp_cover.name
+            
+            create_branded_cover(song, logo_path, cover_path)
+            
+            if os.path.exists(cover_path) and os.path.getsize(cover_path) > 0:
+                print(f"✅ Created logo-only cover: {cover_path} ({os.path.getsize(cover_path)} bytes)")
+            else:
+                print("⚠️ Cover creation failed or empty file")
+                cover_path = None
+        except Exception as e:
+            print(f"⚠️ Error creating branded cover: {e}")
+            cover_path = None
+        
+        # Add metadata to audio
+        metadata_success = False
+        try:
+            if cover_path and os.path.exists(cover_path):
+                metadata_success = add_metadata_to_audio(temp_audio_path, song, cover_path, logo_path)
+            else:
+                print("ℹ️ No cover, trying metadata without cover")
+                metadata_success = add_metadata_to_audio(temp_audio_path, song, None, logo_path)
+        except Exception as e:
+            print(f"⚠️ Error adding metadata: {e}")
+        
+        if not metadata_success:
+            print("ℹ️ Metadata addition failed, but audio will still download")
+        
+        # Update download count
+        with transaction.atomic():
+            song.refresh_from_db()
+            song.downloads = F('downloads') + 1
+            song.save()
+            song.refresh_from_db()
+            print(f"📈 Downloads incremented to: {song.downloads}")
+        
+        # Record download
+        try:
+            SongDownload.objects.create(
+                song=song,
+                user=request.user if request.user.is_authenticated else None,
+                ip_address=get_client_ip(request),
+                file_size=os.path.getsize(temp_audio_path),
+                audio_quality=song.audio_quality,
+            )
+            print("📝 SongDownload record created")
+        except Exception as e:
+            print(f"⚠️ Error creating SongDownload: {e}")
+        
+        # Prepare filename (sanitize)
+        safe_title = re.sub(r'[^\w\s\-_]', '', song.title).strip()
+        safe_artist = re.sub(r'[^\w\s\-_]', '', song.artist.name).strip()
+        
+        if not safe_title:
+            safe_title = "song"
+        if not safe_artist:
+            safe_artist = "artist"
+        
+        filename = f"{safe_title} - {safe_artist} - MusicCityUg.mp3"
+        
+        # Serve the file
+        response = FileResponse(
+            open(temp_audio_path, 'rb'),
+            content_type='audio/mpeg'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        # Cleanup function
+        def cleanup():
+            try:
+                if os.path.exists(temp_audio_path):
+                    os.unlink(temp_audio_path)
+                if cover_path and os.path.exists(cover_path):
+                    os.unlink(cover_path)
+            except Exception as cleanup_error:
+                print(f"Cleanup error: {cleanup_error}")
+        
+        response.closed = cleanup
+        
+        print(f"✅ Download successful for: {song.title}")
+        return response
+        
+    except FileNotFoundError as e:
+        print(f"❌ File not found error: {e}")
+        messages.error(request, 'Audio file not found.')
+        return redirect('song_detail', song_id=song_id)
+    except Exception as e:
+        print(f"❌ Download error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, 'Download failed. Please try again.')
+        return redirect('song_detail', song_id=song_id)
+
+def top_songs(request):
+    """Top songs page with various rankings"""
+    # Most played songs
+    most_played = Song.objects.filter(is_approved=True).select_related('artist', 'genre').order_by('-plays')[:20]
+    
+    # Most downloaded songs
+    most_downloaded = Song.objects.filter(is_approved=True).select_related('artist', 'genre').order_by('-downloads')[:20]
+    
+    # Trending songs (last 7 days)
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    trending = Song.objects.filter(
+        is_approved=True,
+        play_history__played_at__gte=seven_days_ago
+    ).annotate(
+        recent_plays=Count('play_history')
+    ).select_related('artist', 'genre').order_by('-recent_plays')[:20]
+    
+    context = {
+        'most_played': most_played,
+        'most_downloaded': most_downloaded,
+        'trending': trending,
+    }
+    return render(request, 'music/top_songs.html', context)
+
+# ========== ANONYMOUS PLAY TRACKING ==========
+def track_anonymous_play(request, song_id):
+    """Alternative endpoint for anonymous plays (backup)"""
+    if request.method == 'POST':
+        try:
+            song = get_object_or_404(Song, id=song_id)
+            
+            # Check if user can access this song
+            if not song.can_be_accessed_by(request.user):
+                return JsonResponse({
+                    'error': 'Premium content requires subscription'
+                }, status=403)
+            
+            # Increment play count using atomic update
+            with transaction.atomic():
+                song.plays = F('plays') + 1
+                song.save()
+                song.refresh_from_db()
+            
+            # Record anonymous play
+            SongPlay.objects.create(
+                song=song,
+                user=None,
+                ip_address=get_client_ip(request),
+                duration_played=0,
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                audio_quality='standard',
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'plays': song.plays,
+                'message': 'Play counted'
+            })
+            
+        except Exception as e:
+            print(f"❌ Error tracking anonymous play: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+# ========== GET SONG PLAYS ENDPOINT ==========
+def get_song_plays(request, song_id):
+    """Get current play count for a song"""
+    if request.method == 'GET':
+        try:
+            song = get_object_or_404(Song, id=song_id)
+            return JsonResponse({
+                'success': True,
+                'song_id': song_id,
+                'plays': song.plays,
+                'title': song.title
+            })
+        except Exception as e:
+            print(f"❌ Error getting song plays: {e}")
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+# ========== BULK UPDATE PLAYS (for debugging) ==========
+def bulk_update_plays(request):
+    """Debug endpoint to update all song play counts from SongPlay records"""
+    if request.method == 'POST' and request.user.is_superuser:
+        try:
+            from django.db.models import Count
+            updated_songs = []
+            
+            # Get all songs with their actual play counts from SongPlay
+            songs = Song.objects.all()
+            for song in songs:
+                actual_plays = SongPlay.objects.filter(song=song).count()
+                if song.plays != actual_plays:
+                    song.plays = actual_plays
+                    song.save()
+                    updated_songs.append({
+                        'id': song.id,
+                        'title': song.title,
+                        'old_plays': song.plays,
+                        'new_plays': actual_plays
+                    })
+            
+            return JsonResponse({
+                'success': True,
+                'updated_count': len(updated_songs),
+                'updated_songs': updated_songs
+            })
+            
+        except Exception as e:
+            print(f"❌ Error in bulk_update_plays: {e}")
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Unauthorized'})
+
+# ========== TRACK DOWNLOAD ANALYTICS ==========
+def track_download(request):
+    """Track download analytics"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            song_id = data.get('song_id')
+            song_title = data.get('song_title')
+            artist_name = data.get('artist_name')
+            
+            # Optional: Log this to analytics
+            print(f"Download analytics: {song_title} by {artist_name}")
+            
+            return JsonResponse({'success': True})
+        except:
+            return JsonResponse({'success': False})
+    return JsonResponse({'success': False})
+
+# ========== TRACK PARTIAL PLAY ==========
+def track_partial_play(request, song_id):
+    """Track partial play when user pauses"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            current_time = data.get('current_time', 0)
+            
+            # Find the most recent play for this user and song
+            if request.user.is_authenticated:
+                play = SongPlay.objects.filter(
+                    song_id=song_id,
+                    user=request.user
+                ).order_by('-played_at').first()
+            else:
+                # For anonymous users, track by IP
+                play = SongPlay.objects.filter(
+                    song_id=song_id,
+                    ip_address=get_client_ip(request),
+                    user=None
+                ).order_by('-played_at').first()
+            
+            if play:
+                play.duration_played = current_time
+                play.save()
+                
+            return JsonResponse({'success': True})
+        except:
+            return JsonResponse({'success': False})
+    return JsonResponse({'success': False})
+
+# ========== UPDATE PLAY DURATION ==========
+def update_play_duration(request, song_id):
+    """Update play duration when playback ends"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            duration_played = data.get('duration_played', 0)
+            
+            # Find the most recent play for this user and song
+            if request.user.is_authenticated:
+                play = SongPlay.objects.filter(
+                    song_id=song_id,
+                    user=request.user
+                ).order_by('-played_at').first()
+            else:
+                # For anonymous users, track by IP
+                play = SongPlay.objects.filter(
+                    song_id=song_id,
+                    ip_address=get_client_ip(request),
+                    user=None
+                ).order_by('-played_at').first()
+            
+            if play:
+                play.duration_played = duration_played
+                play.save()
+                
+            return JsonResponse({'success': True})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+# ========== LIKE SONG FUNCTION ==========
 @login_required
 def like_song(request, song_id):
     """Like/unlike a song"""
-    song = get_object_or_404(Song, id=song_id)
-    user_profile = UserProfile.objects.get(user=request.user)
-    
-    if song in user_profile.liked_songs.all():
-        user_profile.liked_songs.remove(song)
-        liked = False
-    else:
-        user_profile.liked_songs.add(song)
-        liked = True
-    
-    return JsonResponse({'liked': liked})
-
-
-@login_required
-def download_song(request, song_id):
-    """Download song and increment download count"""
-    song = get_object_or_404(Song, id=song_id)
-    
-    # Increment download count
-    song.increment_downloads()
-    
-    # Record download in SongDownload model
-    SongDownload.objects.create(
-        song=song,
-        user=request.user,
-        ip_address=get_client_ip(request)
-    )
-    
-    # Serve the file for download
-    file_path = song.audio_file.path
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type="audio/mpeg")
-            response['Content-Disposition'] = f'attachment; filename="{song.title} - {song.artist.name}.mp3"'
-            return response
-    else:
-        return JsonResponse({'error': 'File not found'}, status=404)
-
-
-@csrf_exempt
-@login_required
-def increment_play_count(request, song_id):
-    """API endpoint to increment play count"""
     if request.method == 'POST':
-        song = get_object_or_404(Song, id=song_id)
-        song.plays += 1
-        song.save()
-        
-        return JsonResponse({
-            'success': True,
-            'new_play_count': song.plays
-        })
-    
-    return JsonResponse({'success': False})
-
-
-@csrf_exempt
-@login_required
-def increment_download_count(request, song_id):
-    """API endpoint to increment download count"""
-    if request.method == 'POST':
-        song = get_object_or_404(Song, id=song_id)
-        song.downloads += 1
-        song.save()
-        
-        return JsonResponse({
-            'success': True,
-            'new_download_count': song.downloads
-        })
-    
-    return JsonResponse({'success': False})
-
-
-@csrf_exempt
-@login_required
-def follow_artist(request, artist_id):
-    """API endpoint to follow/unfollow an artist"""
-    if request.method == 'POST':
-        artist = get_object_or_404(Artist, id=artist_id)
-        follow, created = Follow.objects.get_or_create(
-            follower=request.user,
-            artist=artist
-        )
-        
-        if not created:
-            follow.delete()
-        
-        return JsonResponse({
-            'followed': created,
-            'followers_count': artist.followers.count()
-        })
-    
-    return JsonResponse({'success': False})
-
-
-# ===== ANALYTICS VIEWS =====
-@login_required
-def song_analytics(request, song_id):
-    """Song analytics for artist"""
-    song = get_object_or_404(Song, id=song_id)
-    
-    # Check if user owns the song
-    if not request.user.userprofile.is_artist or song.artist.user != request.user:
-        messages.error(request, "You don't have permission to view these analytics.")
-        return redirect('my_uploads')
-    
-    # Get play history (last 30 days)
-    thirty_days_ago = timezone.now() - timedelta(days=30)
-    recent_plays = SongPlay.objects.filter(song=song, played_at__gte=thirty_days_ago)
-    
-    # Get download history
-    recent_downloads = SongDownload.objects.filter(song=song, downloaded_at__gte=thirty_days_ago)
-    
-    context = {
-        'song': song,
-        'recent_plays': recent_plays,
-        'recent_downloads': recent_downloads,
-        'total_plays': song.plays,
-        'total_downloads': song.downloads,
-    }
-    return render(request, 'analytics/song_analytics.html', context)
-
-
-@login_required
-def top_songs(request):
-    """Top songs analytics"""
-    # Get top played songs
-    top_played = Song.objects.filter(is_approved=True).order_by('-plays')[:10]
-    
-    # Get top downloaded songs
-    top_downloaded = Song.objects.filter(is_approved=True).order_by('-downloads')[:10]
-    
-    context = {
-        'top_played': top_played,
-        'top_downloaded': top_downloaded,
-    }
-    return render(request, 'analytics/top_songs.html', context)
-
-
-def get_song_stats(request, song_id):
-    """Get current song statistics"""
-    song = get_object_or_404(Song, id=song_id)
-    return JsonResponse({
-        'plays': song.plays,
-        'downloads': song.downloads
-    })
-
-
-# ===== PLAYLIST API VIEWS =====
-@csrf_exempt
-@login_required
-def add_to_playlist(request, song_id):
-    """Add song to playlist"""
-    if request.method == 'POST':
-        song = get_object_or_404(Song, id=song_id)
-        playlist_id = request.POST.get('playlist_id')
-        
-        if playlist_id:
-            playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-            playlist.songs.add(song)
-            return JsonResponse({'success': True})
-        
-    return JsonResponse({'success': False})
-
-
-@login_required
-def remove_from_playlist(request, playlist_id, song_id):
-    """Remove song from playlist"""
-    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-    song = get_object_or_404(Song, id=song_id)
-    
-    playlist.songs.remove(song)
-    messages.success(request, 'Song removed from playlist!')
-    return redirect('playlist_detail', playlist_id=playlist_id)
-
-
-@login_required
-def delete_playlist(request, playlist_id):
-    """Delete playlist"""
-    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
-    playlist.delete()
-    messages.success(request, 'Playlist deleted!')
-    return redirect('playlists')
-
-
-# views.py
-def play_playlist(request, playlist_id):
-    # Your implementation here
-    pass
-
-
-# ===== ERROR HANDLERS =====
-def handler404(request, exception):
-    return render(request, '404.html', status=404)
-
-
-def handler500(request):
-    return render(request, '500.html', status=500)
-
-
-# ===== PREMIUM SUBSCRIPTION VIEWS =====
-def premium_pricing(request):
-    """Premium pricing page"""
-    plans = [
-        {
-            'name': 'Free',
-            'price': 0,
-            'period': 'forever',
-            'description': 'Basic access to our music library',
-            'features': [
-                {'text': 'Access to all songs', 'included': True},
-                {'text': 'Standard audio quality', 'included': True},
-                {'text': 'Limited skips (5 per hour)', 'included': True},
-                {'text': 'With occasional ads', 'included': True},
-                {'text': 'Offline downloads', 'included': False},
-                {'text': 'High quality audio', 'included': False},
-                {'text': 'Unlimited skips', 'included': False},
-                {'text': 'Ad-free experience', 'included': False},
-                {'text': 'Early access to new releases', 'included': False},
-                {'text': 'Exclusive content', 'included': False},
-            ],
-            'popular': False,
-            'cta_text': 'Current Plan',
-            'cta_disabled': True
-        },
-        {
-            'name': 'Premium',
-            'price': 4.99,
-            'period': 'month',
-            'description': 'Enhanced listening experience',
-            'features': [
-                {'text': 'Access to all songs', 'included': True},
-                {'text': 'High quality audio (320kbps)', 'included': True},
-                {'text': 'Unlimited skips', 'included': True},
-                {'text': 'Ad-free experience', 'included': True},
-                {'text': 'Offline downloads', 'included': True},
-                {'text': 'Early access to new releases', 'included': True},
-                {'text': 'Exclusive content', 'included': True},
-                {'text': 'Priority support', 'included': True},
-                {'text': 'Multiple device support', 'included': True},
-                {'text': 'Custom playlists', 'included': True},
-            ],
-            'popular': True,
-            'cta_text': 'Upgrade to Premium',
-            'cta_disabled': False
-        },
-        {
-            'name': 'Premium Plus',
-            'price': 9.99,
-            'period': 'month',
-            'description': 'Ultimate music experience',
-            'features': [
-                {'text': 'Everything in Premium', 'included': True},
-                {'text': 'Ultra HD audio (FLAC)', 'included': True},
-                {'text': 'Exclusive artist content', 'included': True},
-                {'text': 'Concert pre-sales', 'included': True},
-                {'text': 'Artist meet & greets', 'included': True},
-                {'text': 'Limited edition merch', 'included': True},
-                {'text': 'Personalized concierge', 'included': True},
-                {'text': 'Family plan (up to 6 users)', 'included': True},
-                {'text': 'Lyrics integration', 'included': True},
-                {'text': 'Music videos', 'included': True},
-            ],
-            'popular': False,
-            'cta_text': 'Go Premium Plus',
-            'cta_disabled': False
-        }
-    ]
-    
-    # Check if user already has premium
-    user_has_premium = False
-    if request.user.is_authenticated:
         try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            user_has_premium = user_profile.is_premium
-        except UserProfile.DoesNotExist:
-            pass
-    
-    context = {
-        'plans': plans,
-        'user_has_premium': user_has_premium,
-        'title': 'Upgrade to Premium'
-    }
-    return render(request, 'premium/pricing.html', context)
-
-
-@login_required
-def process_payment(request, plan_type):
-    """Process premium payment"""
-    if plan_type not in ['premium', 'premium_plus']:
-        messages.error(request, 'Invalid plan selected.')
-        return redirect('premium_pricing')
-    
-    # Get plan details
-    plan_details = {
-        'premium': {'name': 'Premium', 'price': 4.99, 'duration': 30},
-        'premium_plus': {'name': 'Premium Plus', 'price': 9.99, 'duration': 30}
-    }
-    
-    plan = plan_details[plan_type]
-    
-    if request.method == 'POST':
-        # In a real application, you would integrate with a payment gateway here
-        # For now, we'll simulate successful payment
-        
-        try:
-            # Update user profile
-            user_profile = UserProfile.objects.get(user=request.user)
-            user_profile.is_premium = True
-            user_profile.premium_plan = plan_type
-            user_profile.premium_since = timezone.now()
-            user_profile.premium_expires = timezone.now() + timedelta(days=plan['duration'])
-            user_profile.save()
+            song = get_object_or_404(Song, id=song_id)
+            user = request.user
             
-            # Create payment record (you'd want a Payment model for this)
-            # Payment.objects.create(...)
-            
-            messages.success(request, f'🎉 Welcome to {plan["name"]}! Your premium subscription is now active.')
-            return redirect('premium_success')
-            
-        except Exception as e:
-            messages.error(request, f'Payment failed: {str(e)}')
-            return redirect('premium_pricing')
-    
-    context = {
-        'plan': plan,
-        'plan_type': plan_type,
-    }
-    return render(request, 'premium/payment.html', context)
-
-
-@login_required
-def premium_success(request):
-    """Premium subscription success page"""
-    try:
-        user_profile = UserProfile.objects.get(user=request.user)
-        context = {
-            'user_profile': user_profile,
-            'plan_name': user_profile.get_premium_plan_display() if user_profile.premium_plan else 'Premium'
-        }
-        return render(request, 'premium/success.html', context)
-    except UserProfile.DoesNotExist:
-        messages.error(request, 'User profile not found.')
-        return redirect('home')
-
-
-@login_required
-def premium_features(request):
-    """Showcase premium features"""
-    features = [
-        {
-            'icon': 'fas fa-download',
-            'title': 'Offline Downloads',
-            'description': 'Download your favorite songs and listen offline without using data.'
-        },
-        {
-            'icon': 'fas fa-volume-up',
-            'title': 'High Quality Audio',
-            'description': 'Experience crystal clear sound with 320kbps high quality audio streaming.'
-        },
-        {
-            'icon': 'fas fa-bolt',
-            'title': 'Ad-Free Listening',
-            'description': 'Enjoy uninterrupted music without any advertisements.'
-        },
-        {
-            'icon': 'fas fa-infinity',
-            'title': 'Unlimited Skips',
-            'description': 'Skip as many songs as you want, whenever you want.'
-        },
-        {
-            'icon': 'fas fa-rocket',
-            'title': 'Early Access',
-            'description': 'Get early access to new releases from your favorite artists.'
-        },
-        {
-            'icon': 'fas fa-headphones',
-            'title': 'Exclusive Content',
-            'description': 'Access exclusive tracks, live sessions, and behind-the-scenes content.'
-        }
-    ]
-    
-    user_has_premium = False
-    if request.user.is_authenticated:
-        try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            user_has_premium = user_profile.is_premium
-        except UserProfile.DoesNotExist:
-            pass
-    
-    context = {
-        'features': features,
-        'user_has_premium': user_has_premium
-    }
-    return render(request, 'premium/features.html', context)
-
-
-@login_required
-def profile_view(request):
-    """User profile page"""
-    user_profile = UserProfile.objects.get(user=request.user)
-    
-    # Get user stats
-    liked_songs_count = user_profile.liked_songs.count()
-    playlists_count = Playlist.objects.filter(user=request.user).count()
-    recent_plays = SongPlay.objects.filter(user=request.user).select_related('song').order_by('-played_at')[:10]
-    
-    context = {
-        'user_profile': user_profile,
-        'liked_songs_count': liked_songs_count,
-        'playlists_count': playlists_count,
-        'recent_plays': recent_plays,
-    }
-    return render(request, 'user/profile.html', context)
-
-@login_required
-def settings_view(request):
-    """User settings page"""
-    user_profile = UserProfile.objects.get(user=request.user)
-    
-    if request.method == 'POST':
-        # Handle settings updates
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        bio = request.POST.get('bio')
-        location = request.POST.get('location')
-        website = request.POST.get('website')
-        
-        # Update user
-        request.user.first_name = first_name
-        request.user.last_name = last_name
-        request.user.save()
-        
-        # Update profile
-        user_profile.bio = bio
-        user_profile.location = location
-        user_profile.website = website
-        user_profile.save()
-        
-        messages.success(request, 'Settings updated successfully!')
-        return redirect('settings')
-    
-    context = {
-        'user_profile': user_profile,
-    }
-    return render(request, 'user/settings.html', context)
-
-def help_center(request):
-    """Help center page"""
-    faqs = [
-        {
-            'question': 'How do I upload my music?',
-            'answer': 'Go to your artist dashboard and click "Upload Music". You need to be verified as an artist to upload songs.'
-        },
-        {
-            'question': 'Can I download songs for offline listening?',
-            'answer': 'Yes! Offline downloading is available for Premium and Premium Plus subscribers.'
-        },
-        {
-            'question': 'How do I create a playlist?',
-            'answer': 'Go to your Library page and click "Create Playlist". You can add songs from the discover page or search results.'
-        },
-        {
-            'question': 'What audio formats are supported?',
-            'answer': 'We support MP3, WAV, and OGG formats for audio files.'
-        },
-        {
-            'question': 'How do I become a verified artist?',
-            'answer': 'Contact our support team with your artist information and portfolio for verification.'
-        },
-        {
-            'question': 'Can I cancel my premium subscription?',
-            'answer': 'Yes, you can cancel anytime from your account settings. Your premium features will remain active until the end of your billing period.'
-        }
-    ]
-    
-    context = {
-        'faqs': faqs,
-    }
-    return render(request, 'help/help_center.html', context)
-
-
-import requests
-import json
-from django.conf import settings
-
-# ===== MOBILE MONEY PAYMENT VIEWS =====
-@login_required
-def process_payment(request, plan_type):
-    """Process premium payment with mobile money options"""
-    if plan_type not in ['premium', 'premium_plus']:
-        messages.error(request, 'Invalid plan selected.')
-        return redirect('premium_pricing')
-    
-    # Get plan details
-    plan_details = {
-        'premium': {'name': 'Premium', 'price': 4.99, 'duration': 30},
-        'premium_plus': {'name': 'Premium Plus', 'price': 9.99, 'duration': 30}
-    }
-    
-    plan = plan_details[plan_type]
-    
-    if request.method == 'POST':
-        # Get payment method and phone number
-        payment_method = request.POST.get('payment_method')
-        phone_number = request.POST.get('phone_number')
-        network = request.POST.get('network')
-        
-        if not phone_number:
-            messages.error(request, 'Please enter your phone number.')
-            return redirect('process_payment', plan_type=plan_type)
-        
-        try:
-            # Process mobile money payment
-            if payment_method in ['mtn', 'airtel']:
-                result = process_mobile_money_payment(
-                    request.user,
-                    plan_type,
-                    phone_number,
-                    network,
-                    plan['price']
-                )
-                
-                if result['success']:
-                    messages.success(request, f'Payment initiated! {result["message"]}')
-                    return redirect('payment_pending', transaction_id=result['transaction_id'])
-                else:
-                    messages.error(request, f'Payment failed: {result["message"]}')
-                    return redirect('process_payment', plan_type=plan_type)
-            
+            # Check if user already liked the song
+            if user in song.likes.all():
+                # Unlike
+                song.likes.remove(user)
+                action = 'unliked'
+                message = 'Removed from liked songs'
             else:
-                messages.error(request, 'Invalid payment method selected.')
-                return redirect('process_payment', plan_type=plan_type)
-                
-        except Exception as e:
-            messages.error(request, f'Payment error: {str(e)}')
-            return redirect('process_payment', plan_type=plan_type)
-    
-    context = {
-        'plan': plan,
-        'plan_type': plan_type,
-    }
-    return render(request, 'premium/payment.html', context)
-
-@login_required
-def payment_pending(request, transaction_id):
-    """Show payment pending page while waiting for mobile money confirmation"""
-    context = {
-        'transaction_id': transaction_id,
-    }
-    return render(request, 'premium/payment_pending.html', context)
-
-@login_required
-def check_payment_status(request, transaction_id):
-    """API endpoint to check payment status"""
-    # In a real implementation, you would check with your payment provider
-    # For demo purposes, we'll simulate successful payment after 30 seconds
-    
-    # Check if payment was completed (you'd integrate with actual API here)
-    payment_completed = check_mobile_money_payment_status(transaction_id)
-    
-    if payment_completed:
-        # Update user to premium
-        user_profile = UserProfile.objects.get(user=request.user)
-        user_profile.upgrade_to_premium('premium', 30)  # Default to premium for demo
-        
-        return JsonResponse({
-            'status': 'completed',
-            'message': 'Payment completed successfully!'
-        })
-    else:
-        return JsonResponse({
-            'status': 'pending',
-            'message': 'Waiting for payment confirmation...'
-        })
-
-# ===== MOBILE MONEY SERVICE FUNCTIONS =====
-class MobileMoneyService:
-    """Service class to handle mobile money payments"""
-    
-    @staticmethod
-    def initiate_mtn_payment(phone_number, amount, reference):
-        """
-        Initiate MTN Mobile Money payment
-        Note: This is a simulation. In production, use actual MTN API
-        """
-        try:
-            # Simulate API call to MTN Mobile Money
-            # In production, you would use:
-            # response = requests.post(
-            #     'https://api.mtn.com/v1/mobilemoney/payments',
-            #     headers={
-            #         'Authorization': f'Bearer {settings.MTN_API_KEY}',
-            #         'Content-Type': 'application/json'
-            #     },
-            #     json={
-            #         'amount': str(amount),
-            #         'currency': 'USD',
-            #         'externalId': reference,
-            #         'payer': {
-            #             'partyIdType': 'MSISDN',
-            #             'partyId': phone_number
-            #         },
-            #         'payerMessage': 'Sangabiz Premium Subscription',
-            #         'payeeNote': 'Thank you for subscribing to Sangabiz Premium'
-            #     }
-            # )
+                # Like
+                song.likes.add(user)
+                action = 'liked'
+                message = 'Added to liked songs'
             
-            # Simulate successful API response
-            return {
-                'success': True,
-                'transaction_id': f'MTN_{reference}',
-                'message': 'MTN Mobile Money payment initiated. Please check your phone to complete the transaction.',
-                'provider_reference': f'MTNREF{reference}'
-            }
+            return JsonResponse({
+                'status': 'success',
+                'action': action,
+                'message': message,
+                'likes_count': song.likes.count()
+            })
             
         except Exception as e:
-            return {
-                'success': False,
-                'message': f'MTN payment failed: {str(e)}'
-            }
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
     
-    @staticmethod
-    def initiate_airtel_payment(phone_number, amount, reference):
-        """
-        Initiate Airtel Money payment
-        Note: This is a simulation. In production, use actual Airtel API
-        """
-        try:
-            # Simulate API call to Airtel Money
-            # In production, you would use:
-            # response = requests.post(
-            #     'https://openapi.airtel.africa/merchant/v1/payments/',
-            #     headers={
-            #         'Authorization': f'Bearer {settings.AIRTEL_API_KEY}',
-            #         'Content-Type': 'application/json',
-            #         'X-Country': 'UG',  # Adjust country code as needed
-            #         'X-Currency': 'USD'
-            #     },
-            #     json={
-            #         'reference': reference,
-            #         'subscriber': {
-            #             'country': 'UG',
-            #             'currency': 'USD',
-            #             'msisdn': phone_number
-            #         },
-            #         'transaction': {
-            #             'amount': amount,
-            #             'country': 'UG',
-            #             'currency': 'USD',
-            #             'id': reference
-            #         }
-            #     }
-            # )
-            
-            # Simulate successful API response
-            return {
-                'success': True,
-                'transaction_id': f'AIRTEL_{reference}',
-                'message': 'Airtel Money payment initiated. Please check your phone to complete the transaction.',
-                'provider_reference': f'AIRTELREF{reference}'
-            }
-            
-        except Exception as e:
-            return {
-                'success': False,
-                'message': f'Airtel payment failed: {str(e)}'
-            }
-    
-    @staticmethod
-    def check_payment_status(transaction_id):
-        """
-        Check mobile money payment status
-        In production, this would query the provider's API
-        """
-        # Simulate checking payment status
-        # For demo, assume payment is completed after a short delay
-        import time
-        time.sleep(5)  # Simulate API delay
-        
-        # In production, you would:
-        # 1. Query the provider's API with transaction_id
-        # 2. Return actual status
-        
-        return {
-            'status': 'completed',  # or 'pending', 'failed'
-            'message': 'Payment completed successfully'
-        }
-
-def process_mobile_money_payment(user, plan_type, phone_number, network, amount):
-    """Process mobile money payment"""
-    # Generate unique reference
-    import uuid
-    reference = str(uuid.uuid4())[:8].upper()
-    
-    # Validate phone number format
-    if not validate_phone_number(phone_number, network):
-        return {
-            'success': False,
-            'message': 'Invalid phone number format for the selected network.'
-        }
-    
-    # Process based on network
-    if network == 'mtn':
-        result = MobileMoneyService.initiate_mtn_payment(phone_number, amount, reference)
-    elif network == 'airtel':
-        result = MobileMoneyService.initiate_airtel_payment(phone_number, amount, reference)
-    else:
-        return {
-            'success': False,
-            'message': 'Unsupported mobile network.'
-        }
-    
-    # Store transaction in database if successful
-    if result['success']:
-        Payment.objects.create(
-            user=user,
-            plan=SubscriptionPlan.objects.filter(plan_type=plan_type).first(),
-            amount=amount,
-            status='pending',
-            transaction_id=result['transaction_id'],
-            provider_reference=result.get('provider_reference'),
-            payment_method=network
-        )
-    
-    return result
-
-def validate_phone_number(phone_number, network):
-    """Validate phone number format for different networks"""
-    # Remove any non-digit characters
-    clean_number = ''.join(filter(str.isdigit, phone_number))
-    
-    if network == 'mtn':
-        # MTN Uganda format: 2567XXXXXXXX, 077XXXXXXX
-        return len(clean_number) in [10, 12] and clean_number.startswith(('2567', '077'))
-    elif network == 'airtel':
-        # Airtel Uganda format: 2567XXXXXXXX, 075XXXXXXX, 070XXXXXXX
-        return len(clean_number) in [10, 12] and clean_number.startswith(('2567', '075', '070'))
-    
-    return False
-
-def check_mobile_money_payment_status(transaction_id):
-    """Check if mobile money payment was completed"""
-    try:
-        # In production, this would query the actual provider API
-        result = MobileMoneyService.check_payment_status(transaction_id)
-        
-        if result['status'] == 'completed':
-            # Update payment status in database
-            payment = Payment.objects.get(transaction_id=transaction_id)
-            payment.status = 'completed'
-            payment.completed_at = timezone.now()
-            payment.save()
-            
-            return True
-        return False
-        
-    except Payment.DoesNotExist:
-        return False
-
-# views.py
-from django.http import JsonResponse
-from django.utils import timezone
-
-def track_download(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        # Save download data to database
-        Download.objects.create(
-            song_title=data['song_title'],
-            artist_name=data['artist_name'],
-            user=request.user if request.user.is_authenticated else None,
-            timestamp=timezone.now()
-        )
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'})
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid method'
+    })

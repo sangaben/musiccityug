@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MusicCity UG | Uganda's Music Hub{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        {% include 'header.html' %}
+        
+        
+
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-nav-menu" id="mobile-nav-menu">
+            <div class="mobile-nav-header">
+                <div class="logo">
+                    <img src="{% static 'images/logo.jpeg' %}" alt="MusicCity UG Logo" onerror="this.style.display='none'">
+                    <span class="logo-text">MusicCity UG</span>
+                </div>
+                <button class="nav-btn" id="close-mobile-nav">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-nav-content">
+                <div class="mobile-nav-section">
+                    <ul class="mobile-nav-links">
+                        <li>
+                            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                                <i class="fas fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'discover' %}" class="{% if request.resolver_match.url_name == 'discover' %}active{% endif %}">
+                                <i class="fas fa-search"></i>
+                                <span>Discover</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'artists' %}" class="{% if request.resolver_match.url_name == 'artists' %}active{% endif %}">
+                                <i class="fas fa-users"></i>
+                                <span>Artists</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'library' %}" class="{% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+                                <i class="fas fa-book"></i>
+                                <span>Library</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'playlists' %}" class="{% if request.resolver_match.url_name == 'playlists' %}active{% endif %}">
+                                <i class="fas fa-list"></i>
+                                <span>Playlists</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'genres' %}" class="{% if request.resolver_match.url_name == 'genres' %}active{% endif %}">
+                                <i class="fas fa-compass"></i>
+                                <span>Genres</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mobile-nav-section">
+                    <h3>Your Collection</h3>
+                    <ul class="mobile-nav-links">
+                        <li>
+                            <a href="{% url 'liked_songs' %}">
+                                <i class="fas fa-heart"></i>
+                                <span>Liked Songs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'recently_played' %}">
+                                <i class="fas fa-history"></i>
+                                <span>Recently Played</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% if user.is_authenticated and user.is_artist %}
+                <div class="mobile-nav-section">
+                    <h3>Artist Tools</h3>
+                    <ul class="mobile-nav-links">
+                        <li>
+                            <a href="{% url 'upload_music' %}">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Upload Music</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'my_uploads' %}">
+                                <i class="fas fa-list"></i>
+                                <span>My Uploads</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Overlay -->
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Messages -->
+            {% if messages %}
+            <div class="container messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Main Content -->
+            <main>
+                {% block content %}
+                {% endblock %}
+
+                <!-- Enhanced Help Section Template -->
+                {% block help_section %}
+                <section class="help-section">
+                    <div class="container">
+                        <div class="help-content">
+                            <div class="help-text">
+                                <h3>Need Help Uploading Your Music?</h3>
+                                <p>We're here to help you share your music with the world. Our support team is available to assist you with any questions about uploading, formatting, or promoting your tracks.</p>
+                                
+                                <div class="help-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Quick response within minutes</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Expert guidance on music formatting</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>24/7 support for urgent issues</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="help-contacts">
+                                <a href="https://wa.me/256776848801?text=Hello%20MusicCity%20UG%20Team,%20I%20need%20help%20uploading%20my%20music" 
+                                   target="_blank" 
+                                   class="contact-item whatsapp">
+                                    <div class="contact-icon">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </div>
+                                    <div class="contact-details">
+                                        <div class="contact-title">WhatsApp Support</div>
+                                        <div class="contact-info">+256 7768 48801</div>
+                                        <div class="contact-description">Get instant help with uploading and technical issues</div>
+                                        <div class="quick-response">
+                                            <i class="fas fa-bolt"></i>
+                                            Quick Response
+                                        </div>
+                                    </div>
+                                    <div class="contact-arrow">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                </a>
+
+                                <a href="mailto:musiccityug@gmail.com?subject=Music%20Upload%20Support%20-%20MusicCity%20UG&body=Hello%20MusicCity%20UG%20Team,%0A%0AI%20need%20assistance%20with:%0A%0A-%20Music%20upload%20process%0A-%20File%20format%20requirements%0A-%20Technical%20issues%0A-%20Other%20queries%0A%0APlease%20provide%20your%20guidance.%0A%0AThank you." 
+                                   class="contact-item email">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="contact-details">
+                                        <div class="contact-title">Email Support</div>
+                                        <div class="contact-info">musiccityug@gmail.com</div>
+                                        <div class="contact-description">Detailed assistance for complex upload issues</div>
+                                    </div>
+                                    <div class="contact-arrow">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endblock %}
+            </main>
+
+            {% include 'footer.html' %}
+        </div>
+    </div>
+
+    <!-- Player Section - Hidden by default -->
+    <div class="player-section" id="player-section">
+        <div class="container">
+            <div class="player-container">
+                <div class="song-info">
+                    <div class="song-thumb" id="current-song-thumb"></div>
+                    <div class="song-details">
+                        <h4 id="current-song-title">No song selected</h4>
+                        <p id="current-song-artist">Select a song to play</p>
+                    </div>
+                </div>
+                <div class="player-controls">
+                    <div class="control-buttons">
+                        <button id="shuffle-btn"><i class="fas fa-random"></i></button>
+                        <button id="prev-btn"><i class="fas fa-step-backward"></i></button>
+                        <button class="play-pause" id="play-pause-btn"><i class="fas fa-play"></i></button>
+                        <button id="next-btn"><i class="fas fa-step-forward"></i></button>
+                        <button id="repeat-btn"><i class="fas fa-redo"></i></button>
+                    </div>
+                    <div class="progress-container">
+                        <span class="time" id="current-time">0:00</span>
+                        <div class="progress-bar" id="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <span class="time" id="duration">0:00</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <div class="volume-control">
+                        <i class="fas fa-volume-up" id="volume-icon"></i>
+                        <div class="volume-bar" id="volume-bar">
+                            <div class="volume-level" id="volume-level"></div>
+                        </div>
+                    </div>
+                    <button id="like-btn"><i class="far fa-heart"></i></button>
+                    <button id="queue-btn"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watermark Overlay -->
+    <div class="watermark-overlay" id="watermark-overlay">
+        <div class="watermark-content">
+            <div class="watermark-logo">
+                <i class="fas fa-music"></i>
+            </div>
+            <h3>Downloaded from MusicCity UG</h3>
+            <p class="watermark-text">This song was downloaded from MusicCity UG Platform</p>
+            <button class="download-btn" onclick="closeWatermark()">
+                <i class="fas fa-times"></i>
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="audio-player" preload="metadata"></audio>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2>Login to MusicCity UG</h2>
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="primary-btn">Login</button>
+                    <button type="button" class="secondary-btn" id="login-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signup-modal">
+        <div class="modal-content">
+            <h2>Join MusicCity UG</h2>
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password1">Password</label>
+                    <input type="password" id="signup-password1" name="password1" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password2">Confirm Password</label>
+                    <input type="password" id="signup-password2" name="password2" placeholder="Confirm your password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="primary-btn">Sign Up</button>
+                    <button type="button" class="secondary-btn" id="signup-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

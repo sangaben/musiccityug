@@ -1,0 +1,1750 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home - musiccityug{% endblock %}
+
+{% block content %}
+<!-- Spotify-style Hero Section with Carousel -->
+<section class="spotify-hero">
+    <div class="hero-carousel">
+        <div class="carousel-track">
+            <!-- Hero Slide 1 -->
+            <div class="carousel-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');">
+                <div class="container">
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <p class="hero-badge">UGANDA MUSIC</p>
+                            <h1 class="hero-title">Uganda's Sound, Your Playlist</h1>
+                            <p class="hero-subtitle">Discover the best of Ugandan music. Stream, download, and share authentic sounds from the Pearl of Africa.</p>
+                            <div class="cta-buttons">
+                                {% if user.is_authenticated %}
+                                <button class="spotify-btn spotify-primary" onclick="startListening()" id="startListeningBtn">
+                                    <i class="fas fa-play"></i>
+                                    Start Listening
+                                </button>
+                                {% else %}
+                                <a href="{% url 'signup' %}" class="spotify-btn spotify-primary">
+                                    Get Started Free
+                                </a>
+                                <a href="{% url 'login' %}" class="spotify-btn spotify-secondary">
+                                    Sign In
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <div class="featured-artists">
+                                {% for artist in featured_artists|slice:":4" %}
+                                <div class="artist-circle">
+                                    {% if artist.image %}
+                                    <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                                    {% else %}
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% empty %}
+                                <!-- Fallback artist circles -->
+                                <div class="artist-circle">
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="artist-circle">
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="artist-circle">
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="artist-circle">
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hero Slide 2 -->
+            <div class="carousel-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80');">
+                <div class="container">
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <p class="hero-badge">TRENDING NOW</p>
+                            <h1 class="hero-title">Top Charts Uganda</h1>
+                            <p class="hero-subtitle">Listen to the hottest tracks trending across Uganda right now.</p>
+                            <div class="cta-buttons">
+                                <a href="{% url 'charts' %}" class="spotify-btn spotify-primary">
+                                    <i class="fas fa-chart-line"></i>
+                                    View Charts
+                                </a>
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <div class="trending-preview">
+                                {% for song in most_played|slice:":3" %}
+                                <div class="trending-item">
+                                    <div class="trending-rank">{{ forloop.counter }}</div>
+                                    <div class="trending-info">
+                                        <h4>{{ song.title }}</h4>
+                                        <p>{{ song.artist.name }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="trending-item">
+                                    <div class="trending-rank">1</div>
+                                    <div class="trending-info">
+                                        <h4>No trending songs</h4>
+                                        <p>Check back later</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hero Slide 3 -->
+            <div class="carousel-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1571974599782-87624638275f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2031&q=80');">
+                <div class="container">
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <p class="hero-badge">NEW RELEASES</p>
+                            <h1 class="hero-title">Fresh From The Studio</h1>
+                            <p class="hero-subtitle">Be the first to listen to brand new music from Uganda's top artists.</p>
+                            <div class="cta-buttons">
+                                <a href="{% url 'discover' %}" class="spotify-btn spotify-primary">
+                                    <i class="fas fa-compass"></i>
+                                    Discover
+                                </a>
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <div class="new-releases">
+                                {% for song in featured_songs|slice:":3" %}
+                                <div class="release-item">
+                                    <div class="release-cover">
+                                        {% if song.cover_image %}
+                                        <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                                        {% else %}
+                                        <div class="default-cover small">
+                                            <i class="fas fa-music"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="release-info">
+                                        <h4>{{ song.title }}</h4>
+                                        <p>{{ song.artist.name }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="release-item">
+                                    <div class="release-cover">
+                                        <div class="default-cover small">
+                                            <i class="fas fa-music"></i>
+                                        </div>
+                                    </div>
+                                    <div class="release-info">
+                                        <h4>No new releases</h4>
+                                        <p>Check back soon</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carousel Controls -->
+        <button class="carousel-control prev" onclick="moveSlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="carousel-control next" onclick="moveSlide(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+            <span class="indicator active" onclick="goToSlide(0)"></span>
+            <span class="indicator" onclick="goToSlide(1)"></span>
+            <span class="indicator" onclick="goToSlide(2)"></span>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content Grid -->
+<main class="main-content">
+    <div class="container">
+        <!-- Recently Played -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Recently played</h2>
+                <a href="#" class="see-all">Show all</a>
+            </div>
+            <div class="cards-grid">
+                {% for play in recent_plays|slice:":6" %}
+                <div class="music-card" data-song-id="{{ play.song.id }}">
+                    <div class="card-image">
+                        {% if play.song.cover_image %}
+                        <img src="{{ play.song.cover_image.url }}" alt="{{ play.song.title }}">
+                        {% else %}
+                        <div class="default-cover">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-actions">
+                            <button class="play-btn-card" onclick="playSongFromCard({{ play.song.id }})">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="download-btn-card" onclick="downloadSong({{ play.song.id }})">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">{{ play.song.title }}</h3>
+                        <p class="card-subtitle">{{ play.song.artist.name }}</p>
+                        <div class="song-stats">
+                            <span class="stat"><i class="fas fa-play"></i> {{ play.song.plays }}</span>
+                            <span class="stat"><i class="fas fa-download"></i> {{ play.song.downloads }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>No recent plays</p>
+                    <p class="empty-subtitle">Start listening to Ugandan music</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Made for You - Horizontal Scroll -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Made for You</h2>
+                <a href="{% url 'discover' %}" class="see-all">Show all</a>
+            </div>
+            <div class="horizontal-scroll-container">
+                <button class="scroll-btn scroll-left" onclick="scrollSectionLeft('made-for-you')">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="horizontal-scroll" id="made-for-you">
+                    {% for song in featured_songs %}
+                    <div class="music-card" data-song-id="{{ song.id }}">
+                        <div class="card-image">
+                            {% if song.cover_image %}
+                            <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                            {% else %}
+                            <div class="default-cover">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            {% endif %}
+                            <div class="card-actions">
+                                <button class="play-btn-card" onclick="playSongFromCard({{ song.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="download-btn-card" onclick="downloadSong({{ song.id }})">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">{{ song.title }}</h3>
+                            <p class="card-subtitle">{{ song.artist.name }}</p>
+                            <div class="song-stats">
+                                <span class="stat"><i class="fas fa-play"></i> {{ song.plays }}</span>
+                                <span class="stat"><i class="fas fa-download"></i> {{ song.downloads }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-music"></i>
+                        <p>No featured songs available</p>
+                        {% if user.is_authenticated and user.is_staff %}
+                        <a href="/admin/music/song/add/" class="spotify-btn spotify-primary" style="margin-top: 15px;">
+                            <i class="fas fa-plus"></i> Add Songs
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="scroll-btn scroll-right" onclick="scrollSectionRight('made-for-you')">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Trending Now - Horizontal Scroll -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Trending now</h2>
+                <a href="{% url 'charts' %}" class="see-all">Show all</a>
+            </div>
+            <div class="horizontal-scroll-container">
+                <button class="scroll-btn scroll-left" onclick="scrollSectionLeft('trending-now')">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="horizontal-scroll" id="trending-now">
+                    {% for song in most_played %}
+                    <div class="music-card" data-song-id="{{ song.id }}">
+                        <div class="card-image">
+                            {% if song.cover_image %}
+                            <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                            {% else %}
+                            <div class="default-cover">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            {% endif %}
+                            <div class="trending-badge">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="card-actions">
+                                <button class="play-btn-card" onclick="playSongFromCard({{ song.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="download-btn-card" onclick="downloadSong({{ song.id }})">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">{{ song.title }}</h3>
+                            <p class="card-subtitle">{{ song.artist.name }}</p>
+                            <div class="song-stats">
+                                <span class="stat"><i class="fas fa-play"></i> {{ song.plays }}</span>
+                                <span class="stat"><i class="fas fa-download"></i> {{ song.downloads }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-fire"></i>
+                        <p>No trending songs yet</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="scroll-btn scroll-right" onclick="scrollSectionRight('trending-now')">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Popular Artists - Horizontal Scroll -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Popular artists</h2>
+                <a href="{% url 'artists' %}" class="see-all">Show all</a>
+            </div>
+            <div class="horizontal-scroll-container">
+                <button class="scroll-btn scroll-left" onclick="scrollSectionLeft('popular-artists')">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="horizontal-scroll" id="popular-artists">
+                    {% for artist in trending_artists %}
+                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
+                        <div class="artist-image">
+                            {% if artist.image %}
+                            <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                            {% else %}
+                            <div class="artist-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            {% endif %}
+                            {% if artist.is_verified %}
+                            <div class="verified-badge">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="artist-info">
+                            <h3 class="artist-name">{{ artist.name }}</h3>
+                            <p class="artist-type">Artist</p>
+                            <div class="artist-stats">
+                                <span class="stat"><i class="fas fa-music"></i> {{ artist.song_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No trending artists yet</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="scroll-btn scroll-right" onclick="scrollSectionRight('popular-artists')">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Charts -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Top charts</h2>
+                <a href="{% url 'charts' %}" class="see-all">Show all</a>
+            </div>
+            <div class="charts-container">
+                <div class="charts-list">
+                    {% for song in chart_songs|slice:":5" %}
+                    <div class="chart-item" data-song-id="{{ song.id }}">
+                        <div class="chart-rank">{{ forloop.counter }}</div>
+                        <div class="chart-image">
+                            {% if song.cover_image %}
+                            <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                            {% else %}
+                            <div class="default-cover small">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="chart-info">
+                            <h4 class="chart-title">{{ song.title }}</h4>
+                            <p class="chart-artist">{{ song.artist.name }}</p>
+                        </div>
+                        <div class="chart-plays">
+                            <i class="fas fa-play"></i> {{ song.plays }}
+                        </div>
+                        <div class="chart-downloads">
+                            <i class="fas fa-download"></i> {{ song.downloads }}
+                        </div>
+                        <div class="chart-duration">{{ song.duration|default:"3:45" }}</div>
+                        <div class="chart-actions">
+                            <button class="play-btn-small" onclick="playSongFromCard({{ song.id }})">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="download-btn-small" onclick="downloadSong({{ song.id }})">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>No chart data available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Browse Genres -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Browse genres</h2>
+                <a href="{% url 'genres' %}" class="see-all">Show all</a>
+            </div>
+            <div class="genres-grid">
+                {% for genre in genres|slice:":8" %}
+                <a href="{% url 'genre_songs' genre.id %}" class="genre-card" style="background: {{ genre.color|default:'linear-gradient(135deg, #6c5ce7, #fd79a8)' }};">
+                    <h3 class="genre-name">{{ genre.name }}</h3>
+                    <p class="genre-count">{{ genre.song_count }} songs</p>
+                </a>
+                {% empty %}
+                <!-- Fallback genres -->
+                <a href="#" class="genre-card" style="background: linear-gradient(135deg, #FFD700, #FF6B35);">
+                    <h3 class="genre-name">Kadongo Kamu</h3>
+                    <p class="genre-count">24 songs</p>
+                </a>
+                <a href="#" class="genre-card" style="background: linear-gradient(135deg, #C4E538, #009432);">
+                    <h3 class="genre-name">Afrobeat</h3>
+                    <p class="genre-count">42 songs</p>
+                </a>
+                <a href="#" class="genre-card" style="background: linear-gradient(135deg, #ED4C67, #B53471);">
+                    <h3 class="genre-name">Dancehall</h3>
+                    <p class="genre-count">18 songs</p>
+                </a>
+                <a href="#" class="genre-card" style="background: linear-gradient(135deg, #0652DD, #1289A7);">
+                    <h3 class="genre-name">Gospel</h3>
+                    <p class="genre-count">36 songs</p>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== SPOTIFY-INSPIRED VARIABLES ===== */
+:root {
+    --spotify-black: #121212;
+    --spotify-dark: #181818;
+    --spotify-gray: #282828;
+    --spotify-light-gray: #b3b3b3;
+    --spotify-white: #ffffff;
+    --spotify-green: #1db954;
+    --uganda-yellow: #FFD100;
+    --uganda-red: #D90000;
+    --uganda-black: #000000;
+    --card-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* ===== SPOTIFY HERO SECTION WITH CAROUSEL ===== */
+.spotify-hero {
+    position: relative;
+    height: 85vh;
+    min-height: 600px;
+    overflow: hidden;
+}
+
+.hero-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+.hero-carousel:active {
+    cursor: grabbing;
+}
+
+.carousel-track {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+    width: 33.333%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: var(--transition);
+}
+
+.carousel-control:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-control.prev {
+    left: 20px;
+}
+
+.carousel-control.next {
+    right: 20px;
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.indicator.active {
+    background: var(--spotify-green);
+    transform: scale(1.2);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+}
+
+.hero-text {
+    flex: 1;
+    max-width: 600px;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--spotify-white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    line-height: 1.1;
+    color: var(--spotify-white);
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.spotify-btn {
+    padding: 14px 32px;
+    border-radius: 500px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.spotify-primary {
+    background-color: var(--spotify-green);
+    color: var(--spotify-black);
+}
+
+.spotify-primary:hover {
+    background-color: #1ed760;
+    transform: scale(1.05);
+}
+
+.spotify-secondary {
+    background-color: transparent;
+    color: var(--spotify-white);
+    border: 2px solid var(--spotify-white);
+}
+
+.spotify-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.hero-visual {
+    flex: 0 0 auto;
+}
+
+.featured-artists {
+    display: flex;
+    gap: 15px;
+}
+
+.artist-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    animation: float 6s ease-in-out infinite;
+}
+
+.artist-circle:nth-child(2) {
+    animation-delay: 1.5s;
+}
+
+.artist-circle:nth-child(3) {
+    animation-delay: 3s;
+}
+
+.artist-circle:nth-child(4) {
+    animation-delay: 4.5s;
+}
+
+.artist-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artist-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--spotify-white);
+    font-size: 2rem;
+}
+
+.trending-preview, .new-releases {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+}
+
+.trending-item, .release-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.trending-item:hover, .release-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.trending-item:last-child, .release-item:last-child {
+    margin-bottom: 0;
+}
+
+.trending-rank {
+    width: 30px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--spotify-green);
+    font-size: 1.2rem;
+}
+
+.release-cover {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 15px;
+}
+
+.release-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trending-info h4, .release-info h4 {
+    color: var(--spotify-white);
+    margin: 0 0 5px;
+    font-size: 1rem;
+}
+
+.trending-info p, .release-info p {
+    color: var(--spotify-light-gray);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    padding: 40px 0;
+    background: var(--spotify-black);
+}
+
+.content-section {
+    margin-bottom: 50px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--spotify-white);
+}
+
+.see-all {
+    color: var(--spotify-light-gray);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.see-all:hover {
+    color: var(--spotify-white);
+    text-decoration: underline;
+}
+
+/* ===== HORIZONTAL SCROLL SECTIONS ===== */
+.horizontal-scroll-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.horizontal-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    padding: 10px 0;
+    flex: 1;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.scroll-btn {
+    background: var(--spotify-gray);
+    border: none;
+    color: var(--spotify-white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+    z-index: 2;
+}
+
+.scroll-btn:hover {
+    background: var(--spotify-green);
+    color: var(--spotify-black);
+    transform: scale(1.1);
+}
+
+.scroll-btn.scroll-left {
+    margin-right: 10px;
+}
+
+.scroll-btn.scroll-right {
+    margin-left: 10px;
+}
+
+/* ===== CARDS GRID ===== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.music-card {
+    background: var(--spotify-gray);
+    border-radius: var(--card-radius);
+    padding: 16px;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    flex: 0 0 auto;
+    width: 180px;
+}
+
+.music-card:hover {
+    background: #3e3e3e;
+    transform: translateY(-5px);
+}
+
+.card-image {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--spotify-white);
+    font-size: 2rem;
+}
+
+.default-cover.small {
+    font-size: 1.5rem;
+    height: 50px;
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: var(--transition);
+}
+
+.music-card:hover .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.play-btn-card, .download-btn-card {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn-card {
+    background: var(--spotify-green);
+    color: var(--spotify-black);
+}
+
+.download-btn-card {
+    background: var(--uganda-yellow);
+    color: var(--spotify-black);
+}
+
+.play-btn-card:hover, .download-btn-card:hover {
+    transform: scale(1.1);
+}
+
+.trending-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--uganda-yellow);
+    color: var(--spotify-black);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+}
+
+.card-content {
+    min-height: 62px;
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--spotify-white);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-subtitle {
+    color: var(--spotify-light-gray);
+    font-size: 0.875rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--spotify-light-gray);
+}
+
+/* ===== ARTIST GRID ===== */
+.artist-grid .music-card {
+    text-align: center;
+}
+
+.artist-card {
+    background: var(--spotify-gray);
+    border-radius: var(--card-radius);
+    padding: 16px;
+    transition: var(--transition);
+    cursor: pointer;
+    text-align: center;
+    flex: 0 0 auto;
+    width: 180px;
+}
+
+.artist-card:hover {
+    background: #3e3e3e;
+    transform: translateY(-5px);
+}
+
+.artist-image {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    overflow: hidden;
+    aspect-ratio: 1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: var(--spotify-green);
+    color: var(--spotify-black);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+}
+
+.artist-info {
+    min-height: 62px;
+}
+
+.artist-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--spotify-white);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-type {
+    color: var(--spotify-light-gray);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.artist-stats {
+    margin-top: 8px;
+}
+
+/* ===== CHARTS ===== */
+.charts-container {
+    background: var(--spotify-gray);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.chart-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.chart-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chart-item:last-child {
+    border-bottom: none;
+}
+
+.chart-rank {
+    width: 40px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--spotify-light-gray);
+}
+
+.chart-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 16px;
+}
+
+.chart-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chart-info {
+    flex: 1;
+}
+
+.chart-title {
+    font-weight: 400;
+    margin-bottom: 4px;
+    color: var(--spotify-white);
+    font-size: 1rem;
+}
+
+.chart-artist {
+    color: var(--spotify-light-gray);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.chart-plays, .chart-downloads {
+    color: var(--spotify-light-gray);
+    font-size: 0.875rem;
+    margin: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.chart-duration {
+    color: var(--spotify-light-gray);
+    font-size: 0.875rem;
+    margin: 0 20px;
+}
+
+.chart-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.chart-item:hover .chart-actions {
+    opacity: 1;
+}
+
+.play-btn-small, .download-btn-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--spotify-light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.chart-item:hover .play-btn-small,
+.chart-item:hover .download-btn-small {
+    color: var(--spotify-white);
+}
+
+.play-btn-small:hover, .download-btn-small:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== GENRES GRID ===== */
+.genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.genre-card {
+    padding: 20px;
+    border-radius: var(--card-radius);
+    text-decoration: none;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.genre-card:hover {
+    transform: scale(1.02);
+}
+
+.genre-name {
+    font-weight: 700;
+    color: var(--spotify-white);
+    font-size: 1.2rem;
+    z-index: 2;
+    position: relative;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.genre-count {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 5px 0 0;
+    z-index: 2;
+    position: relative;
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--spotify-light-gray);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: var(--spotify-light-gray);
+    opacity: 0.7;
+}
+
+.empty-state p {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--spotify-light-gray);
+}
+
+.empty-subtitle {
+    font-size: 1rem;
+    color: var(--spotify-light-gray);
+    opacity: 0.7;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 40px;
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    
+    .trending-preview, .new-releases {
+        min-width: 250px;
+    }
+    
+    .music-card, .artist-card {
+        width: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .spotify-hero {
+        height: 70vh;
+        min-height: 500px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .spotify-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .featured-artists {
+        justify-content: center;
+    }
+    
+    .artist-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .carousel-control.prev {
+        left: 10px;
+    }
+    
+    .carousel-control.next {
+        right: 10px;
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+    
+    .chart-plays, .chart-downloads, .chart-duration {
+        display: none;
+    }
+    
+    .genres-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    
+    .trending-preview, .new-releases {
+        min-width: 200px;
+    }
+    
+    .music-card, .artist-card {
+        width: 140px;
+    }
+    
+    .scroll-btn {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .genres-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-item {
+        padding: 8px 12px;
+    }
+    
+    .chart-image {
+        margin: 0 12px;
+    }
+    
+    .carousel-indicators {
+        bottom: 15px;
+    }
+    
+    .trending-preview, .new-releases {
+        min-width: 100%;
+        margin-top: 20px;
+    }
+    
+    .music-card, .artist-card {
+        width: 150px;
+    }
+    
+    .scroll-btn {
+        display: none; /* Hide scroll buttons on very small screens */
+    }
+    
+    .horizontal-scroll-container {
+        gap: 5px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Carousel functionality with touch/swipe support
+let currentSlide = 0;
+const totalSlides = 3;
+const track = document.querySelector('.carousel-track');
+const indicators = document.querySelectorAll('.indicator');
+
+// Touch/swipe variables
+let startX = 0;
+let currentX = 0;
+let isDragging = false;
+
+function moveSlide(direction) {
+    currentSlide += direction;
+    
+    // Handle boundaries
+    if (currentSlide < 0) {
+        currentSlide = totalSlides - 1;
+    } else if (currentSlide >= totalSlides) {
+        currentSlide = 0;
+    }
+    
+    updateCarousel();
+}
+
+function goToSlide(slideIndex) {
+    currentSlide = slideIndex;
+    updateCarousel();
+}
+
+function updateCarousel() {
+    // Update track position
+    track.style.transform = `translateX(-${currentSlide * 33.333}%)`;
+    
+    // Update indicators
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlide) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
+}
+
+// Auto-advance carousel
+let carouselInterval = setInterval(() => {
+    moveSlide(1);
+}, 5000);
+
+// Pause auto-advance on hover
+document.querySelector('.hero-carousel').addEventListener('mouseenter', () => {
+    clearInterval(carouselInterval);
+});
+
+document.querySelector('.hero-carousel').addEventListener('mouseleave', () => {
+    carouselInterval = setInterval(() => {
+        moveSlide(1);
+    }, 5000);
+});
+
+// Touch/swipe functionality for carousel
+const carousel = document.querySelector('.hero-carousel');
+
+carousel.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+    clearInterval(carouselInterval);
+});
+
+carousel.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX;
+});
+
+carousel.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    
+    const diff = startX - currentX;
+    const threshold = 50;
+    
+    if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+            // Swipe left - next slide
+            moveSlide(1);
+        } else {
+            // Swipe right - previous slide
+            moveSlide(-1);
+        }
+    }
+    
+    isDragging = false;
+    
+    // Restart auto-advance
+    carouselInterval = setInterval(() => {
+        moveSlide(1);
+    }, 5000);
+});
+
+// Mouse drag functionality for carousel
+carousel.addEventListener('mousedown', (e) => {
+    startX = e.clientX;
+    isDragging = true;
+    carousel.style.cursor = 'grabbing';
+    clearInterval(carouselInterval);
+});
+
+carousel.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    currentX = e.clientX;
+});
+
+carousel.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    
+    const diff = startX - currentX;
+    const threshold = 50;
+    
+    if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+            // Drag left - next slide
+            moveSlide(1);
+        } else {
+            // Drag right - previous slide
+            moveSlide(-1);
+        }
+    }
+    
+    isDragging = false;
+    carousel.style.cursor = 'grab';
+    
+    // Restart auto-advance
+    carouselInterval = setInterval(() => {
+        moveSlide(1);
+    }, 5000);
+});
+
+carousel.addEventListener('mouseleave', () => {
+    if (isDragging) {
+        isDragging = false;
+        carousel.style.cursor = 'grab';
+        
+        // Restart auto-advance
+        carouselInterval = setInterval(() => {
+            moveSlide(1);
+        }, 5000);
+    }
+});
+
+// Horizontal scroll functionality for sections
+function scrollSectionLeft(sectionId) {
+    const section = document.getElementById(sectionId);
+    section.scrollBy({
+        left: -300,
+        behavior: 'smooth'
+    });
+}
+
+function scrollSectionRight(sectionId) {
+    const section = document.getElementById(sectionId);
+    section.scrollBy({
+        left: 300,
+        behavior: 'smooth'
+    });
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects for cards
+    document.querySelectorAll('.music-card, .artist-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
+    
+    // Add click handlers for music cards
+    document.querySelectorAll('.music-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if play or download button was clicked
+            if (!e.target.closest('.play-btn-card') && !e.target.closest('.download-btn-card')) {
+                const songId = parseInt(this.dataset.songId);
+                if (songId) {
+                    // This function should be defined in base.html
+                    if (typeof playSongFromCard === 'function') {
+                        playSongFromCard(songId);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Add click handlers for chart items
+    document.querySelectorAll('.chart-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Don't trigger if play or download button was clicked
+            if (!e.target.closest('.play-btn-small') && !e.target.closest('.download-btn-small')) {
+                const songId = parseInt(this.dataset.songId);
+                if (songId) {
+                    // This function should be defined in base.html
+                    if (typeof playSongFromCard === 'function') {
+                        playSongFromCard(songId);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Add touch/swipe functionality to horizontal scroll sections
+    document.querySelectorAll('.horizontal-scroll').forEach(section => {
+        let startX = 0;
+        let currentX = 0;
+        let isScrolling = false;
+        
+        section.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isScrolling = true;
+        });
+        
+        section.addEventListener('touchmove', (e) => {
+            if (!isScrolling) return;
+            currentX = e.touches[0].clientX;
+        });
+        
+        section.addEventListener('touchend', () => {
+            if (!isScrolling) return;
+            
+            const diff = startX - currentX;
+            const threshold = 50;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    // Swipe left - scroll right
+                    section.scrollBy({
+                        left: 300,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    // Swipe right - scroll left
+                    section.scrollBy({
+                        left: -300,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+            
+            isScrolling = false;
+        });
+    });
+});
+
+// Simple notification system (if not defined in base.html)
+function showNotification(message, type = 'info') {
+    // Check if notification function exists in base.html
+    if (typeof showNotification !== 'undefined' && typeof showNotification === 'function') {
+        return; // Use the one from base.html
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add styles
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: ${type === 'success' ? '#1db954' : type === 'error' ? '#e22134' : '#4688d7'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 10000;
+        animation: slideInUp 0.3s ease;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        font-size: 0.9rem;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutDown 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Add CSS animations for notifications (if not in base.html)
+if (!document.querySelector('style[data-notification-animations]')) {
+    const style = document.createElement('style');
+    style.setAttribute('data-notification-animations', 'true');
+    style.textContent = `
+        @keyframes slideInUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutDown {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+</script>
+{% endblock %}

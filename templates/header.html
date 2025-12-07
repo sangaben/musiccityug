@@ -1,0 +1,1201 @@
+{% load static %}
+<!-- MDuuno Style Header with Footer-like Background -->
+<header class="mdundo-header footer-style-header">
+    <div class="header-top">
+        <div class="logo-section">
+            <button class="mobile-nav-toggle" id="mobile-nav-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="{% url 'home' %}" class="logo">
+                <img src="{% static 'images/logo.jpeg' %}" alt="MusicCity UG Logo" onerror="this.style.display='none'">
+                <span class="logo-text">MusicCity<span class="logo-highlight">UG</span></span>
+            </a>
+            
+            <!-- Add Page Title Section Here -->
+            <div class="page-title-container">
+                <span class="title-divider">|</span>
+                <h1 class="page-title">
+                    {% if request.resolver_match.url_name == 'home' %}
+                        Home
+                    {% elif request.resolver_match.url_name == 'discover' %}
+                        All Songs
+                    {% elif request.resolver_match.url_name == 'charts' %}
+                        Charts
+                    {% elif request.resolver_match.url_name == 'news' %}
+                        News
+                    {% elif request.resolver_match.url_name == 'artists' %}
+                        Artists
+                    {% elif request.resolver_match.url_name == 'genres' %}
+                        Genres
+                    {% else %}
+                        MusicCityUG
+                    {% endif %}
+                </h1>
+            </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="nav-controls">
+            <button class="nav-btn" id="back-btn" title="Back">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-btn" id="forward-btn" title="Forward">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-bar" id="desktop-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search for songs, artists, albums...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+
+        <!-- Mobile Search Button Only -->
+        <div class="mobile-search-only">
+            <button class="mobile-search-btn" id="mobile-search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{% url 'discover' %}" class="nav-item {% if request.resolver_match.url_name == 'discover' %}active{% endif %}">
+                <i class="fas fa-compass"></i>
+                <span>All songs</span>
+            </a>
+            <a href="{% url 'charts' %}" class="nav-item {% if request.resolver_match.url_name == 'charts' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Charts</span>
+            </a>
+            <a href="{% url 'news' %}" class="nav-item {% if request.resolver_match.url_name == 'news' %}active{% endif %}">
+                <i class="fas fa-newspaper"></i>
+                <span>News</span>
+            </a>
+            <a href="{% url 'artists' %}" class="nav-item {% if request.resolver_match.url_name == 'artists' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                <span>Artists</span>
+            </a>
+            <a href="{% url 'genres' %}" class="nav-item {% if request.resolver_match.url_name == 'genres' %}active{% endif %}">
+                <i class="fas fa-music"></i>
+                <span>Genres</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Mobile Quick Actions -->
+    <div class="quick-actions-mobile">
+        <button class="quick-action" onclick="location.href='{% url 'home' %}'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+
+        <button class="quick-action" onclick="location.href='{% url 'discover' %}'">
+            <i class="fas fa-compass"></i>
+            <span>All songs</span>
+        </button>
+
+        <button class="quick-action" onclick="location.href='{% url 'artists' %}'">
+            <i class="fas fa-users"></i>
+            <span>Artists</span>
+        </button>
+
+        <button class="quick-action" onclick="location.href='{% url 'genres' %}'">
+            <i class="fas fa-music"></i>
+            <span>Genres</span>
+        </button>
+        <button class="quick-action" onclick="location.href='{% url 'news' %}'">
+            <i class="fas fa-newspaper"></i>
+            <span>News</span>
+        </button>
+    </div>
+</header>
+
+<style>
+/* MDuuno Style Header with Footer-like Background */
+.footer-style-header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    border-bottom: 1px solid #333;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+.footer-style-header .header-top {
+    background: transparent;
+}
+
+.footer-style-header .logo-text {
+    color: #ffffff;
+}
+
+.footer-style-header .logo-highlight {
+    color: #ff6b00;
+}
+
+.footer-style-header .mobile-nav-toggle {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.footer-style-header .mobile-nav-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.footer-style-header .nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.footer-style-header .nav-btn:hover:not(:disabled) {
+    background: rgba(255, 107, 0, 0.2);
+    border-color: #ff6b00;
+    color: #ff6b00;
+}
+
+.footer-style-header .search-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-style-header .search-bar:focus-within {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #ff6b00;
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+}
+
+.footer-style-header .search-bar i {
+    color: #cccccc;
+}
+
+.footer-style-header .search-bar input {
+    color: #ffffff;
+}
+
+.footer-style-header .search-bar input::placeholder {
+    color: #999999;
+}
+
+.footer-style-header .search-results {
+    background: #2d2d2d;
+    border: 1px solid #444;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.footer-style-header .search-result-item {
+    border-bottom: 1px solid #444;
+    color: #ffffff;
+}
+
+.footer-style-header .search-result-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.footer-style-header .search-result-item i {
+    color: #cccccc;
+}
+
+.footer-style-header .result-title {
+    color: #ffffff;
+}
+
+.footer-style-header .result-subtitle {
+    color: #999999;
+}
+
+.footer-style-header .search-result-header {
+    border-bottom: 1px solid #444;
+    color: #999999;
+}
+
+.footer-style-header .search-result-footer button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #444;
+    color: #cccccc;
+}
+
+.footer-style-header .search-result-footer button:hover {
+    background: rgba(255, 107, 0, 0.2);
+    color: #ff6b00;
+}
+
+.footer-style-header .mobile-search-btn {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.footer-style-header .mobile-search-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Main Navigation - Dark Theme */
+.footer-style-header .main-nav {
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid #333;
+}
+
+.footer-style-header .nav-item {
+    color: #cccccc;
+}
+
+.footer-style-header .nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.footer-style-header .nav-item.active {
+    color: #ff6b00;
+    background: rgba(255, 107, 0, 0.1);
+}
+
+/* Mobile Quick Actions - Dark Theme */
+.footer-style-header .quick-actions-mobile {
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid #333;
+}
+
+.footer-style-header .quick-action {
+    color: #cccccc;
+}
+
+.footer-style-header .quick-action:hover {
+    color: #ff6b00;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Menu - Dark Theme */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.mobile-menu-content {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85%;
+    max-width: 300px;
+    height: 100%;
+    background: #1a1a1a;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-menu-overlay.active .mobile-menu-content {
+    transform: translateX(0);
+}
+
+.mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #333;
+}
+
+.mobile-logo .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.mobile-logo .logo-highlight {
+    color: #ff6b00;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    color: #cccccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b00;
+}
+
+.mobile-menu-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: #cccccc;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.mobile-nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ff6b00;
+    border-left-color: #ff6b00;
+}
+
+.mobile-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.mobile-menu-footer {
+    background: #2d2d2d;
+    border-top: 1px solid #333;
+    padding: 20px;
+}
+
+.mobile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.mobile-user-info .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ff6b00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: white;
+}
+
+.mobile-user-info .user-details .user-name {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.mobile-user-info .user-details .user-email {
+    color: #999999;
+    font-size: 14px;
+}
+
+.mobile-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mobile-auth-btn {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    text-align: center;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    color: #cccccc;
+}
+
+.mobile-auth-btn.signup {
+    background: #ff6b00;
+    color: #ffffff;
+    border-color: #ff6b00;
+}
+
+.mobile-auth-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-auth-btn.signup:hover {
+    background: #e55a00;
+    border-color: #e55a00;
+}
+
+.mobile-logout-form {
+    margin: 0;
+}
+
+.mobile-logout-form .mobile-auth-btn {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.mobile-logout-form .mobile-auth-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* Original header styles */
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+/* Page Title Container Styles */
+.page-title-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 10px;
+}
+
+.title-divider {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 20px;
+    font-weight: 300;
+}
+
+.page-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.mobile-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 18px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.logo:hover {
+    transform: translateY(-1px);
+}
+
+.logo img {
+    height: 32px;
+    width: auto;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.logo-highlight {
+    color: #ff6b00;
+}
+
+.nav-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.nav-btn {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.search-container {
+    flex: 1;
+    max-width: 500px;
+    position: relative;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.search-bar:focus-within {
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+}
+
+.search-bar i {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.search-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-results.active {
+    display: block;
+}
+
+/* Mobile Search Only Container */
+.mobile-search-only {
+    display: none;
+    align-items: center;
+}
+
+.mobile-search-btn {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-nav {
+    border-top: 1px solid #f1f3f4;
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.nav-container::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.nav-item i {
+    font-size: 16px;
+}
+
+.quick-actions-mobile {
+    display: none;
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: space-around;
+}
+
+.quick-actions-mobile::-webkit-scrollbar {
+    display: none;
+}
+
+.quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.quick-action i {
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+
+.quick-action span {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .header-top {
+        padding: 12px 20px;
+    }
+    
+    .nav-container {
+        padding: 0 20px;
+        justify-content: flex-start;
+    }
+    
+    .search-container {
+        max-width: 400px;
+    }
+    
+    .page-title {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-top {
+        padding: 12px 16px;
+        gap: 16px;
+    }
+    
+    .mobile-nav-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .mobile-search-only {
+        display: flex;
+    }
+    
+    .search-container {
+        display: none;
+    }
+    
+    .search-container.mobile-active {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        z-index: 1001;
+        padding: 8px 0;
+    }
+    
+    .nav-controls {
+        display: none;
+    }
+    
+    .nav-container {
+        padding: 0 16px;
+    }
+    
+    .nav-item {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .nav-item span {
+        display: none;
+    }
+    
+    .nav-item i {
+        margin: 0;
+        font-size: 18px;
+    }
+    
+    .quick-actions-mobile {
+        display: flex;
+    }
+    
+    /* Hide page title on mobile */
+    .page-title-container {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-top {
+        padding: 10px 12px;
+    }
+    
+    .logo-text {
+        font-size: 20px;
+    }
+    
+    .logo img {
+        height: 28px;
+    }
+    
+    .nav-container {
+        padding: 0 12px;
+    }
+    
+    .nav-item {
+        padding: 8px 10px;
+    }
+    
+    .quick-actions-mobile {
+        padding: 10px 12px;
+    }
+    
+    .quick-action {
+        padding: 6px 8px;
+        min-width: 55px;
+    }
+    
+    .quick-action i {
+        font-size: 16px;
+    }
+    
+    .quick-action span {
+        font-size: 10px;
+    }
+}
+
+/* Animation for mobile search */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-container.mobile-active {
+    animation: slideDown 0.2s ease-out;
+}
+
+/* Focus states for accessibility */
+.nav-btn:focus-visible,
+.mobile-search-btn:focus-visible,
+.quick-action:focus-visible,
+.nav-item:focus-visible {
+    outline: 2px solid #ff6b00;
+    outline-offset: 2px;
+}
+</style>
+
+<script>
+    // MDuuno Header JavaScript
+    class MDuunoHeader {
+        constructor() {
+            this.isMobileMenuOpen = false;
+            this.init();
+        }
+
+        init() {
+            this.setupMobileNavigation();
+            this.setupSearchFunctionality();
+            this.setupNavigationControls();
+            this.setupQuickActions();
+            this.setupMobileMenu();
+        }
+
+        setupMobileNavigation() {
+            const mobileToggle = document.getElementById('mobile-nav-toggle');
+            const mobileSearchBtn = document.getElementById('mobile-search-btn');
+            const searchContainer = document.querySelector('.search-container');
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', () => {
+                    this.toggleMobileMenu();
+                });
+            }
+
+            if (mobileSearchBtn) {
+                mobileSearchBtn.addEventListener('click', () => {
+                    searchContainer.classList.toggle('mobile-active');
+                    if (searchContainer.classList.contains('mobile-active')) {
+                        const searchInput = document.getElementById('search-input');
+                        setTimeout(() => searchInput.focus(), 100);
+                    }
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container') && !e.target.closest('.mobile-search-btn')) {
+                    searchContainer.classList.remove('mobile-active');
+                }
+            });
+        }
+
+        setupMobileMenu() {
+            this.createMobileMenu();
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isMobileMenuOpen) {
+                    this.closeMobileMenu();
+                }
+            });
+        }
+
+        createMobileMenu() {
+            const overlay = document.createElement('div');
+            overlay.className = 'mobile-menu-overlay';
+            overlay.innerHTML = `
+                <div class="mobile-menu-content">
+                    <div class="mobile-menu-header">
+                        <div class="mobile-logo">
+                            <span class="logo-text">MusicCity<span class="logo-highlight">UG</span></span>
+                        </div>
+                        <button class="mobile-menu-close" id="mobile-menu-close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-menu-nav">
+                        <a href="{% url 'home' %}" class="mobile-nav-item">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                        <a href="{% url 'discover' %}" class="mobile-nav-item">
+                            <i class="fas fa-compass"></i>
+                            <span>Discover</span>
+                        </a>
+                        <a href="{% url 'charts' %}" class="mobile-nav-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Charts</span>
+                        </a>
+                        <a href="{% url 'news' %}" class="mobile-nav-item">
+                            <i class="fas fa-newspaper"></i>
+                            <span>News</span>
+                        </a>
+                        <a href="{% url 'artists' %}" class="mobile-nav-item">
+                            <i class="fas fa-users"></i>
+                            <span>Artists</span>
+                        </a>
+                        <a href="{% url 'genres' %}" class="mobile-nav-item">
+                            <i class="fas fa-music"></i>
+                            <span>Genres</span>
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+
+            const closeBtn = document.getElementById('mobile-menu-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.closeMobileMenu();
+                });
+            }
+
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.closeMobileMenu();
+                }
+            });
+
+            const navItems = overlay.querySelectorAll('.mobile-nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    this.closeMobileMenu();
+                });
+            });
+        }
+
+        toggleMobileMenu() {
+            if (this.isMobileMenuOpen) {
+                this.closeMobileMenu();
+            } else {
+                this.openMobileMenu();
+            }
+        }
+
+        openMobileMenu() {
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                this.isMobileMenuOpen = true;
+            }
+        }
+
+        closeMobileMenu() {
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                this.isMobileMenuOpen = false;
+            }
+        }
+
+        setupSearchFunctionality() {
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+
+            if (searchInput) {
+                let searchTimeout;
+                
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    const query = e.target.value.trim();
+                    
+                    if (query.length > 0) {
+                        searchTimeout = setTimeout(() => {
+                            this.performSearch(query);
+                        }, 300);
+                    } else {
+                        this.hideSearchResults();
+                    }
+                });
+
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleSearchEnter(searchInput.value);
+                    }
+                    
+                    if (e.key === 'Escape') {
+                        this.hideSearchResults();
+                        searchInput.blur();
+                    }
+                });
+
+                searchInput.addEventListener('focus', () => {
+                    this.showRecentSearches();
+                });
+            }
+        }
+
+        performSearch(query) {
+            const searchResults = document.getElementById('search-results');
+            
+            const results = this.generateMockResults(query);
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = `
+                    <div class="search-result-item">
+                        <i class="fas fa-music"></i>
+                        <div class="result-info">
+                            <div class="result-title">"${query}" - Song</div>
+                            <div class="result-subtitle">Various Artists</div>
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <i class="fas fa-user"></i>
+                        <div class="result-info">
+                            <div class="result-title">${query}</div>
+                            <div class="result-subtitle">Artist</div>
+                        </div>
+                    </div>
+                    <div class="search-result-item">
+                        <i class="fas fa-record-vinyl"></i>
+                        <div class="result-info">
+                            <div class="result-title">"${query}" - Album</div>
+                            <div class="result-subtitle">2024 • 12 tracks</div>
+                        </div>
+                    </div>
+                    <div class="search-result-footer">
+                        <button onclick="window.location.href='/search/?q=${encodeURIComponent(query)}'">
+                            View all results for "${query}"
+                        </button>
+                    </div>
+                `;
+                searchResults.classList.add('active');
+            }
+        }
+
+        generateMockResults(query) {
+            return [
+                { type: 'song', title: `"${query}" - Song`, subtitle: 'Various Artists' },
+                { type: 'artist', title: query, subtitle: 'Artist' },
+                { type: 'album', title: `"${query}" - Album`, subtitle: '2024 • 12 tracks' }
+            ];
+        }
+
+        handleSearchEnter(query) {
+            if (query.trim()) {
+                window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+            }
+        }
+
+        showRecentSearches() {
+            const searchResults = document.getElementById('search-results');
+            const recentSearches = this.getRecentSearches();
+            
+            if (recentSearches.length > 0) {
+                searchResults.innerHTML = `
+                    <div class="search-result-header">
+                        <span>Recent Searches</span>
+                        <button onclick="mdundoHeader.clearRecentSearches()">Clear</button>
+                    </div>
+                    ${recentSearches.map(search => `
+                        <div class="search-result-item recent-search">
+                            <i class="fas fa-clock"></i>
+                            <div class="result-info">
+                                <div class="result-title">${search}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+                searchResults.classList.add('active');
+                
+                searchResults.querySelectorAll('.recent-search').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const searchText = item.querySelector('.result-title').textContent;
+                        document.getElementById('search-input').value = searchText;
+                        this.performSearch(searchText);
+                    });
+                });
+            }
+        }
+
+        hideSearchResults() {
+            const searchResults = document.getElementById('search-results');
+            searchResults.classList.remove('active');
+        }
+
+        getRecentSearches() {
+            try {
+                return JSON.parse(localStorage.getItem('mdundo_recent_searches') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        clearRecentSearches() {
+            localStorage.removeItem('mdundo_recent_searches');
+            this.hideSearchResults();
+        }
+
+        setupNavigationControls() {
+            const backBtn = document.getElementById('back-btn');
+            const forwardBtn = document.getElementById('forward-btn');
+
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    window.history.back();
+                });
+            }
+
+            if (forwardBtn) {
+                forwardBtn.addEventListener('click', () => {
+                    window.history.forward();
+                });
+            }
+
+            this.updateNavButtons();
+            window.addEventListener('popstate', () => {
+                this.updateNavButtons();
+            });
+        }
+
+        updateNavButtons() {
+            const backBtn = document.getElementById('back-btn');
+            const forwardBtn = document.getElementById('forward-btn');
+
+            if (backBtn) {
+                backBtn.disabled = !window.history.length || window.history.length <= 1;
+            }
+        }
+
+        setupQuickActions() {
+            const quickActions = document.querySelectorAll('.quick-action');
+            quickActions.forEach(action => {
+                action.addEventListener('click', function() {
+                    console.log('Quick action:', this.querySelector('span').textContent);
+                });
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        window.mdundoHeader = new MDuunoHeader();
+    });
+</script>

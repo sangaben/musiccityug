@@ -1,0 +1,1845 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ artist.name }} - Sangabiz{% endblock %}
+
+{% block content %}
+<div class="artist-profile">
+    <!-- Artist Header Section -->
+    <section class="artist-hero" style="background: linear-gradient(180deg, {{ artist.genre.color|default:'#6c5ce7' }} 0%, var(--bg-primary) 100%);">
+        <div class="container">
+            <div class="artist-header">
+                <div class="artist-main-info">
+                    <div class="artist-image-section">
+                        <div class="artist-image">
+                            {% if artist.image %}
+                                <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                            {% else %}
+                                <div class="artist-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                            {% if artist.is_verified %}
+                            <div class="verified-badge">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="artist-details">
+                        <div class="artist-badge">
+                            <i class="fas fa-user-music"></i>
+                            Artist
+                        </div>
+                        <h1 class="artist-name">{{ artist.name }}</h1>
+                        <p class="artist-genre">
+                            <i class="fas fa-compass"></i>
+                            {{ artist.genre.name|default:"No genre specified" }}
+                        </p>
+                        
+                        <div class="artist-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ songs.count }}</div>
+                                <div class="stat-label">Songs</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">{{ total_plays }}</div>
+                                <div class="stat-label">Total Plays</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">{{ total_downloads }}</div>
+                                <div class="stat-label">Downloads</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">{{ followers_count }}</div>
+                                <div class="stat-label">Followers</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="hero-actions">
+                    <button class="btn-play-hero" onclick="playArtistShuffle()">
+                        <i class="fas fa-play"></i>
+                        Play
+                    </button>
+                    <button class="btn-follow-hero {% if is_following %}following{% endif %}" onclick="followArtist({{ artist.id }}, this)">
+                        {% if is_following %}
+                            <i class="fas fa-check"></i> Following
+                        {% else %}
+                            <i class="fas fa-plus"></i> Follow
+                        {% endif %}
+                    </button>
+                    <button class="btn-more" onclick="showMoreOptions()">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Songs Section -->
+    <section class="songs-section">
+        <div class="container">
+            <!-- Songs Header -->
+            <div class="songs-header">
+                <h2 class="section-title">Popular</h2>
+                <div class="header-actions">
+                    <span class="show-count">Showing {{ songs.count }} songs</span>
+                </div>
+            </div>
+
+            <!-- Songs List -->
+            <div class="spotify-songs-list">
+                <div class="songs-list-header">
+                    <div class="header-number">#</div>
+                    <div class="header-title">Title</div>
+                    <div class="header-plays">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="header-duration">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="header-actions">Actions</div>
+                </div>
+
+                <div class="songs-list">
+                    {% for song in songs %}
+                    <div class="song-row" data-song-id="{{ song.id }}" onclick="playSong({{ song.id }})">
+                        <div class="song-number">
+                            <span class="track-number">{{ forloop.counter }}</span>
+                            <button class="play-indicator" onclick="event.stopPropagation(); playSong({{ song.id }})">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="song-info">
+                            <div class="song-image">
+                                {% if song.cover_image %}
+                                    <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                                {% else %}
+                                    <div class="song-image-placeholder">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="song-details">
+                                <h4 class="song-title">{{ song.title }}</h4>
+                                <p class="song-artist">{{ artist.name }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="song-plays">
+                            {{ song.plays }}
+                        </div>
+                        
+                        <div class="song-duration">
+                            {{ song.duration|default:"3:45" }}
+                        </div>
+                        
+                        <div class="song-row-actions">
+                            <button class="btn-like {% if song.is_liked %}liked{% endif %}" onclick="event.stopPropagation(); likeSong({{ song.id }}, this)">
+                                <i class="{% if song.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                            </button>
+                            <button class="btn-download" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn-more" onclick="event.stopPropagation(); showSongOptions({{ song.id }})">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Albums/EPs Section -->
+    {% if albums %}
+    <section class="albums-section">
+        <div class="container">
+            <h2 class="section-title">Albums</h2>
+            <div class="albums-grid">
+                {% for album in albums %}
+                <div class="album-card" onclick="viewAlbum({{ album.id }})">
+                    <div class="album-image">
+                        {% if album.cover_image %}
+                            <img src="{{ album.cover_image.url }}" alt="{{ album.title }}">
+                        {% else %}
+                            <div class="album-image-placeholder">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                        {% endif %}
+                        <button class="album-play-btn" onclick="event.stopPropagation(); playAlbum({{ album.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="album-info">
+                        <h4 class="album-title">{{ album.title }}</h4>
+                        <p class="album-year">{{ album.release_year }}</p>
+                        <p class="album-songs">{{ album.songs.count }} songs</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- About Section -->
+    {% if artist.bio %}
+    <section class="about-section">
+        <div class="container">
+            <h2 class="section-title">About</h2>
+            <div class="bio-content">
+                <p class="artist-bio">{{ artist.bio }}</p>
+                <div class="bio-stats">
+                    <div class="bio-stat">
+                        <strong>{{ artist.joined_date|date:"Y" }}</strong>
+                        <span>Year Joined</span>
+                    </div>
+                    <div class="bio-stat">
+                        <strong>{{ songs.count }}</strong>
+                        <span>Total Songs</span>
+                    </div>
+                    <div class="bio-stat">
+                        <strong>{{ total_plays }}</strong>
+                        <span>Total Plays</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Song Options Modal -->
+<div id="songOptionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Song Options</h3>
+            <span class="close" onclick="closeSongOptions()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="song-options-list">
+                <button class="option-btn" onclick="addToPlaylist(currentSongId)">
+                    <i class="fas fa-plus"></i>
+                    Add to Playlist
+                </button>
+                <button class="option-btn" onclick="shareSong(currentSongId)">
+                    <i class="fas fa-share-alt"></i>
+                    Share Song
+                </button>
+                <button class="option-btn" onclick="addToQueue(currentSongId)">
+                    <i class="fas fa-list"></i>
+                    Add to Queue
+                </button>
+                <button class="option-btn" onclick="viewSongDetails(currentSongId)">
+                    <i class="fas fa-info-circle"></i>
+                    Song Details
+                </button>
+                {% if user.is_authenticated and user == artist.user %}
+                <button class="option-btn text-warning" onclick="editSong(currentSongId)">
+                    <i class="fas fa-edit"></i>
+                    Edit Song
+                </button>
+                <button class="option-btn text-danger" onclick="deleteSong(currentSongId)">
+                    <i class="fas fa-trash"></i>
+                    Delete Song
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Artist Profile Styles */
+.artist-profile {
+    background: var(--bg-primary);
+    min-height: 100vh;
+    color: var(--light);
+}
+
+/* Artist Hero Section - Spotify Style */
+.artist-hero {
+    padding: 120px 0 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.artist-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 60%, var(--bg-primary) 100%);
+    z-index: 1;
+}
+
+.artist-header {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.artist-main-info {
+    display: flex;
+    gap: 30px;
+    align-items: flex-end;
+    margin-bottom: 40px;
+}
+
+.artist-image {
+    width: 232px;
+    height: 232px;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artist-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #535353, #b3b3b3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: #727272;
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #1DB954;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    border: 3px solid var(--bg-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.artist-details {
+    flex: 1;
+    padding-bottom: 20px;
+}
+
+.artist-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.artist-name {
+    font-size: 4rem;
+    font-weight: 900;
+    margin: 0 0 16px 0;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.artist-genre {
+    font-size: 1rem;
+    margin: 0 0 30px 0;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.artist-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.stat-item {
+    text-align: left;
+}
+
+.stat-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+/* Hero Actions */
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.btn-play-hero {
+    background: #1DB954;
+    color: black;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 32px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-play-hero:hover {
+    background: #1ed760;
+    transform: scale(1.04);
+}
+
+.btn-follow-hero {
+    background: transparent;
+    color: var(--light);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-follow-hero:hover {
+    border-color: var(--light);
+    transform: scale(1.04);
+}
+
+.btn-follow-hero.following {
+    background: rgba(255,255,255,0.1);
+    border-color: transparent;
+}
+
+.btn-more {
+    background: transparent;
+    color: var(--light);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.btn-more:hover {
+    background: rgba(255,255,255,0.1);
+    opacity: 1;
+}
+
+/* Songs Section */
+.songs-section {
+    padding: 0 0 60px;
+    background: var(--bg-primary);
+}
+
+.songs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 32px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--light);
+}
+
+.show-count {
+    font-size: 0.875rem;
+    opacity: 0.7;
+}
+
+/* Spotify Songs List */
+.spotify-songs-list {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.songs-list-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 80px 100px;
+    gap: 16px;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.header-number {
+    text-align: center;
+}
+
+.header-title {
+    padding-left: 60px;
+}
+
+.header-plays, .header-duration, .header-actions {
+    text-align: center;
+}
+
+/* Song Rows */
+.songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.song-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 80px 100px;
+    gap: 16px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    align-items: center;
+}
+
+.song-row:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.song-number {
+    position: relative;
+    text-align: center;
+}
+
+.track-number {
+    font-size: 1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.play-indicator {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--light);
+    font-size: 0.875rem;
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.song-row:hover .track-number {
+    opacity: 0;
+}
+
+.song-row:hover .play-indicator {
+    display: block;
+}
+
+.song-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.song-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.song-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #727272;
+    font-size: 1rem;
+}
+
+.song-details {
+    min-width: 0;
+    flex: 1;
+}
+
+.song-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    color: var(--light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-artist {
+    font-size: 0.875rem;
+    margin: 0;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-plays, .song-duration {
+    text-align: center;
+    font-size: 0.875rem;
+    opacity: 0.7;
+}
+
+.song-row-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.song-row:hover .song-row-actions {
+    opacity: 1;
+}
+
+.btn-like, .btn-download, .btn-more {
+    background: transparent;
+    border: none;
+    color: var(--light);
+    opacity: 0.7;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.btn-like:hover, .btn-download:hover, .btn-more:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.1);
+}
+
+.btn-like.liked {
+    color: #1DB954;
+    opacity: 1;
+}
+
+/* Albums Section */
+.albums-section {
+    padding: 40px 0 60px;
+    background: var(--bg-primary);
+}
+
+.albums-section .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
+}
+
+.album-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.album-card:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-4px);
+}
+
+.album-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.album-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.album-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #727272;
+    font-size: 2rem;
+}
+
+.album-play-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: #1DB954;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s ease;
+}
+
+.album-card:hover .album-play-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.album-info {
+    text-align: left;
+}
+
+.album-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-year, .album-songs {
+    font-size: 0.875rem;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/* About Section */
+.about-section {
+    padding: 40px 0 60px;
+    background: var(--bg-primary);
+}
+
+.about-section .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.bio-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.artist-bio {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.bio-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bio-stat {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.bio-stat strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--light);
+}
+
+.bio-stat span {
+    font-size: 0.875rem;
+    opacity: 0.7;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: #282828;
+    margin: 10% auto;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    border: none;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--light);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.close {
+    color: var(--gray);
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.close:hover {
+    color: var(--light);
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 8px 0;
+}
+
+.song-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.option-btn {
+    background: transparent;
+    border: none;
+    padding: 16px 24px;
+    color: var(--light);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    text-align: left;
+    width: 100%;
+}
+
+.option-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.option-btn.text-warning {
+    color: #ffa500;
+}
+
+.option-btn.text-danger {
+    color: #ff4444;
+}
+
+/* ===== MOBILE STYLES ===== */
+@media (max-width: 768px) {
+    .artist-hero {
+        padding: 100px 0 40px;
+    }
+    
+    .artist-main-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .artist-image {
+        width: 192px;
+        height: 192px;
+    }
+    
+    .artist-name {
+        font-size: 2.5rem;
+    }
+    
+    .artist-stats {
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .hero-actions {
+        justify-content: center;
+    }
+    
+    .songs-header {
+        padding: 0 16px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .spotify-songs-list {
+        padding: 0 16px;
+    }
+    
+    .songs-list-header {
+        grid-template-columns: 30px 1fr 60px 60px 80px;
+        gap: 12px;
+        padding: 8px 12px;
+    }
+    
+    .song-row {
+        grid-template-columns: 30px 1fr 60px 60px 80px;
+        gap: 12px;
+        padding: 8px 12px;
+    }
+    
+    .header-title {
+        padding-left: 50px;
+    }
+    
+    .song-info {
+        gap: 12px;
+    }
+    
+    .song-image {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .bio-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .albums-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .artist-name {
+        font-size: 2rem;
+    }
+    
+    .artist-stats {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .stat-item {
+        flex: 1;
+        min-width: 80px;
+    }
+    
+    .hero-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .songs-list-header, .song-row {
+        grid-template-columns: 30px 1fr 50px 50px 60px;
+    }
+    
+    .song-plays, .song-duration {
+        font-size: 0.75rem;
+    }
+    
+    .song-row-actions {
+        opacity: 1;
+    }
+    
+    .albums-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables for sharing
+let currentShareType = ''; // 'artist', 'songs', 'single_song'
+let currentSongId = null;
+let currentSongTitle = '';
+let currentArtistName = '{{ artist.name|escapejs }}';
+let currentArtistId = {{ artist.id }};
+let currentPageUrl = window.location.href;
+
+// Initialize artist page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeArtistPage();
+    initializeShareFunctionality();
+    initializeDownloadFunctionality();
+});
+
+function initializeArtistPage() {
+    console.log('🎵 Initializing artist page...');
+    
+    // Show/hide all songs
+    const showAllSongsBtn = document.getElementById('show-all-songs');
+    const hideAllSongsBtn = document.getElementById('hide-all-songs');
+    const allSongsSection = document.getElementById('all-songs-section');
+    const popularSongsSection = document.querySelector('.popular-songs-section');
+
+    if (showAllSongsBtn) {
+        showAllSongsBtn.addEventListener('click', function() {
+            allSongsSection.style.display = 'block';
+            popularSongsSection.style.display = 'none';
+        });
+    }
+
+    if (hideAllSongsBtn) {
+        hideAllSongsBtn.addEventListener('click', function() {
+            allSongsSection.style.display = 'none';
+            popularSongsSection.style.display = 'block';
+        });
+    }
+}
+
+function initializeShareFunctionality() {
+    // Close share dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const shareDropdown = document.getElementById('share-dropdown');
+        const shareBtn = document.querySelector('.share-btn');
+        
+        if (shareDropdown && shareBtn && !shareDropdown.contains(event.target) && !shareBtn.contains(event.target)) {
+            shareDropdown.classList.remove('show');
+        }
+    });
+}
+
+function initializeDownloadFunctionality() {
+    console.log('📥 Download functionality initialized');
+}
+
+// ===== SHARE FUNCTIONALITY =====
+function toggleShareDropdown() {
+    const dropdown = document.getElementById('share-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+function shareArtist(platform) {
+    const artistName = '{{ artist.name|escapejs }}';
+    const url = encodeURIComponent(currentPageUrl);
+    const text = encodeURIComponent(`Check out ${artistName} on Sangabiz!`);
+    
+    shareOnPlatform(platform, url, text);
+    toggleShareDropdown();
+}
+
+function shareArtistSongs() {
+    currentShareType = 'songs';
+    const modal = document.getElementById('shareModal');
+    const shareInput = document.getElementById('share-link-input');
+    
+    const shareText = `Check out ${currentArtistName}'s songs on Sangabiz! ${currentPageUrl}`;
+    shareInput.value = shareText;
+    
+    modal.classList.add('show');
+}
+
+function shareSingleSong(songId, songTitle, artistName) {
+    currentShareType = 'single_song';
+    currentSongId = songId;
+    currentSongTitle = songTitle;
+    
+    const modal = document.getElementById('shareModal');
+    const shareInput = document.getElementById('share-link-input');
+    
+    const songUrl = `${currentPageUrl}#song-${songId}`;
+    const shareText = `Listen to "${songTitle}" by ${artistName} on Sangabiz! ${songUrl}`;
+    shareInput.value = shareText;
+    
+    modal.classList.add('show');
+}
+
+function shareOnPlatform(platform) {
+    const shareInput = document.getElementById('share-link-input');
+    const url = encodeURIComponent(currentPageUrl);
+    let shareUrl = '';
+    
+    switch(platform) {
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            break;
+        case 'twitter':
+            const text = encodeURIComponent(`Check out ${currentArtistName} on Sangabiz!`);
+            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+            break;
+        case 'whatsapp':
+            shareUrl = `https://wa.me/?text=${encodeURIComponent(shareInput.value)}`;
+            break;
+        case 'telegram':
+            shareUrl = `https://t.me/share/url?url=${url}&text=${encodeURIComponent(`Check out ${currentArtistName}`)}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+    
+    closeShareModal();
+}
+
+function copyShareLink() {
+    const shareInput = document.getElementById('share-link-input');
+    shareInput.select();
+    shareInput.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(shareInput.value).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    }).catch(err => {
+        document.execCommand('copy');
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function closeShareModal() {
+    const modal = document.getElementById('shareModal');
+    modal.classList.remove('show');
+}
+
+function copyArtistLink() {
+    navigator.clipboard.writeText(currentPageUrl).then(() => {
+        showToast('Artist link copied to clipboard!', 'success');
+        toggleShareDropdown();
+    }).catch(err => {
+        document.execCommand('copy');
+        showToast('Artist link copied to clipboard!', 'success');
+        toggleShareDropdown();
+    });
+}
+
+// ===== DOWNLOAD FUNCTIONALITY =====
+function downloadAllSongs() {
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    
+    if (!isAuthenticated) {
+        showToast('Please login to download songs', 'info');
+        return;
+    }
+    
+    if ({{ songs_count }} === 0) {
+        showToast('No songs available to download', 'error');
+        return;
+    }
+    
+    const modal = document.getElementById('downloadAllModal');
+    modal.classList.add('show');
+}
+
+function confirmDownloadAll() {
+    const includeMetadata = document.getElementById('include-metadata').checked;
+    const createZip = document.getElementById('create-zip').checked;
+    
+    closeDownloadAllModal();
+    
+    showToast(`Starting download of {{ songs_count }} songs...`, 'info');
+    
+    trackBulkDownload();
+    
+    const songElements = document.querySelectorAll('.song-item');
+    let downloadedCount = 0;
+    
+    songElements.forEach((songElement, index) => {
+        setTimeout(() => {
+            const songId = songElement.dataset.songId;
+            const songUrl = songElement.dataset.audioUrl;
+            const songTitle = songElement.querySelector('.song-title').textContent;
+            
+            downloadSong(songId, songUrl, songTitle, currentArtistName, null, true);
+            
+            downloadedCount++;
+            
+            if (downloadedCount === songElements.length) {
+                setTimeout(() => {
+                    showToast(`Downloaded ${downloadedCount} songs successfully!`, 'success');
+                }, 1000);
+            }
+        }, index * 500);
+    });
+}
+
+function closeDownloadAllModal() {
+    const modal = document.getElementById('downloadAllModal');
+    modal.classList.remove('show');
+}
+
+// Enhanced download function with better URL handling
+function downloadSong(songId, songUrl, songTitle, artistName, buttonElement, isBulkDownload = false) {
+    console.log('🔍 DEBUG - Download started:', {
+        songId,
+        songUrl,
+        songTitle,
+        artistName,
+        isBulkDownload,
+        authenticated: {% if user.is_authenticated %}true{% else %}false{% endif %}
+    });
+
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    
+    if (!isAuthenticated && !isBulkDownload) {
+        showToast('Please login to download songs', 'info');
+        return;
+    }
+
+    // Enhanced URL validation and fixing
+    let finalSongUrl = songUrl;
+    
+    // Check if URL is relative and needs to be converted to absolute
+    if (songUrl && !songUrl.startsWith('http') && !songUrl.startsWith('//')) {
+        // It's a relative URL, convert to absolute
+        if (songUrl.startsWith('/')) {
+            finalSongUrl = window.location.origin + songUrl;
+        } else {
+            finalSongUrl = window.location.origin + '/' + songUrl;
+        }
+        console.log('🔄 DEBUG - Converted relative URL to absolute:', finalSongUrl);
+    }
+    
+    // Validate the final URL
+    if (!finalSongUrl || !isValidUrl(finalSongUrl)) {
+        console.error('❌ DEBUG - Invalid song URL after processing:', finalSongUrl);
+        
+        // Try to construct URL from known patterns
+        const alternativeUrl = constructSongUrl(songId);
+        if (alternativeUrl) {
+            finalSongUrl = alternativeUrl;
+            console.log('🔄 DEBUG - Using alternative URL:', finalSongUrl);
+        } else {
+            showToast('Song file not available for download', 'error');
+            return;
+        }
+    }
+
+    if (buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        buttonElement.classList.add('downloading');
+    }
+
+    // First track the download
+    trackSongDownload(songId)
+        .then(data => {
+            console.log('✅ DEBUG - Download tracked successfully:', data);
+            
+            if (data.success) {
+                updateDownloadCountUI(songId, data.download_count);
+            }
+            
+            // Always try to download the file, even if tracking fails
+            triggerFileDownload(songId, finalSongUrl, songTitle, artistName, buttonElement);
+            
+            if (!isBulkDownload) {
+                showToast(`Downloading: ${songTitle}`, 'success');
+            }
+        })
+        .catch(error => {
+            console.error('❌ DEBUG - Download tracking error:', error);
+            // Even if tracking fails, try to download the file
+            triggerFileDownload(songId, finalSongUrl, songTitle, artistName, buttonElement);
+            
+            if (!isBulkDownload) {
+                showToast('Download started', 'info');
+            }
+        })
+        .finally(() => {
+            if (buttonElement) {
+                setTimeout(() => {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="fas fa-download"></i>';
+                    buttonElement.classList.remove('downloading');
+                }, 2000);
+            }
+        });
+}
+
+// URL validation helper function
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
+
+// Construct alternative URL if original is invalid
+function constructSongUrl(songId) {
+    // Try different URL patterns that might work with your Django setup
+    const patterns = [
+        `/media/audio_files/${songId}.mp3`,
+        `/media/songs/${songId}.mp3`,
+        `/api/songs/${songId}/download/`,
+        `/download/song/${songId}/`,
+        `/song/${songId}/download/`
+    ];
+    
+    for (const pattern of patterns) {
+        const url = pattern.startsWith('http') ? pattern : window.location.origin + pattern;
+        console.log('🔍 DEBUG - Testing URL pattern:', url);
+        return url;
+    }
+    
+    return null;
+}
+
+// Enhanced file download trigger
+function triggerFileDownload(songId, songUrl, songTitle, artistName, buttonElement) {
+    console.log('📥 DEBUG - Triggering file download:', songUrl);
+    
+    // Method 1: Create a temporary anchor element (most reliable)
+    const link = document.createElement('a');
+    link.href = songUrl;
+    
+    // Clean filename for download
+    const cleanFileName = `${songTitle} - ${artistName}.mp3`
+        .replace(/[^a-zA-Z0-9\s\-\.\(\)]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+        
+    link.download = cleanFileName;
+    link.style.display = 'none';
+    link.setAttribute('target', '_blank');
+    
+    // Add to document and trigger click
+    document.body.appendChild(link);
+    
+    try {
+        link.click();
+        console.log('✅ DEBUG - Download initiated via anchor click');
+    } catch (error) {
+        console.warn('⚠️ DEBUG - Anchor click failed, trying event dispatch');
+        const clickEvent = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+        });
+        link.dispatchEvent(clickEvent);
+    }
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(link)) {
+            document.body.removeChild(link);
+        }
+    }, 100);
+    
+    // Fallback: Open in new tab after a delay
+    setTimeout(() => {
+        console.log('🔄 DEBUG - Trying fallback download method');
+        window.open(songUrl, '_blank');
+    }, 1000);
+}
+
+// ===== TRACKING FUNCTIONS =====
+function trackBulkDownload() {
+    console.log('📊 DEBUG - Tracking bulk download');
+    
+    return fetch('/api/track-bulk-download/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            artist_id: currentArtistId,
+            song_count: {{ songs_count }},
+            timestamp: new Date().toISOString()
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .catch(error => {
+        console.error('❌ DEBUG - Bulk download tracking error:', error);
+        return { success: true, error: 'Tracking failed but download continued' };
+    });
+}
+
+function trackSongDownload(songId) {
+    console.log('📊 DEBUG - Tracking song download:', songId);
+    
+    const csrfToken = getCookie('csrftoken');
+    if (!csrfToken) {
+        console.warn('⚠️ DEBUG - CSRF token not found');
+        return Promise.resolve({ success: false, error: 'CSRF token missing' });
+    }
+    
+    return fetch('/api/track-download/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            song_id: songId,
+            timestamp: new Date().toISOString(),
+            source: 'artist_page'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .catch(error => {
+        console.error('❌ DEBUG - Song download tracking error:', error);
+        return { 
+            success: false, 
+            download_count: 0,
+            error: 'Tracking failed but download continued' 
+        };
+    });
+}
+
+// ===== ARTIST FUNCTIONS =====
+function followArtist(artistId, button) {
+    console.log('👤 Following artist:', artistId);
+    
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    
+    if (!isAuthenticated) {
+        showToast('Please login to follow artists', 'info');
+        return;
+    }
+
+    const btnText = button.querySelector('.btn-text');
+    const loadingSpinner = button.querySelector('.loading-spinner');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    loadingSpinner.style.display = 'inline-block';
+    button.classList.add('loading');
+    button.disabled = true;
+
+    fetch(`/api/artists/${artistId}/follow/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('👤 Follow response:', data);
+        if (data.success) {
+            if (data.followed) {
+                button.classList.add('following');
+                btnText.textContent = 'Following';
+                showToast(`Now following ${data.artist_name || 'artist'}!`, 'success');
+            } else {
+                button.classList.remove('following');
+                btnText.textContent = 'Follow';
+                showToast(`Unfollowed ${data.artist_name || 'artist'}`, 'info');
+            }
+            
+            // Update followers count everywhere
+            updateFollowersCount(data.followers_count);
+        } else {
+            showToast(data.error || 'Error following artist', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Follow error:', error);
+        showToast('Error following artist', 'error');
+    })
+    .finally(() => {
+        // Hide loading state
+        btnText.style.display = 'inline-block';
+        loadingSpinner.style.display = 'none';
+        button.classList.remove('loading');
+        button.disabled = false;
+    });
+}
+
+function updateFollowersCount(newCount) {
+    // Update in header
+    const headerFollowers = document.querySelector('.artist-stats-header .followers-count');
+    if (headerFollowers) {
+        headerFollowers.textContent = `${newCount} followers`;
+    }
+    
+    // Update in stats section
+    const statsFollowers = document.querySelector('.stats-section .followers-count');
+    if (statsFollowers) {
+        statsFollowers.textContent = newCount;
+    }
+}
+
+// ===== SONG PLAYBACK FUNCTIONS =====
+function playAllSongs() {
+    console.log('🎵 Playing all songs by artist');
+    
+    const songElements = document.querySelectorAll('.song-item');
+    const songs = Array.from(songElements).map(element => {
+        return {
+            id: parseInt(element.dataset.songId),
+            title: element.querySelector('.song-title').textContent,
+            artist: '{{ artist.name|escapejs }}',
+            audio: element.dataset.audioUrl,
+            cover: element.querySelector('.song-image img')?.src || '{% static "images/default-cover.jpg" %}'
+        };
+    });
+
+    if (songs.length > 0 && typeof window.playSong === 'function') {
+        window.playSong(songs[0], songs, 0);
+        showToast(`Playing all songs by {{ artist.name|escapejs }}`, 'success');
+    } else {
+        showToast('No songs available to play', 'error');
+    }
+}
+
+function playSongFromCard(songId) {
+    console.log('🎵 Playing song from artist page:', songId);
+    
+    const songElement = document.querySelector(`[data-song-id="${songId}"]`);
+    if (!songElement) {
+        console.error('Song element not found');
+        return;
+    }
+
+    const songData = {
+        id: songId,
+        title: songElement.querySelector('.song-title').textContent,
+        artist: '{{ artist.name|escapejs }}',
+        audio: songElement.dataset.audioUrl,
+        cover: element.querySelector('.song-image img')?.src || '{% static "images/default-cover.jpg" %}'
+    };
+
+    // Get all songs for playlist
+    const allSongElements = document.querySelectorAll('.song-item');
+    const playlist = Array.from(allSongElements).map(element => ({
+        id: parseInt(element.dataset.songId),
+        title: element.querySelector('.song-title').textContent,
+        artist: '{{ artist.name|escapejs }}',
+        audio: element.dataset.audioUrl,
+        cover: element.querySelector('.song-image img')?.src || '{% static "images/default-cover.jpg" %}'
+    }));
+
+    const songIndex = playlist.findIndex(song => song.id === songId);
+
+    if (typeof window.playSong === 'function') {
+        window.playSong(songData, playlist, songIndex);
+        
+        // Track play count
+        trackSongPlay(songId)
+            .then(data => {
+                if (data.success) {
+                    updatePlayCountUI(songId, data.play_count);
+                }
+            })
+            .catch(error => {
+                console.error('Play count tracking error:', error);
+            });
+            
+        // Visual feedback
+        highlightPlayingSong(songId);
+    } else {
+        console.error('Global playSong function not available');
+        showToast('Music player not available', 'error');
+    }
+}
+
+function trackSongPlay(songId) {
+    return fetch('/api/track-play/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            song_id: songId,
+            timestamp: new Date().toISOString(),
+            duration_played: 0,
+            source: 'artist_page'
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    });
+}
+
+function highlightPlayingSong(songId) {
+    // Remove playing class from all songs
+    document.querySelectorAll('.song-item').forEach(item => {
+        item.classList.remove('playing');
+    });
+    
+    // Add playing class to current song
+    const currentSongElement = document.querySelector(`[data-song-id="${songId}"]`);
+    if (currentSongElement) {
+        currentSongElement.classList.add('playing');
+    }
+}
+
+function playAlbum(albumId) {
+    console.log('🎵 Playing album:', albumId);
+    showToast('Album playback starting...', 'info');
+}
+
+function playArtist(artistId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    console.log('🎵 Playing artist:', artistId);
+    showToast('Playing artist...', 'info');
+}
+
+// ===== UI UPDATE FUNCTIONS =====
+function updatePlayCountUI(songId, newPlayCount) {
+    const playElements = document.querySelectorAll(`[data-song-id="${songId}"] .plays`);
+    playElements.forEach(element => {
+        element.textContent = newPlayCount;
+        
+        // Animation
+        element.style.transform = 'scale(1.2)';
+        element.style.color = 'var(--primary)';
+        setTimeout(() => {
+            element.style.transform = 'scale(1)';
+            element.style.color = '';
+        }, 300);
+    });
+}
+
+function updateDownloadCountUI(songId, newDownloadCount) {
+    const downloadElements = document.querySelectorAll(`[data-song-id="${songId}"] .downloads`);
+    downloadElements.forEach(element => {
+        element.textContent = newDownloadCount;
+        
+        // Animation
+        element.style.transform = 'scale(1.2)';
+        element.style.color = 'var(--primary)';
+        setTimeout(() => {
+            element.style.transform = 'scale(1)';
+            element.style.color = '';
+        }, 300);
+    });
+}
+
+function likeSong(songId, button) {
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    
+    if (!isAuthenticated) {
+        showToast('Please login to like songs', 'info');
+        return;
+    }
+
+    const heartIcon = button.querySelector('i');
+    const isCurrentlyLiked = button.classList.contains('liked');
+
+    fetch(`/api/songs/${songId}/like/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.liked) {
+                button.classList.add('liked');
+                heartIcon.className = 'fas fa-heart';
+                showToast('Song added to your likes', 'success');
+            } else {
+                button.classList.remove('liked');
+                heartIcon.className = 'far fa-heart';
+                showToast('Song removed from your likes', 'info');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Like error:', error);
+        showToast('Error updating like', 'error');
+    });
+}
+
+// ===== UTILITY FUNCTIONS =====
+function showToast(message, type = 'info') {
+    // Create toast element
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+    }
+    
+    // Set toast content and style
+    toast.innerHTML = `
+        <i class="fas fa-${getToastIcon(type)}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Set background color based on type
+    const colors = {
+        success: 'var(--primary)',
+        error: '#e74c3c',
+        info: '#3498db',
+        warning: '#f39c12'
+    };
+    
+    toast.style.background = colors[type] || colors.info;
+    
+    toast.classList.add('show');
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-circle',
+        info: 'info-circle',
+        warning: 'exclamation-triangle'
+    };
+    return icons[type] || 'info-circle';
+}
+
+function showNotification(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+    } else {
+        // Fallback to toast
+        showToast(message, type);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function viewArtist(artistId) {
+    window.location.href = `/artists/${artistId}/`;
+}
+
+// Make functions available globally
+window.playSongFromCard = playSongFromCard;
+window.downloadSong = downloadSong;
+window.followArtist = followArtist;
+window.playAllSongs = playAllSongs;
+window.shareSingleSong = shareSingleSong;
+window.downloadAllSongs = downloadAllSongs;
+
+console.log('✅ Artist page JavaScript loaded successfully!');
+console.log('🔧 Download functionality ready with comprehensive error handling');
+</script>
+{% endblock %}

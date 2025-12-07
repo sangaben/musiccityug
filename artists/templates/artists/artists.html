@@ -1,0 +1,638 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Artists - MusicCity UG{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Artists</h1>
+        <p>Discover amazing artists on MusicCity UG</p>
+    </div>
+
+    <!-- Popular Artists Section -->
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-fire"></i>
+                Most Popular
+            </h2>
+            <a href="{% url 'artists' %}?sort=popular" class="see-all">Show all</a>
+        </div>
+        
+        <div class="horizontal-scroll-section">
+            <div class="scroll-container">
+                <div class="scroll-content">
+                    {% for artist in popular_artists %}
+                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
+                        <div class="card-image">
+                            <div class="artist-image">
+                                {% if artist.image %}
+                                    <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                                {% else %}
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                {% if artist.is_verified %}
+                                <div class="verified-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-actions">
+                                <button class="play-btn-card" onclick="event.stopPropagation(); playArtist({{ artist.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="artist-name">{{ artist.name }}</h3>
+                            <p class="artist-genre">{{ artist.genre.name|default:"Artist" }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-scroll-state">
+                        <i class="fas fa-users"></i>
+                        <p>No popular artists found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="scroll-nav-btn scroll-prev" onclick="scrollSection(this, -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-nav-btn scroll-next" onclick="scrollSection(this, 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- New Artists Section -->
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-star"></i>
+                Newly Added
+            </h2>
+            <a href="{% url 'artists' %}?sort=new" class="see-all">Show all</a>
+        </div>
+        
+        <div class="horizontal-scroll-section">
+            <div class="scroll-container">
+                <div class="scroll-content">
+                    {% for artist in new_artists %}
+                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
+                        <div class="card-image">
+                            <div class="artist-image">
+                                {% if artist.image %}
+                                    <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                                {% else %}
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                {% if artist.is_verified %}
+                                <div class="verified-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-actions">
+                                <button class="play-btn-card" onclick="event.stopPropagation(); playArtist({{ artist.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="artist-name">{{ artist.name }}</h3>
+                            <p class="artist-genre">Joined {{ artist.created_at|timesince }} ago</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-scroll-state">
+                        <i class="fas fa-user-plus"></i>
+                        <p>No new artists found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="scroll-nav-btn scroll-prev" onclick="scrollSection(this, -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-nav-btn scroll-next" onclick="scrollSection(this, 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- All Artists Section -->
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                All Artists
+            </h2>
+            <a href="{% url 'artists' %}?sort=all" class="see-all">Show all</a>
+        </div>
+        
+        <div class="horizontal-scroll-section">
+            <div class="scroll-container">
+                <div class="scroll-content">
+                    {% for artist in artists %}
+                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
+                        <div class="card-image">
+                            <div class="artist-image">
+                                {% if artist.image %}
+                                    <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                                {% else %}
+                                    <div class="artist-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                {% if artist.is_verified %}
+                                <div class="verified-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-actions">
+                                <button class="play-btn-card" onclick="event.stopPropagation(); playArtist({{ artist.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="artist-name">{{ artist.name }}</h3>
+                            <p class="artist-genre">{{ artist.genre.name|default:"Artist" }}</p>
+                            <div class="artist-stats">
+                                <span class="stat">
+                                    <i class="fas fa-music"></i>
+                                    {{ artist.songs.count }} songs
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-scroll-state">
+                        <i class="fas fa-users"></i>
+                        <p>No artists found</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="scroll-nav-btn scroll-prev" onclick="scrollSection(this, -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-nav-btn scroll-next" onclick="scrollSection(this, 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+</div>
+
+<style>
+/* ===== VARIABLES ===== */
+:root {
+    --spotify-black: #121212;
+    --spotify-dark: #181818;
+    --spotify-gray: #282828;
+    --spotify-light-gray: #b3b3b3;
+    --spotify-white: #ffffff;
+    --spotify-green: #1db954;
+    --uganda-yellow: #FFD100;
+    --uganda-red: #D90000;
+    --uganda-black: #000000;
+    --card-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 40px 0 20px;
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 15px;
+    color: var(--spotify-white);
+    letter-spacing: -0.5px;
+}
+
+.page-header p {
+    font-size: 1.2rem;
+    color: var(--spotify-light-gray);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ===== CONTENT SECTIONS ===== */
+.content-section {
+    margin-bottom: 60px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--spotify-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: var(--spotify-green);
+}
+
+.see-all {
+    color: var(--spotify-light-gray);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.see-all:hover {
+    color: var(--spotify-white);
+    text-decoration: underline;
+}
+
+/* ===== HORIZONTAL SCROLL SECTIONS ===== */
+.horizontal-scroll-section {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.scroll-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.scroll-content {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 4px 24px 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scroll-content::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: var(--spotify-white);
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    opacity: 0;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-prev { left: -20px; }
+.scroll-next { right: -20px; }
+
+.horizontal-scroll-section:hover .scroll-nav-btn {
+    opacity: 1;
+}
+
+.scroll-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.scroll-nav-btn:disabled:hover {
+    transform: translateY(-50%) scale(1);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* ===== ARTIST CARDS - HORIZONTAL SCROLL ===== */
+.artist-card {
+    flex: 0 0 auto;
+    width: 180px;
+    background: var(--spotify-gray);
+    border-radius: var(--card-radius);
+    padding: 16px;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+
+.artist-card:hover {
+    background: #3e3e3e;
+    transform: translateY(-8px);
+}
+
+.card-image {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.artist-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.artist-card:hover .artist-image img {
+    transform: scale(1.05);
+}
+
+.artist-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--spotify-white);
+    font-size: 3rem;
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: var(--spotify-green);
+    color: var(--spotify-black);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: 2px solid var(--spotify-gray);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: var(--transition);
+}
+
+.artist-card:hover .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.play-btn-card {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--spotify-green);
+    border: none;
+    color: var(--spotify-black);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn-card:hover {
+    background: #1ed760;
+    transform: scale(1.1);
+}
+
+.card-content {
+    min-height: 60px;
+}
+
+.artist-name {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--spotify-white);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-genre {
+    color: var(--spotify-light-gray);
+    font-size: 0.85rem;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-stats {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 0 0;
+}
+
+.artist-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--spotify-light-gray);
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-scroll-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    color: var(--spotify-light-gray);
+    min-width: 200px;
+}
+
+.empty-scroll-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.7;
+}
+
+.empty-scroll-state p {
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .artist-card {
+        width: 160px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .page-header p {
+        font-size: 1rem;
+    }
+    
+    .artist-card {
+        width: 140px;
+        padding: 12px;
+    }
+    
+    .scroll-nav-btn {
+        display: none;
+    }
+    
+    .scroll-content {
+        gap: 16px;
+        padding-bottom: 20px;
+    }
+    
+    .artist-stats .stat {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .artist-card {
+        width: 130px;
+        padding: 10px;
+    }
+    
+    .artist-name {
+        font-size: 0.9rem;
+    }
+    
+    .artist-genre {
+        font-size: 0.8rem;
+    }
+    
+    .artist-stats .stat {
+        font-size: 0.65rem;
+    }
+}
+
+/* Ensure all sections have consistent styling */
+.content-section:last-child {
+    margin-bottom: 30px;
+}
+</style>
+
+<script>
+// Artist page functionality
+function viewArtist(artistId) {
+    window.location.href = `/artist/${artistId}/`;
+}
+
+function playArtist(artistId) {
+    // Play artist's top songs or implement artist radio
+    console.log('Playing artist:', artistId);
+    // You can implement this to play the artist's songs
+}
+
+function scrollSection(button, direction) {
+    const section = button.closest('.horizontal-scroll-section');
+    const scrollContent = section.querySelector('.scroll-content');
+    const scrollAmount = 400; // Adjust based on card width + gap
+    
+    scrollContent.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
+    
+    // Update button states after scroll
+    setTimeout(() => updateScrollButtons(section), 300);
+}
+
+function updateScrollButtons(section) {
+    const scrollContent = section.querySelector('.scroll-content');
+    const prevBtn = section.querySelector('.scroll-prev');
+    const nextBtn = section.querySelector('.scroll-next');
+    
+    // Show/hide buttons based on scroll position
+    prevBtn.style.opacity = scrollContent.scrollLeft > 0 ? '1' : '0.3';
+    nextBtn.style.opacity = 
+        scrollContent.scrollLeft < (scrollContent.scrollWidth - scrollContent.clientWidth - 10) ? '1' : '0.3';
+}
+
+// Initialize scroll sections
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollSections = document.querySelectorAll('.horizontal-scroll-section');
+    
+    scrollSections.forEach(section => {
+        const scrollContent = section.querySelector('.scroll-content');
+        
+        // Check if scrolling is needed and update buttons
+        const checkScroll = () => {
+            const needsScroll = scrollContent.scrollWidth > scrollContent.clientWidth;
+            const prevBtn = section.querySelector('.scroll-prev');
+            const nextBtn = section.querySelector('.scroll-next');
+            
+            if (needsScroll) {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+                updateScrollButtons(section);
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
+        };
+        
+        scrollContent.addEventListener('scroll', () => updateScrollButtons(section));
+        window.addEventListener('resize', checkScroll);
+        checkScroll();
+    });
+});
+
+// Make functions globally available
+window.viewArtist = viewArtist;
+window.playArtist = playArtist;
+window.scrollSection = scrollSection;
+</script>
+{% endblock %}

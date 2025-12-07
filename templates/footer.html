@@ -1,0 +1,64 @@
+{% load static %}
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>MusicCity UG</h3>
+                <p>Uganda's premier destination for music streaming and downloads. Discover local talent and enjoy millions of songs.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Explore</h3>
+                <ul>
+                    <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{% url 'discover' %}"><i class="fas fa-search"></i> Discover</a></li>
+                    <li><a href="{% url 'library' %}"><i class="fas fa-book"></i> Library</a></li>
+                    <li><a href="{% url 'playlists' %}"><i class="fas fa-list"></i> Playlists</a></li>
+                    <li><a href="{% url 'genres' %}"><i class="fas fa-compass"></i> Genres</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column artist-support">
+                <h3>Artist Support</h3>
+                <ul>
+                    
+                    <li><strong>Need Help Uploading?</strong></li>
+                    <li>
+                        <a href="https://wa.me/256767848801?text=Hello%20MusicCity%20UG%20Team,%20I%20need%20help%20uploading%20my%20music" 
+                           target="_blank" 
+                           class="contact-link whatsapp">
+                            <i class="fab fa-whatsapp"></i>
+                            WhatsApp: +256 7768 48801
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:musiccityug@gmail.com?subject=Music%20Upload%20Support%20-%20MusicCity%20UG&body=Hello%20MusicCity%20UG%20Team,%0A%0AI%20need%20assistance%20with%20uploading%20my%20music.%0A%0AThank%20you." 
+                           class="contact-link email">
+                            <i class="fas fa-envelope"></i>
+                            Email: musiccityug@gmail.com
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 MusicCity UG. All rights reserved.</p>
+            <div class="built-by">
+                <div class="built-by-content">
+                    <span class="built-by-text">Built with</span>
+                    <span class="heart">❤️</span>
+                    <span class="built-by-text">by</span>
+                    <a href="https://sangaben.onrender.com" target="_blank" class="developer-link">
+                        <span class="developer-name">Sanga</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

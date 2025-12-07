@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liked Songs - Sangabiz{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="hero" style="background: linear-gradient(135deg, #1DB954, #191414); padding: 60px 0; border-radius: 15px; margin-bottom: 40px;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">❤️</div>
+            <h1 style="font-size: 48px; margin-bottom: 20px; color: white; font-weight: 900;">Liked Songs</h1>
+            <p style="font-size: 18px; color: white; opacity: 0.9;">
+                Your collection of favorite tracks
+            </p>
+            <div style="margin-top: 20px; color: var(--gray);">
+                {{ liked_songs.count }} songs
+            </div>
+        </div>
+    </div>
+
+    <!-- Songs List -->
+    <div class="song-list">
+        {% if liked_songs %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title">Your Liked Songs</h2>
+                <button class="download-btn" onclick="playAllLikedSongs()">
+                    <i class="fas fa-play"></i>
+                    Play All
+                </button>
+            </div>
+
+            {% for song in liked_songs %}
+            <div class="song-item" data-song-id="{{ song.id }}" data-audio-url="{{ song.audio_file.url }}" data-cover-url="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}">
+                <div class="song-number">{{ forloop.counter }}</div>
+                <div class="play-icon" onclick="playThisSong({{ song.id }})">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="song-info-small">
+                    <div class="song-title">{{ song.title }}</div>
+                    <div class="song-artist">{{ song.artist.name }}</div>
+                </div>
+                <div class="song-duration">{{ song.formatted_duration }}</div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="nav-btn" onclick="likeSong({{ song.id }})" title="Remove from Liked Songs">
+                        <i class="fas fa-heart" style="color: var(--primary);"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadWithWatermark('{{ song.audio_file.url }}', '{{ song.title }}', '{{ song.artist.name }}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px; color: var(--gray);">❤️</div>
+                <h2 style="color: var(--light); margin-bottom: 16px;">No liked songs yet</h2>
+                <p style="color: var(--gray); margin-bottom: 30px;">
+                    Start exploring music and like your favorite songs to see them here.
+                </p>
+                <button class="primary-btn" onclick="window.location.href='{% url 'discover' %}'">
+                    <i class="fas fa-search"></i>
+                    Discover Music
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function playAllLikedSongs() {
+        const songs = document.querySelectorAll('.song-item');
+        const playlist = [];
+        
+        songs.forEach((songElement, index) => {
+            const songData = {
+                id: songElement.dataset.songId,
+                title: songElement.querySelector('.song-title').textContent,
+                artist: songElement.querySelector('.song-artist').textContent,
+                audio: songElement.dataset.audioUrl,
+                cover: songElement.dataset.coverUrl
+            };
+            playlist.push(songData);
+        });
+        
+        if (playlist.length > 0) {
+            playSong(playlist[0], playlist, 0);
+        }
+    }
+    
+    function likeSong(songId) {
+        fetch(`/like-song/${songId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the song from the list
+                const songElement = document.querySelector(`[data-song-id="${songId}"]`);
+                if (songElement) {
+                    songElement.remove();
+                }
+                
+                // Update song count
+                updateSongCount();
+                
+                // Show message
+                showMessage(data.message, 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Error updating like status', 'error');
+        });
+    }
+    
+    function updateSongCount() {
+        const songs = document.querySelectorAll('.song-item');
+        const countElement = document.querySelector('.hero .song-count');
+        if (countElement) {
+            countElement.textContent = `${songs.length} songs`;
+        }
+    }
+    
+    function showMessage(message, type) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            background: ${type === 'success' ? 'var(--primary)' : '#dc3545'};
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        messageDiv.textContent = message;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
+</script>
+{% endblock %}
