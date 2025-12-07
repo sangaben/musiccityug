@@ -5,14 +5,33 @@ Django settings for sangabiz project.
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# -----------------------------
+# Base Directory
+# -----------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%')
-DEBUG = True
-ALLOWED_HOSTS = ['musiccityug.com', 'www.musiccityug.com', '72.61.200.13', 'musiccityug.onrender']
+# -----------------------------
+# Security
+# -----------------------------
+SECRET_KEY = os.getenv(
+    'SECRET_KEY', 
+    'django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%'
+)
 
+# Toggle DEBUG using environment variable (True for dev, False for prod)
+DEBUG = os.getenv('DEBUG', 'False') == 'False'
+
+# Hosts allowed
+ALLOWED_HOSTS = [
+    'musiccityug.com',
+    'www.musiccityug.com',
+    '72.61.200.13',
+    'musiccityug.onrender.com',
+]
+
+# -----------------------------
+# Installed Apps
+# -----------------------------
 INSTALLED_APPS = [
     'jazzmin',
     'unfold',
@@ -26,21 +45,23 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 
-    # Custom apps - MAKE SURE LIBRARY IS HERE
+    # Custom apps
     'accounts',
     'music',
-    'artists', 
+    'artists',
     'analytics',
     'payments',
-    'library',  # ← THIS MUST BE PRESENT
+    'library',
     'help',
-    'news', 
-
+    'news',
 ]
 
+# -----------------------------
+# Middleware
+# -----------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Removed duplicate SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files efficiently
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -49,12 +70,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# -----------------------------
+# URLs & WSGI
+# -----------------------------
 ROOT_URLCONF = 'sangabiz.urls'
+WSGI_APPLICATION = 'sangabiz.wsgi.application'
 
+# -----------------------------
+# Templates
+# -----------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,15 +90,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'music.context_processors.genres',  # Make sure this exists
+                'music.context_processors.genres',  # Custom context processor
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'sangabiz.wsgi.application'
-
-# Database
+# -----------------------------
+# Database (SQLite for dev, you can switch to PostgreSQL for prod)
+# -----------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -78,67 +106,63 @@ DATABASES = {
     }
 }
 
-# Password validation
+# -----------------------------
+# Password Validators
+# -----------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8},},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
+# -----------------------------
 # Internationalization
+# -----------------------------
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# -----------------------------
+# Static & Media Files
+# -----------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Changed to general static directory
-]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# -----------------------------
 # Authentication
+# -----------------------------
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'  # Changed from 'index' to 'home'
-LOGOUT_REDIRECT_URL = 'home'  # Changed from 'index' to 'home'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
+# -----------------------------
 # Crispy Forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+# -----------------------------
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-# Email settings (development)
+# -----------------------------
+# Email (Dev only)
+# -----------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+# -----------------------------
+# File Uploads
+# -----------------------------
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 
-# Security settings
-if DEBUG:
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-    SECURE_SSL_REDIRECT = False
-else:
+# -----------------------------
+# Security for Production
+# -----------------------------
+if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
@@ -148,145 +172,63 @@ else:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
+else:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
 
-# WhiteNoise configuration for static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# -----------------------------
+# Default Auto Field
+# -----------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-# Jazzmin Settings for MusicCityUg Admin Panel
+# -----------------------------
+# Jazzmin Admin Settings
+# -----------------------------
 JAZZMIN_SETTINGS = {
-    # Title on the brand (19 chars max)
-    "site_brand": "MusicCityUg Admin",
-    
-    # Logo to use for your site (must be present in static files)
+    "site_title": "MusicCityUg Admin",
+    "site_header": "MusicCityUg Administration",
+    "site_brand": "MusicCityUg",
+    "index_title": "Welcome to MusicCityUg Admin",
     "site_logo": "images/logo.jpeg",
-    
-    # Logo to use for login form (defaults to site_logo)
     "login_logo": "images/logo.jpeg",
-    
-    # Logo to use for login form in dark themes (defaults to login_logo)
     "login_logo_dark": None,
-    
-    # CSS classes that are applied to the logo above
     "site_logo_classes": "img-circle",
-    
-    # Welcome text on the login screen
     "welcome_sign": "Welcome to MusicCityUg Admin Panel",
-    
-    # Copyright on the footer
     "copyright": "MusicCityUg Ltd",
-    
-    # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
-    "user_avatar": None,
-    
-    # Top Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
     "topmenu_links": [
-        # Url that gets reversed (Permissions can be added)
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-        
-        # external url that opens in a new window (Permissions can be added)
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Website", "url": "/", "new_window": True},
-        
-        # model admin to link to (Permissions checked against model)
         {"model": "auth.User"},
-        
-        # App with dropdown menu to all its models pages (Permissions checked against models)
         {"app": "music"},
         {"app": "artists"},
         {"app": "library"},
     ],
-    
-    # User Menu
     "usermenu_links": [
         {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True, "icon": "fas fa-life-ring"},
         {"model": "auth.user"}
     ],
-    
-    # Side Menu
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
-    
-    # Order apps and models alphabetically
-    "order_with_respect_to": ["accounts", "auth", "music", "artists", "library", "analytics", "payments"],
-    
-    # Icons for side menu apps/models
     "icons": {
         "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.Group": "fas fa-users",
         "accounts.userprofile": "fas fa-user-circle",
         "music": "fas fa-music",
-        "music.song": "fas fa-file-audio",
-        "music.album": "fas fa-compact-disc",
-        "music.genre": "fas fa-tags",
         "artists": "fas fa-microphone-alt",
-        "artists.artist": "fas fa-user-tie",
         "library": "fas fa-book",
-        "library.playlist": "fas fa-list-music",
         "analytics": "fas fa-chart-line",
         "payments": "fas fa-credit-card",
         "help": "fas fa-question-circle",
         "news": "fas fa-newspaper",
     },
-    
-    # Default icons for models (if not specified above)
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    
-    # UI Tweaks
-    "related_modal_active": False,
-    "custom_css": None,
-    "custom_js": None,
-    "use_google_fonts_cdn": True,
-    "show_ui_builder": True,  # Allows customizing theme from admin
-    
-    # Change view
-    "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
-    
-    # Theme Settings
-    "theme": "darkly",  # You can change to: darkly, flatly, journal, litera, lumen, lux, materia, minty, pulse, sandstone, simplex, sketchy, slate, solar, spacelab, superhero, united, yeti
+    "theme": "darkly",
+    "show_ui_builder": True,
 }
 
-# Jazzmin UI Tweaks
 JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-primary",
-    "navbar": "navbar-dark navbar-primary",
-    "no_navbar_border": False,
     "navbar_fixed": True,
-    "layout_boxed": False,
-    "footer_fixed": False,
     "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "darkly",  # Match with JAZZMIN_SETTINGS
+    "theme": "darkly",
     "dark_mode_theme": "darkly",
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    },
-    "actions_sticky_top": True
 }
 
-# Custom Admin Titles
-JAZZMIN_SETTINGS["site_title"] = "MusicCityUg Admin"
-JAZZMIN_SETTINGS["site_header"] = "MusiccityUg Administration"
-JAZZMIN_SETTINGS["site_brand"] = "MusicCityUg"
-JAZZMIN_SETTINGS["index_title"] = "Welcome to MusiccityUg Admin"
