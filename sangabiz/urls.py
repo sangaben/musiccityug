@@ -16,3 +16,6 @@ urlpatterns = [
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = "music.views.custom_404"  # Change 'music' to the app where you put the view
+handler500 = "music.views.custom_404"  # You can create a separate view for 500 errors if needed
