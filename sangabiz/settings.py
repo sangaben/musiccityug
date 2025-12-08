@@ -97,7 +97,7 @@ TEMPLATES = [
 ]
 
 # -----------------------------
-# Database (SQLite for dev, you can switch to PostgreSQL for prod)
+# Database (SQLite for dev, switch to PostgreSQL for prod)
 # -----------------------------
 DATABASES = {
     'default': {
@@ -154,10 +154,11 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # -----------------------------
-# File Uploads
+# File Uploads (Large Songs)
 # -----------------------------
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 200 * 1024 * 1024  # 200 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 200 * 1024 * 1024  # 200 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # optional, for large forms
 
 # -----------------------------
 # Security for Production
@@ -190,9 +191,9 @@ JAZZMIN_SETTINGS = {
     "site_header": "MusicCityUg Administration",
     "site_brand": "MusicCityUg",
     "index_title": "Welcome to MusicCityUg Admin",
-    "site_logo": "images/logo.jpeg",
     "login_logo": "images/logo.jpeg",
     "login_logo_dark": None,
+    "site_logo": "images/logo.jpeg",
     "site_logo_classes": "img-circle",
     "welcome_sign": "Welcome to MusicCityUg Admin Panel",
     "copyright": "MusicCityUg Ltd",
@@ -225,10 +226,15 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": True,
 }
 
+# -----------------------------
+# Jazzmin UI Tweaks (Login Logo Resize)
+# -----------------------------
 JAZZMIN_UI_TWEAKS = {
     "navbar_fixed": True,
     "sidebar_fixed": True,
     "theme": "darkly",
     "dark_mode_theme": "darkly",
+    "login_logo_width": "180px",  # Adjust logo width
+    "login_logo_height": "80px",  # Adjust logo height
 }
 
