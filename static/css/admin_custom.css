@@ -1,0 +1,30 @@
+/* Admin custom CSS for better display */
+.login-box .login-logo {
+    margin-bottom: 20px;
+}
+
+.login-box .card {
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* Fix for admin page responsiveness */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 10px !important;
+    }
+    
+    .navbar-nav {
+        margin-left: 0 !important;
+    }
+}
+
+/* Improve table readability */
+.table th, .table td {
+    vertical-align: middle !important;
+}
+
+/* Better form styling */
+.form-control:focus {
+    border-color: #4a5568;
+    box-shadow: 0 0 0 0.2rem rgba(74, 85, 104, 0.25);
+}

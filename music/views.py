@@ -1115,7 +1115,8 @@ def like_song(request, song_id):
 
 
 
-from django.shortcuts import render
-
+# ========== ERROR HANDLERS ==========
 def custom_404(request, exception):
-    return render(request, "404.html", status=404)
+    """Custom 404 error page"""
+    return render(request, "music/404.html", status=404)
+

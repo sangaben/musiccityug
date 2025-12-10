@@ -14,5 +14,9 @@ urlpatterns = [
     path('', include('analytics.urls')),
 ]
 
+# Add these handler definitions
+handler404 = 'music.views.custom_404'  # Should accept (request, exception)
+handler500 = 'music.views.custom_500'  # Should accept (request) only
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
