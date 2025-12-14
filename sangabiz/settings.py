@@ -110,14 +110,15 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "sangabiz_db"),
-        "USER": os.getenv("DB_USER", "sangabiz_user"),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "NAME": os.getenv("DB_NAME", "musiccityug"),
+        "USER": os.getenv("DB_USER", "musicuser"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "securepassword"),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
         "CONN_MAX_AGE": 600,
     }
 }
+
 
 # --------------------------------------------------
 # Password Validation
