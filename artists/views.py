@@ -17,12 +17,12 @@ from django.db.models import Value
 
 def artists(request):
     """All artists page with popular and new sections"""
-    # Get all verified artists with additional data
+    # Get all verified artists with additional data - REMOVED select_related('user')
     artists_list = Artist.objects.filter(is_verified=True).annotate(
         total_songs=Count('songs', distinct=True),
         total_plays=Coalesce(Sum('songs__plays'), Value(0)),
         total_downloads=Coalesce(Sum('songs__downloads'), Value(0))
-    ).select_related('user').order_by('-created_at')
+    ).order_by('-created_at')  # Removed: .select_related('user')
     
     # Most popular artists (based on total plays + downloads)
     popular_artists = artists_list.annotate(
@@ -89,9 +89,19 @@ def artist_detail(request, artist_id):
 
 @login_required
 def artist_dashboard(request):
-    """Artist dashboard"""
+    """Artist dashboard - UPDATED to check for user field"""
     try:
-        artist = request.user.artist_profile
+        # Check if user field exists in Artist model
+        if hasattr(Artist, 'user') and Artist._meta.get_field('user'):
+            # If user field exists, use it
+            artist = request.user.artist_profile
+        else:
+            # If no user field, try to get artist by email or other method
+            # You might need to adjust this based on your actual model
+            artist = Artist.objects.filter(email=request.user.email).first()
+            if not artist:
+                messages.error(request, "You need to be an artist to access the dashboard.")
+                return redirect('home')
     except Artist.DoesNotExist:
         messages.error(request, "You need to be an artist to access the dashboard.")
         return redirect('home')
@@ -125,13 +135,21 @@ def artist_dashboard(request):
 
 @login_required
 def upload_music(request):
-    """Song upload for artists"""
-    # Check if user is an artist
-    try:
-        artist_profile = Artist.objects.get(user=request.user)
-    except Artist.DoesNotExist:
-        messages.error(request, "You need to be an artist to upload music.")
-        return redirect('discover')
+    """Song upload for artists - UPDATED to handle artists without user field"""
+    # Check if user is an artist - updated method
+    if hasattr(Artist, 'user') and Artist._meta.get_field('user'):
+        # If user field exists, use it
+        try:
+            artist_profile = Artist.objects.get(user=request.user)
+        except Artist.DoesNotExist:
+            messages.error(request, "You need to be an artist to upload music.")
+            return redirect('discover')
+    else:
+        # If no user field, try to find artist by email
+        artist_profile = Artist.objects.filter(email=request.user.email).first()
+        if not artist_profile:
+            messages.error(request, "You need to be an artist to upload music.")
+            return redirect('discover')
     
     if request.method == 'POST':
         form = SongUploadForm(request.POST, request.FILES)
@@ -187,18 +205,26 @@ def upload_music(request):
 
 @login_required
 def my_uploads(request):
-    """Artist's uploaded songs"""
-    # Check if user is an artist
-    if not hasattr(request.user, 'userprofile') or not request.user.userprofile.is_artist:
+    """Artist's uploaded songs - UPDATED to handle artists without user field"""
+    # Check if user is an artist - updated logic
+    artist_profile = None
+    
+    if hasattr(Artist, 'user') and Artist._meta.get_field('user'):
+        # If user field exists, use it
+        try:
+            artist_profile = Artist.objects.get(user=request.user)
+        except Artist.DoesNotExist:
+            messages.error(request, "Artist profile not found.")
+            artist_profile = None
+    else:
+        # If no user field, try by email
+        artist_profile = Artist.objects.filter(email=request.user.email).first()
+    
+    if not artist_profile:
         messages.error(request, "You need to be an artist to view uploads.")
         return redirect('discover')
     
-    try:
-        artist_profile = Artist.objects.get(user=request.user)
-        songs = Song.objects.filter(artist=artist_profile).order_by('-upload_date')
-    except Artist.DoesNotExist:
-        messages.error(request, "Artist profile not found.")
-        songs = []
+    songs = Song.objects.filter(artist=artist_profile).order_by('-upload_date')
     
     context = {
         'songs': songs,
