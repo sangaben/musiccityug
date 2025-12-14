@@ -377,51 +377,52 @@
                 </button>
             </div>
         </section>
-
-        <!-- Popular Artists -->
-        <section class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">Popular Artists</h2>
-                <a href="{% url 'artists' %}" class="see-all">Show all</a>
-            </div>
-            <div class="artists-scroll-container">
-                <div class="artists-scroll">
-                    {% for artist in trending_artists|slice:":12" %}
-                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
-                        <div class="artist-image">
-                            {% if artist.image %}
-                            <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
-                            {% else %}
-                            <div class="artist-placeholder">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            {% endif %}
-                            {% if artist.is_verified %}
-                            <div class="verified-badge">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            {% endif %}
+<!-- Popular Artists -->
+<section class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">Popular Artists</h2>
+        <a href="{% url 'artists' %}" class="see-all">Show all</a>
+    </div>
+    <div class="artists-scroll-container">
+        <div class="artists-scroll">
+            {% for artist in trending_artists|slice:":12" %}
+            <a href="{% url 'artist_detail' artist.id %}" class="artist-link">
+                <div class="artist-card">
+                    <div class="artist-image">
+                        {% if artist.image %}
+                        <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                        {% else %}
+                        <div class="artist-placeholder">
+                            <i class="fas fa-user"></i>
                         </div>
-                        <div class="artist-info">
-                            <h3 class="artist-name">{{ artist.name }}</h3>
-                            <p class="artist-type">Artist</p>
+                        {% endif %}
+                        {% if artist.is_verified %}
+                        <div class="verified-badge">
+                            <i class="fas fa-check"></i>
                         </div>
+                        {% endif %}
                     </div>
-                    {% empty %}
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>No artists available</p>
+                    <div class="artist-info">
+                        <h3 class="artist-name">{{ artist.name }}</h3>
+                        <p class="artist-type">Artist</p>
                     </div>
-                    {% endfor %}
                 </div>
-                <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+            </a>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>No artists available</p>
             </div>
-        </section>
+            {% endfor %}
+        </div>
+        <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</section>
     </div>
 </main>
 {% endblock %}
