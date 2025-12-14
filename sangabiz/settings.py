@@ -6,36 +6,39 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# --------------------------------------------------
+# Load environment variables
+# --------------------------------------------------
 load_dotenv()
 
-# -----------------------------
+# --------------------------------------------------
 # Base Directory
-# -----------------------------
+# --------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# -----------------------------
+# --------------------------------------------------
 # Security
-# -----------------------------
+# --------------------------------------------------
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
     "django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%"
 )
 
-# Debug controlled using .env file
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-# Allowed Hosts
 ALLOWED_HOSTS = [
+    "musiccityug.com",
+    "www.musiccityug.com",
     "sangabiz.com",
     "www.sangabiz.com",
+    "31.220.78.100",
     "127.0.0.1",
     "localhost",
-    ".onrender.com",
 ]
 
-# -----------------------------
-# Installed Apps
-# -----------------------------
+# --------------------------------------------------
+# Application Definition
+# --------------------------------------------------
 INSTALLED_APPS = [
     "jazzmin",
     "django.contrib.humanize",
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "crispy_forms",
     "crispy_bootstrap5",
 
@@ -59,9 +63,9 @@ INSTALLED_APPS = [
     "news",
 ]
 
-# -----------------------------
+# --------------------------------------------------
 # Middleware
-# -----------------------------
+# --------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -73,12 +77,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# --------------------------------------------------
+# URLs & WSGI
+# --------------------------------------------------
 ROOT_URLCONF = "sangabiz.urls"
 WSGI_APPLICATION = "sangabiz.wsgi.application"
 
-# -----------------------------
+# --------------------------------------------------
 # Templates
-# -----------------------------
+# --------------------------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -97,9 +104,9 @@ TEMPLATES = [
     },
 ]
 
-# -----------------------------
+# --------------------------------------------------
 # Database (PostgreSQL)
-# -----------------------------
+# --------------------------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -112,27 +119,27 @@ DATABASES = {
     }
 }
 
-# -----------------------------
-# Password Validators
-# -----------------------------
+# --------------------------------------------------
+# Password Validation
+# --------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": Rogers。    "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# -----------------------------
+# --------------------------------------------------
 # Internationalization
-# -----------------------------
+# --------------------------------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# -----------------------------
+# --------------------------------------------------
 # Static & Media Files
-# -----------------------------
+# --------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -142,40 +149,40 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 
-# -----------------------------
+# --------------------------------------------------
 # Authentication Redirects
-# -----------------------------
+# --------------------------------------------------
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
-# -----------------------------
+# --------------------------------------------------
 # Crispy Forms
-# -----------------------------
+# --------------------------------------------------
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# -----------------------------
-# Email Settings
-# -----------------------------
+# --------------------------------------------------
+# Email Configuration
+# --------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "webmaster@sangabiz.com")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "webmaster@musiccityug.com")
 
-# -----------------------------
-# Session Settings
-# -----------------------------
+# --------------------------------------------------
+# Sessions
+# --------------------------------------------------
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# -----------------------------
+# --------------------------------------------------
 # Production Security
-# -----------------------------
+# --------------------------------------------------
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -188,9 +195,9 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# -----------------------------
+# --------------------------------------------------
 # Logging
-# -----------------------------
+# --------------------------------------------------
 LOGS_DIR = BASE_DIR / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
@@ -210,14 +217,17 @@ LOGGING = {
     },
 }
 
-# -----------------------------
-# Jazzmin UI
-# -----------------------------
+# --------------------------------------------------
+# Jazzmin Configuration
+# --------------------------------------------------
+SITE_URL = "https://musiccityug.com"
+
 JAZZMIN_SETTINGS = {
-    "site_title": "Sangabiz Admin",
-    "site_header": "Sangabiz",
-    "site_brand": "Sangabiz",
-    "welcome_sign": "Welcome to Sangabiz Admin Panel",
+    "site_title": "MusicCityUG Admin",
+    "site_header": "MusicCityUG",
+    "site_brand": "MusicCityUG",
+    "site_url": SITE_URL,   # 👈 enables “View site”
+    "welcome_sign": "Welcome to MusicCityUG Admin Panel",
     "theme": "darkly",
     "show_sidebar": True,
 }
@@ -228,7 +238,7 @@ JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
 }
 
-# -----------------------------
-# Default Auto Field
-# -----------------------------
+# --------------------------------------------------
+# Default Primary Key
+# --------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
