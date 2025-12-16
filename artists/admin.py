@@ -1,5 +1,6 @@
 # artists/admin.py
 from django.contrib import admin
+from django.contrib.auth.models import User  # Add this import
 from django.db.models import Sum, Count
 from django.utils.html import format_html
 from .models import Artist, Follow
