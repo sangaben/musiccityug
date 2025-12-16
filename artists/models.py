@@ -9,7 +9,15 @@ class ArtistManager(models.Manager):
         return self.filter(is_verified=True)
 
 class Artist(models.Model):
-    # Completely remove the user field if you want artists independent
+    # Optional user field - artists can exist with or without a user account
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='artist_profile',
+        help_text="Optional link to a user account for artist login/management"
+    )
     name = models.CharField(max_length=200)
     bio = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='artists/', blank=True, null=True)
@@ -27,6 +35,18 @@ class Artist(models.Model):
     
     def __str__(self):
         return self.name
+    
+    @property
+    def has_user_account(self):
+        """Check if this artist is linked to a user account"""
+        return self.user is not None
+    
+    @property
+    def username(self):
+        """Get username if linked to user account, otherwise return name"""
+        if self.user:
+            return self.user.username
+        return self.name.lower().replace(' ', '_')
 
 class Follow(models.Model):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
