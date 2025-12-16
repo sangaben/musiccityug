@@ -55,4 +55,5 @@ class Follow(models.Model):
     
     class Meta:
         unique_together = ['follower', 'artist']
+
         app_label = 'artists'

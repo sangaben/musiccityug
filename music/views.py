@@ -1119,4 +1119,3 @@ def like_song(request, song_id):
 def custom_404(request, exception):
     """Custom 404 error page"""
     return render(request, "music/404.html", status=404)
-

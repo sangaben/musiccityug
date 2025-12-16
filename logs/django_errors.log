@@ -25,3 +25,277 @@ ERROR 2025-12-11 13:39:53,872 basehttp 29819 137838134818368 You're accessing th
 ERROR 2025-12-11 13:39:54,125 basehttp 29819 137838134818368 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2025-12-11 13:39:55,339 basehttp 29819 137838134818368 You're accessing the development server over HTTPS, but it only supports HTTP.
 ERROR 2025-12-11 13:39:55,379 basehttp 29819 137838134818368 You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+You're accessing the development server over HTTPS, but it only supports HTTP.
+Internal Server Error: /admin/artists/artist/add/
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 809, in get_form
+    return modelform_factory(self.model, **defaults)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 642, in modelform_factory
+    return type(form)(class_name, (form,), form_class_attrs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 321, in __new__
+    raise FieldError(message)
+django.core.exceptions.FieldError: Unknown field(s) (user) specified for Artist
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1886, in add_view
+    return self.changeform_view(request, None, form_url, extra_context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1747, in changeform_view
+    return self._changeform_view(request, object_id, form_url, extra_context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 1782, in _changeform_view
+    ModelForm = self.get_form(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 811, in get_form
+    raise FieldError(
+django.core.exceptions.FieldError: Unknown field(s) (user) specified for Artist. Check fields/fieldsets/exclude attributes of class ArtistAdmin.
+"GET /admin/artists/artist/add/ HTTP/1.1" 500 137890
+Internal Server Error: /admin/artists/artist/
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column artists_artist.user_id does not exist
+LINE 1: ... FROM "artists_artist" INNER JOIN "auth_user" ON ("artists_a...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 2046, in changelist_view
+    media = self.media + formset.media
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/formsets.py", line 521, in media
+    if self.forms:
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/formsets.py", line 207, in forms
+    for i in range(self.total_form_count())
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/formsets.py", line 182, in total_form_count
+    initial_forms = self.initial_form_count()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 685, in initial_form_count
+    return len(self.get_queryset())
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 382, in __len__
+    self._fetch_all()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1886, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column artists_artist.user_id does not exist
+LINE 1: ... FROM "artists_artist" INNER JOIN "auth_user" ON ("artists_a...
+                                                             ^
+
+"GET /admin/artists/artist/ HTTP/1.1" 500 183940
+Internal Server Error: /artists/
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/sanga/Documents/music_cityug/sangabiz/artists/views.py", line 41, in artists
+    return render(request, 'artists/artists.html', context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/defaulttags.py", line 194, in render
+    len_values = len(values)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 382, in __len__
+    self._fetch_all()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1886, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 279, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1367, in get_related_selections
+    raise FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'user'. Choices are: genre
+"GET /artists/ HTTP/1.1" 500 206815
+Internal Server Error: /artists/
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/sanga/Documents/music_cityug/sangabiz/artists/views.py", line 41, in artists
+    return render(request, 'artists/artists.html', context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/template/defaulttags.py", line 194, in render
+    len_values = len(values)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 382, in __len__
+    self._fetch_all()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 1886, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 279, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/db/models/sql/compiler.py", line 1367, in get_related_selections
+    raise FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'user'. Choices are: genre
+"GET /artists/ HTTP/1.1" 500 206822
+Internal Server Error: /admin/artists/artist/
+Traceback (most recent call last):
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 2041, in changelist_view
+    FormSet = self.get_changelist_formset(request)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 896, in get_changelist_formset
+    self.get_changelist_form(request),
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 883, in get_changelist_form
+    return modelform_factory(self.model, **defaults)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 642, in modelform_factory
+    return type(form)(class_name, (form,), form_class_attrs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 300, in __new__
+    fields = fields_for_model(
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/forms/models.py", line 229, in fields_for_model
+    formfield = formfield_callback(f, **kwargs)
+  File "/home/sanga/sangabiz_project/venv/lib/python3.10/site-packages/django/contrib/admin/options.py", line 172, in formfield_for_dbfield
+    formfield = self.formfield_for_foreignkey(db_field, request, **kwargs)
+  File "/home/sanga/Documents/music_cityug/sangabiz/artists/admin.py", line 91, in formfield_for_foreignkey
+    kwargs["queryset"] = User.objects.filter(artist_profile__isnull=True)
+NameError: name 'User' is not defined
+"GET /admin/artists/artist/ HTTP/1.1" 500 138414
