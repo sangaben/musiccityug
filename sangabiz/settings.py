@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv(
     "django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%"
 )
 
-DEBUG =True
+DEBUG =False
 
 ALLOWED_HOSTS = [
     "musiccityug.com",
@@ -238,7 +238,7 @@ JAZZMIN_SETTINGS = {
     "login_logo": "images/llogo.jpeg",
     "login_logo_dark": "images/logo.jpeg",
     "site_logo_classes": "img-circle",
-    "site_icon": "admin/img/favicon.ico",
+    "site_icon": "images/favicon.ico",
     "welcome_sign": "Welcome to MusicCityUG Administration",
     "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
     
