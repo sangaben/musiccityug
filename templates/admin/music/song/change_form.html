@@ -1,0 +1,896 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    :root {
+        --spotify-black: #121212;
+        --spotify-dark-gray: #181818;
+        --spotify-light-gray: #282828;
+        --spotify-lighter-gray: #333333;
+        --spotify-white: #FFFFFF;
+        --spotify-text-primary: #FFFFFF;
+        --spotify-text-secondary: #B3B3B3;
+        --spotify-green: #1DB954;
+        --spotify-green-hover: #1ED760;
+        --spotify-gradient: linear-gradient(135deg, #450af5, #c4efd9);
+        --spotify-gradient-alt: linear-gradient(135deg, #1e3264, #1DB954);
+        --spotify-card-bg: rgba(255, 255, 255, 0.1);
+        --spotify-card-hover: rgba(255, 255, 255, 0.2);
+        --spotify-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Custom styles for Song form - Spotify Style */
+    .song-form-container {
+        padding: 30px;
+        background: linear-gradient(135deg, #1e3264 0%, #121212 100%);
+        margin: -20px -20px 30px -20px;
+        color: var(--spotify-text-primary);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .song-form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(29, 185, 84, 0.1) 50%, transparent 70%);
+        animation: shimmer 3s infinite linear;
+        background-size: 200% 200%;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .song-form-header {
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .song-form-header h1 {
+        color: var(--spotify-text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 900;
+        font-size: 2.5rem;
+        background: var(--spotify-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 2px 20px rgba(69, 10, 245, 0.3);
+    }
+
+    .song-form-header h1 i {
+        font-size: 2.5rem;
+        background: var(--spotify-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .song-form-header p {
+        opacity: 0.8;
+        margin: 10px 0 0 0;
+        font-size: 1.1rem;
+        color: var(--spotify-text-secondary);
+        font-weight: 400;
+    }
+
+    /* Upload progress - Spotify Style */
+    .upload-progress {
+        margin: 30px 0;
+        padding: 0 20px;
+    }
+
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .progress-steps:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 20px;
+        right: 20px;
+        height: 2px;
+        background: var(--spotify-lighter-gray);
+        z-index: 1;
+        transform: translateY(-50%);
+    }
+
+    .progress-step {
+        position: relative;
+        z-index: 2;
+        background: var(--spotify-light-gray);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: var(--spotify-text-secondary);
+        border: 2px solid var(--spotify-lighter-gray);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1.2rem;
+    }
+
+    .progress-step.active {
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        border-color: var(--spotify-green);
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+    }
+
+    .progress-step.completed {
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        border-color: var(--spotify-green);
+    }
+
+    /* Form sections styling - Spotify Card Design */
+    .form-section {
+        background: var(--spotify-card-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--spotify-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section:hover {
+        background: var(--spotify-card-hover);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--spotify-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-section:hover::before {
+        opacity: 1;
+    }
+
+    .form-section h2 {
+        color: var(--spotify-text-primary);
+        margin-top: 0;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 700;
+        font-size: 1.3rem;
+        letter-spacing: -0.5px;
+    }
+
+    .form-section h2 i {
+        color: var(--spotify-green);
+        font-size: 1.4rem;
+        background: var(--spotify-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Field styling */
+    .form-row {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-left: 4px solid var(--spotify-green);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-row:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(5px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-row label {
+        font-weight: 600;
+        color: var(--spotify-text-primary);
+        margin-bottom: 10px;
+        display: block;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-row label:after {
+        content: " *";
+        color: var(--spotify-green);
+        font-weight: bold;
+        margin-left: 2px;
+    }
+
+    /* Input styling */
+    input[type="text"], 
+    input[type="number"], 
+    input[type="file"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--spotify-lighter-gray);
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--spotify-text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    input[type="text"]:focus, 
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+        background: var(--spotify-light-gray);
+        border-color: var(--spotify-green);
+        box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
+        outline: none;
+    }
+
+    /* File upload styling */
+    .file-upload-area {
+        border: 3px dashed var(--spotify-green);
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+        background: rgba(29, 185, 84, 0.1);
+        margin-top: 15px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .file-upload-area:hover {
+        background: rgba(29, 185, 84, 0.15);
+        border-color: var(--spotify-green-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(29, 185, 84, 0.2);
+    }
+
+    .file-upload-area i {
+        font-size: 56px;
+        color: var(--spotify-green);
+        margin-bottom: 20px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-area:hover i {
+        transform: scale(1.1);
+        color: var(--spotify-green-hover);
+    }
+
+    .file-upload-area p {
+        color: var(--spotify-text-primary);
+        margin: 10px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .file-upload-area small {
+        color: var(--spotify-text-secondary);
+        display: block;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    /* Duration fields */
+    .duration-fields {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+    }
+
+    .duration-field {
+        flex: 1;
+    }
+
+    .duration-field label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--spotify-text-secondary);
+    }
+
+    /* Checkbox styling */
+    .checkbox-row {
+        display: flex;
+        gap: 30px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid var(--spotify-lighter-gray);
+        background: var(--spotify-dark-gray);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked {
+        background: var(--spotify-green);
+        border-color: var(--spotify-green);
+    }
+
+    .checkbox-item label {
+        font-weight: 600;
+        color: var(--spotify-text-primary);
+        cursor: pointer;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Submit button styling */
+    .submit-row {
+        background: linear-gradient(135deg, var(--spotify-dark-gray), var(--spotify-light-gray));
+        padding: 25px;
+        border-radius: 16px;
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-row::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--spotify-gradient);
+    }
+
+    .submit-row input[type="submit"] {
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-row input[type="submit"]:hover {
+        background: var(--spotify-green-hover);
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+    }
+
+    .submit-row input[type="submit"]:active {
+        transform: scale(0.98);
+    }
+
+    /* Help text */
+    .help {
+        color: var(--spotify-text-secondary);
+        font-size: 0.9rem;
+        margin-top: 10px;
+        padding: 12px 15px;
+        background: rgba(255, 215, 0, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #FFD700;
+        line-height: 1.5;
+    }
+
+    /* Audio preview section */
+    .audio-preview {
+        background: var(--spotify-dark-gray);
+        color: var(--spotify-text-primary);
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 15px;
+        border: 2px solid var(--spotify-green);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .audio-preview h4 {
+        margin-top: 0;
+        color: var(--spotify-green);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+    /* Quality badges */
+    .quality-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-left: 10px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .quality-lossless {
+        background: linear-gradient(135deg, var(--spotify-green), #27ae60);
+        color: var(--spotify-black);
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .quality-high {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: var(--spotify-text-primary);
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .quality-medium {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: var(--spotify-text-primary);
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+    }
+
+    /* Required field indicator */
+    .required:before {
+        content: "• ";
+        color: var(--spotify-green);
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* Field errors */
+    .errors {
+        border-left-color: #FF4747 !important;
+        background: rgba(255, 71, 71, 0.1) !important;
+    }
+
+    .errorlist {
+        color: #FF4747;
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .errorlist li {
+        padding: 8px 12px;
+        background: rgba(255, 71, 71, 0.1);
+        border-radius: 6px;
+        margin-bottom: 5px;
+        border-left: 3px solid #FF4747;
+    }
+
+    /* Form actions */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    /* Spotify logo animation */
+    .spotify-logo {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: var(--spotify-green);
+        border-radius: 50%;
+        position: relative;
+        margin-right: 10px;
+    }
+
+    .spotify-logo::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 15px;
+        height: 15px;
+        background: var(--spotify-black);
+        border-radius: 50%;
+    }
+
+    .spotify-logo::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        width: 20px;
+        height: 8px;
+        background: var(--spotify-green);
+        border-radius: 4px;
+        clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .song-form-container {
+            padding: 20px;
+        }
+        
+        .song-form-header h1 {
+            font-size: 2rem;
+        }
+        
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .form-section {
+            padding: 20px;
+        }
+        
+        .checkbox-row {
+            gap: 15px;
+        }
+        
+        .duration-fields {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .submit-row {
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .submit-row input[type="submit"] {
+            width: 100%;
+        }
+    }
+
+    /* Custom scrollbar for form */
+    .form-section::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .form-section::-webkit-scrollbar-track {
+        background: var(--spotify-dark-gray);
+        border-radius: 10px;
+    }
+
+    .form-section::-webkit-scrollbar-thumb {
+        background: var(--spotify-green);
+        border-radius: 10px;
+        border: 2px solid var(--spotify-dark-gray);
+    }
+
+    .form-section::-webkit-scrollbar-thumb:hover {
+        background: var(--spotify-green-hover);
+    }
+
+    /* Floating action button */
+    .fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        border: none;
+    }
+
+    .fab:hover {
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 12px 35px rgba(29, 185, 84, 0.6);
+    }
+
+    /* Success message */
+    .success-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: var(--spotify-shadow);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease-out;
+        font-weight: 600;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid var(--spotify-green);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Selection color */
+    ::selection {
+        background-color: rgba(29, 185, 84, 0.3);
+        color: var(--spotify-text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="song-form-container">
+    <div class="song-form-header">
+        <h1>
+            <span class="spotify-logo"></span>
+            <i class="fas fa-music"></i>
+            {% if add %}Upload New Song{% else %}Edit Song{% endif %}
+        </h1>
+        <p>{% if add %}Fill in the details below to upload a new track to MusicCityUG{% else %}Edit the song details and metadata{% endif %}</p>
+    </div>
+</div>
+
+<div class="upload-progress">
+    <div class="progress-steps">
+        <div class="progress-step active">1</div>
+        <div class="progress-step">2</div>
+        <div class="progress-step">3</div>
+        <div class="progress-step">4</div>
+    </div>
+</div>
+
+{{ block.super }}
+
+<button class="fab" title="Quick Actions">
+    <i class="fas fa-bolt"></i>
+</button>
+
+{% endblock %}
+
+{% block field_sets %}
+{% for fieldset in adminform %}
+  <div class="form-section">
+    <h2>
+      {% if fieldset.name == "Song Details" or fieldset.name == "Basic Information" %}
+        <i class="fas fa-info-circle"></i>
+      {% elif fieldset.name == "Duration" %}
+        <i class="fas fa-clock"></i>
+      {% elif fieldset.name == "Audio Upload" or fieldset.name == "Media Files" %}
+        <i class="fas fa-file-upload"></i>
+      {% elif fieldset.name == "Content Settings" %}
+        <i class="fas fa-cog"></i>
+      {% elif fieldset.name == "Additional Information" or fieldset.name == "Additional Info" %}
+        <i class="fas fa-plus-circle"></i>
+      {% elif fieldset.name == "Statistics" %}
+        <i class="fas fa-chart-bar"></i>
+      {% else %}
+        <i class="fas fa-folder"></i>
+      {% endif %}
+      {{ fieldset.name }}
+    </h2>
+    
+    {% if fieldset.description %}
+    <div class="help">{{ fieldset.description }}</div>
+    {% endif %}
+    
+    {% for line in fieldset %}
+      <div class="form-row">
+        {% for field in line %}
+          <div class="fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}">
+            {% if field.is_checkbox %}
+              <div class="checkbox-item">
+                {{ field.field }}
+                {{ field.label_tag }}
+              </div>
+            {% else %}
+              {{ field.label_tag }}
+              {% if field.is_readonly %}
+                  <div class="readonly">{{ field.contents }}</div>
+              {% else %}
+                  {{ field.field }}
+              {% endif %}
+            {% endif %}
+            {% if field.field.help_text %}
+              <div class="help">{{ field.field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+              {{ field.errors }}
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script>
+(function($) {
+    $(document).ready(function() {
+        // Add Spotify-style interactions
+        $('.file-upload-area').on('click', function() {
+            $(this).find('input[type="file"]').click();
+        });
+
+        // Update progress steps based on field completion
+        function updateProgress() {
+            var completed = 0;
+            $('input[required], select[required], textarea[required]').each(function() {
+                if ($(this).val().trim() !== '') {
+                    completed++;
+                }
+            });
+            
+            var total = $('input[required], select[required], textarea[required]').length;
+            var progress = Math.min(Math.round((completed / total) * 4), 4);
+            
+            $('.progress-step').removeClass('active completed');
+            for (var i = 0; i < progress; i++) {
+                $('.progress-step').eq(i).addClass('completed');
+                if (i === progress - 1) {
+                    $('.progress-step').eq(i).addClass('active');
+                }
+            }
+        }
+
+        // Update progress on input change
+        $('input, select, textarea').on('change input', updateProgress);
+        updateProgress();
+
+        // Add floating button functionality
+        $('.fab').on('click', function() {
+            // Quick actions menu
+            alert('Quick Actions:\n\n• Validate Form\n• Preview Song\n• Save Draft\n• Clear Form');
+        });
+
+        // Add audio preview for file inputs
+        $('input[type="file"][accept*="audio"]').on('change', function(e) {
+            if (e.target.files.length > 0) {
+                var file = e.target.files[0];
+                var url = URL.createObjectURL(file);
+                
+                // Remove existing preview
+                $(this).closest('.form-row').find('.audio-preview').remove();
+                
+                // Add new preview
+                var preview = $(
+                    '<div class="audio-preview">' +
+                    '<h4><i class="fas fa-play-circle"></i> Audio Preview</h4>' +
+                    '<audio controls style="width: 100%; margin-top: 10px;">' +
+                    '<source src="' + url + '" type="' + file.type + '">' +
+                    'Your browser does not support audio preview.' +
+                    '</audio>' +
+                    '</div>'
+                );
+                
+                $(this).closest('.form-row').append(preview);
+            }
+        });
+
+        // Add duration calculation
+        $('[name="duration_minutes"], [name="duration_seconds"]').on('input', function() {
+            var minutes = parseInt($('[name="duration_minutes"]').val()) || 0;
+            var seconds = parseInt($('[name="duration_seconds"]').val()) || 0;
+            
+            if (seconds >= 60) {
+                minutes += Math.floor(seconds / 60);
+                seconds = seconds % 60;
+                $('[name="duration_minutes"]').val(minutes);
+                $('[name="duration_seconds"]').val(seconds);
+            }
+            
+            // Update display
+            var display = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+            $(this).closest('.form-row').find('.duration-display').remove();
+            $(this).closest('.form-row').append(
+                '<div class="duration-display">Duration: ' + display + '</div>'
+            );
+        });
+
+        // Form submission with loading
+        $('#song_form').on('submit', function() {
+            $('.submit-row input[type="submit"]').html(
+                '<span class="loading-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></span> Processing...'
+            ).prop('disabled', true);
+            
+            // Show loading overlay
+            $('body').append(
+                '<div class="loading-overlay">' +
+                '<div class="loading-spinner"></div>' +
+                '</div>'
+            );
+        });
+    });
+})(django.jQuery);
+</script>
+{% endblock %}
