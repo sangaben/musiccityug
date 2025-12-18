@@ -1,7 +1,7 @@
-# music/models.py
+# music/models.py - FIXED VERSION
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import timedelta
 
@@ -12,7 +12,7 @@ class Genre(models.Model):
     
     class Meta:
         ordering = ['name']
-        app_label = 'music'  # Add this line
+        app_label = 'music'
     
     def __str__(self):
         return self.name
@@ -27,30 +27,39 @@ class Song(models.Model):
     title = models.CharField(max_length=200)
     artist = models.ForeignKey('artists.Artist', on_delete=models.CASCADE, related_name='songs')
     
-    # FIXED: Only ONE genre field
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, blank=True, related_name='songs')
+    featured_artists = models.ManyToManyField(
+        'artists.Artist',
+        related_name='featured_songs',
+        blank=True
+    )
     
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, blank=True, related_name='songs')
     audio_file = models.FileField(
         upload_to='songs/',
         validators=[FileExtensionValidator(allowed_extensions=['mp3', 'wav', 'ogg', 'm4a'])]
     )
     cover_image = models.ImageField(upload_to='covers/', blank=True, null=True)
-    duration = models.PositiveIntegerField(help_text="Duration in seconds", default=0)
+    
+    # Duration fields
+    duration_minutes = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(59)],
+        help_text="Minutes part of duration (0-59)"
+    )
+    duration_seconds = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(59)],
+        help_text="Seconds part of duration (0-59)"
+    )
+    
     upload_date = models.DateTimeField(auto_now_add=True)
     plays = models.PositiveIntegerField(default=0)
     downloads = models.PositiveIntegerField(default=0)
-    
-    # REMOVED: Duplicate genre field that was here
-    
     is_approved = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
-    
-    # Premium content fields
     is_premium_only = models.BooleanField(default=False, help_text="Only available to premium users")
     preview_duration = models.PositiveIntegerField(default=30, help_text="Preview duration in seconds for free users")
     audio_quality = models.CharField(max_length=20, choices=AUDIO_QUALITY_CHOICES, default='standard')
-    
-    # Metadata
     lyrics = models.TextField(blank=True, null=True)
     bpm = models.PositiveIntegerField(blank=True, null=True, help_text="Beats per minute")
     release_year = models.PositiveIntegerField(blank=True, null=True)
@@ -61,10 +70,39 @@ class Song(models.Model):
             models.Index(fields=['-upload_date']),
             models.Index(fields=['is_approved', 'is_featured']),
         ]
-        app_label = 'music'  # Add this line
+        app_label = 'music'
     
     def __str__(self):
-        return f"{self.title} - {self.artist.name}"
+        # FIXED: Simplified to prevent recursion
+        try:
+            artist_name = str(self.artist)
+        except Exception:
+            artist_name = "Unknown Artist"
+            
+        featured_count = self.featured_artists.count()
+        
+        if featured_count > 0:
+            return f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
+        return f"{self.title} - {artist_name}"
+    
+    # Property to get total duration in seconds
+    @property
+    def duration(self):
+        """Return total duration in seconds."""
+        return (self.duration_minutes * 60) + self.duration_seconds
+    
+    @duration.setter
+    def duration(self, seconds):
+        """Set duration from total seconds."""
+        self.duration_minutes = seconds // 60
+        self.duration_seconds = seconds % 60
+    
+    @property
+    def all_artists(self):
+        """Return list of all artists on the track."""
+        artists = [self.artist]
+        artists.extend(list(self.featured_artists.all()))
+        return artists
     
     def increment_plays(self):
         self.plays += 1
@@ -76,9 +114,8 @@ class Song(models.Model):
     
     @property
     def formatted_duration(self):
-        minutes = self.duration // 60
-        seconds = self.duration % 60
-        return f"{minutes}:{seconds:02d}"
+        """Return duration in MM:SS format."""
+        return f"{self.duration_minutes:02d}:{self.duration_seconds:02d}"
     
     @property
     def is_recent(self):
@@ -96,8 +133,30 @@ class Song(models.Model):
         if user.is_authenticated and hasattr(user, 'userprofile'):
             return user.userprofile.is_premium_active
         return False
-# music/models.py - UPDATE THE SongPlay MODEL
+    
 
+
+    def __str__(self):
+        # Use caching to prevent recursion
+        if hasattr(self, '_str_cache'):
+            return self._str_cache
+            
+        try:
+            artist_name = self.artist.name if self.artist else "Unknown Artist"
+        except Exception:
+            artist_name = "Unknown Artist"
+            
+        featured_count = self.featured_artists.count()
+        
+        if featured_count > 0:
+            result = f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
+        else:
+            result = f"{self.title} - {artist_name}"
+            
+        # Cache the result
+        self._str_cache = result
+        return result
+    
 class SongPlay(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='play_history')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='song_plays')
