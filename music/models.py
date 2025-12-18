@@ -1,4 +1,4 @@
-# music/models.py - FIXED VERSION
+# music/models.py - COMPLETE FIXED VERSION
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
@@ -26,6 +26,14 @@ class Song(models.Model):
     
     title = models.CharField(max_length=200)
     artist = models.ForeignKey('artists.Artist', on_delete=models.CASCADE, related_name='songs')
+    
+    # Display artist name field
+    display_artist_name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Optional: Artist name to display (different from linked artist)"
+    )
     
     featured_artists = models.ManyToManyField(
         'artists.Artist',
@@ -73,17 +81,38 @@ class Song(models.Model):
         app_label = 'music'
     
     def __str__(self):
-        # FIXED: Simplified to prevent recursion
-        try:
-            artist_name = str(self.artist)
-        except Exception:
-            artist_name = "Unknown Artist"
+        # Use caching to prevent recursion
+        if hasattr(self, '_str_cache'):
+            return self._str_cache
             
+        artist_name = self.get_display_artist_name()
         featured_count = self.featured_artists.count()
         
         if featured_count > 0:
-            return f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
-        return f"{self.title} - {artist_name}"
+            result = f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
+        else:
+            result = f"{self.title} - {artist_name}"
+            
+        # Cache the result
+        self._str_cache = result
+        return result
+    
+    def get_display_artist_name(self):
+        """
+        Returns the display artist name if set, otherwise returns the linked artist's name.
+        """
+        if self.display_artist_name:
+            return self.display_artist_name
+        
+        try:
+            return str(self.artist)
+        except Exception:
+            return "Unknown Artist"
+    
+    @property
+    def display_artist(self):
+        """Property version of get_display_artist_name() for template access."""
+        return self.get_display_artist_name()
     
     # Property to get total duration in seconds
     @property
@@ -102,6 +131,17 @@ class Song(models.Model):
         """Return list of all artists on the track."""
         artists = [self.artist]
         artists.extend(list(self.featured_artists.all()))
+        return artists
+    
+    @property
+    def all_artists_display(self):
+        """Return list of all artist display names on the track."""
+        artists = [self.get_display_artist_name()]
+        
+        # For featured artists, you could also add display names if needed
+        for featured in self.featured_artists.all():
+            artists.append(str(featured))
+        
         return artists
     
     def increment_plays(self):
@@ -133,30 +173,7 @@ class Song(models.Model):
         if user.is_authenticated and hasattr(user, 'userprofile'):
             return user.userprofile.is_premium_active
         return False
-    
 
-
-    def __str__(self):
-        # Use caching to prevent recursion
-        if hasattr(self, '_str_cache'):
-            return self._str_cache
-            
-        try:
-            artist_name = self.artist.name if self.artist else "Unknown Artist"
-        except Exception:
-            artist_name = "Unknown Artist"
-            
-        featured_count = self.featured_artists.count()
-        
-        if featured_count > 0:
-            result = f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
-        else:
-            result = f"{self.title} - {artist_name}"
-            
-        # Cache the result
-        self._str_cache = result
-        return result
-    
 class SongPlay(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='play_history')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='song_plays')
@@ -213,10 +230,7 @@ class SongDownload(models.Model):
             models.Index(fields=['-downloaded_at']),
             models.Index(fields=['song', 'downloaded_at']),
         ]
-        app_label = 'music'  # Add this line
+        app_label = 'music'
     
     def __str__(self):
         return f"{self.song.title} downloaded by {self.user.username if self.user else 'Anonymous'}"
-
-# Remove the duplicate Genre definition at the bottom
-# The Genre class is already defined at the top
