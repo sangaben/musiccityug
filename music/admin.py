@@ -1,4 +1,4 @@
-# music/admin.py - UPDATED VERSION
+# music/admin.py - COMPLETE FIXED VERSION
 from django.contrib import admin
 from django.utils.html import format_html
 from django import forms
@@ -31,7 +31,7 @@ class SongAdminForm(forms.ModelForm):
             if duration_seconds >= 60:
                 self.add_error('duration_seconds', 'Seconds must be between 0 and 59.')
         
-        # Validate artist selection
+        # Validate artist selection - either manual OR dropdown
         if not artist_name_manual and not artist:
             raise forms.ValidationError(
                 "You must either select an artist from the list OR enter a manual artist name."
@@ -63,18 +63,38 @@ class SongAdminForm(forms.ModelForm):
         
         return cleaned_data
 
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ['name', 'color_display', 'song_count']
+    search_fields = ['name', 'description']
+    readonly_fields = ['song_count_display']
+    
+    def color_display(self, obj):
+        return format_html(
+            '<span style="display: inline-block; width: 20px; height: 20px; background-color: {}; border-radius: 3px;"></span> {}',
+            obj.color, obj.color
+        )
+    color_display.short_description = 'Color'
+    
+    def song_count(self, obj):
+        return obj.songs.count()
+    song_count.short_description = 'Songs'
+    
+    def song_count_display(self, obj):
+        return obj.songs.count()
+    song_count_display.short_description = 'Number of Songs'
+
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     form = SongAdminForm
     change_form_template = 'admin/music/song/change_form.html'
     add_form_template = 'admin/music/song/change_form.html'
     
-    # Display in list view
     list_display = [
         'title', 
-        'artist_display',  # Use custom method
+        'artist_display',  # Use the fixed property display
         'genre', 
-        'formatted_duration_column',
+        'formatted_duration_display',
         'plays', 
         'downloads', 
         'is_approved', 
@@ -87,7 +107,6 @@ class SongAdmin(admin.ModelAdmin):
         'upload_date', 'audio_quality'
     ]
     
-    # Search both manual and foreign key artists
     search_fields = [
         'title', 
         'artist_name_manual',  # Search manual artist names
@@ -100,13 +119,14 @@ class SongAdmin(admin.ModelAdmin):
         'plays', 'downloads', 'upload_date', 'popularity_score_display',
         'artist_info_display', 'total_duration_display'
     ]
+    
     list_editable = ['is_approved', 'is_featured']
     list_per_page = 25
     date_hierarchy = 'upload_date'
     
     filter_horizontal = ['featured_artists']
     
-    # UPDATED: Fieldsets with manual artist field
+    # Updated fieldsets with artist_name_manual field
     fieldsets = (
         ('Basic Information', {
             'fields': (
@@ -138,10 +158,11 @@ class SongAdmin(admin.ModelAdmin):
         }),
     )
     
-    # Custom method to display artist in list view
+    # FIXED: Artist display method (property, not method call)
     def artist_display(self, obj):
         """Display artist (manual or from foreign key)"""
-        artist_name = obj.get_artist_display()
+        # Use the property - NO PARENTHESES!
+        artist_name = obj.get_artist_display
         
         # Add indicator for manual vs selected artist
         if obj.artist_name_manual:
@@ -158,37 +179,49 @@ class SongAdmin(admin.ModelAdmin):
     artist_display.short_description = 'Artist'
     artist_display.admin_order_field = 'artist__name'  # Can order by foreign key
     
-    def formatted_duration_column(self, obj):
-        minutes = obj.duration_minutes if obj.duration_minutes is not None else 0
-        seconds = obj.duration_seconds if obj.duration_seconds is not None else 0
-        return f"{minutes:02d}:{seconds:02d}"
-    formatted_duration_column.short_description = 'Duration'
+    def formatted_duration_display(self, obj):
+        try:
+            minutes = obj.duration_minutes if obj.duration_minutes is not None else 0
+            seconds = obj.duration_seconds if obj.duration_seconds is not None else 0
+            return f"{minutes:02d}:{seconds:02d}"
+        except Exception:
+            return "00:00"
+    formatted_duration_display.short_description = 'Duration'
     
     # Display total duration in seconds in admin form
     def total_duration_display(self, obj):
-        total = obj.duration
-        return f"Total: {total} seconds ({obj.formatted_duration})"
+        try:
+            total = obj.duration
+            return f"Total: {total} seconds ({obj.formatted_duration})"
+        except Exception:
+            return "Duration not set"
     total_duration_display.short_description = 'Total Duration'
     
     # Display artist info (manual vs selected)
     def artist_info_display(self, obj):
-        info = []
-        
-        if obj.artist_name_manual:
-            info.append(f"<strong>Manual Artist:</strong> {obj.artist_name_manual}")
-        
-        if obj.artist:
-            info.append(f"<strong>Selected Artist:</strong> {obj.artist.name}")
-        
-        if obj.featured_artists.exists():
-            featured_names = [str(artist) for artist in obj.featured_artists.all()]
-            info.append(f"<strong>Featured Artists:</strong> {', '.join(featured_names)}")
-        
-        return format_html('<br>'.join(info)) if info else "No artist information"
+        try:
+            info = []
+            
+            if obj.artist_name_manual:
+                info.append(f"<strong>Manual Artist:</strong> {obj.artist_name_manual}")
+            
+            if obj.artist:
+                info.append(f"<strong>Selected Artist:</strong> {obj.artist.name}")
+            
+            if obj.featured_artists.exists():
+                featured_names = [str(artist) for artist in obj.featured_artists.all()]
+                info.append(f"<strong>Featured Artists:</strong> {', '.join(featured_names)}")
+            
+            return format_html('<br>'.join(info)) if info else "No artist information"
+        except Exception:
+            return "Error loading artist information"
     artist_info_display.short_description = 'Artist Information'
     
     def popularity_score_display(self, obj):
-        return obj.popularity_score
+        try:
+            return obj.popularity_score
+        except Exception:
+            return 0
     popularity_score_display.short_description = 'Popularity Score'
     
     def save_model(self, request, obj, form, change):
@@ -214,28 +247,6 @@ class SongAdmin(admin.ModelAdmin):
             'all': ('admin/css/song_admin.css',)
         }
         js = ('admin/js/song_admin.js',)
-
-# Keep your existing GenreAdmin, SongPlayAdmin, SongDownloadAdmin
-@admin.register(Genre)
-class GenreAdmin(admin.ModelAdmin):
-    list_display = ['name', 'color_display', 'song_count']
-    search_fields = ['name', 'description']
-    readonly_fields = ['song_count_display']
-    
-    def color_display(self, obj):
-        return format_html(
-            '<span style="display: inline-block; width: 20px; height: 20px; background-color: {}; border-radius: 3px;"></span> {}',
-            obj.color, obj.color
-        )
-    color_display.short_description = 'Color'
-    
-    def song_count(self, obj):
-        return obj.songs.count()
-    song_count.short_description = 'Songs'
-    
-    def song_count_display(self, obj):
-        return obj.songs.count()
-    song_count_display.short_description = 'Number of Songs'
 
 @admin.register(SongPlay)
 class SongPlayAdmin(admin.ModelAdmin):
