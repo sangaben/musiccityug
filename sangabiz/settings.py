@@ -225,7 +225,7 @@ LOGGING = {
     },
 }
 # --------------------------------------------------
-# Jazzmin Configuration (Fixed for Single Search Bar)
+# Jazzmin Configuration (App-Specific Search)
 # --------------------------------------------------
 SITE_URL = "https://musiccityug.com"
 
@@ -254,9 +254,8 @@ JAZZMIN_SETTINGS = {
         "analytics", "library", "news", "help", "auth"
     ],
     
-    # ========== SEARCH CONFIGURATION ==========
-    # IMPORTANT: This controls the global search in navbar
-    "search_model": ["auth.User", "music.Song", "artists.Artist"],
+    # ========== REMOVE GLOBAL SEARCH ==========
+    "search_model": [],  # Empty list removes the global search bar
     
     # ========== TOP MENU ==========
     "topmenu_links": [
@@ -279,19 +278,28 @@ JAZZMIN_SETTINGS = {
         "auth.Group": "fas fa-users",
         "music": "fas fa-music",
         "music.Song": "fas fa-file-audio",
+        "music.Genre": "fas fa-tag",
+        "music.SongPlay": "fas fa-play-circle",
+        "music.SongDownload": "fas fa-download",
         "artists": "fas fa-microphone-alt",
         "artists.Artist": "fas fa-user-tie",
+        "artists.Band": "fas fa-users",
         "accounts": "fas fa-user-circle",
         "accounts.UserProfile": "fas fa-id-card",
         "payments": "fas fa-credit-card",
         "payments.Transaction": "fas fa-exchange-alt",
+        "payments.Subscription": "fas fa-calendar-check",
         "analytics": "fas fa-chart-line",
         "analytics.PlayAnalytic": "fas fa-chart-bar",
+        "analytics.DownloadAnalytic": "fas fa-chart-pie",
         "library": "fas fa-book",
+        "library.Collection": "fas fa-folder",
         "help": "fas fa-question-circle",
         "help.FAQ": "fas fa-comment-dots",
+        "help.SupportTicket": "fas fa-ticket-alt",
         "news": "fas fa-newspaper",
         "news.Article": "fas fa-file-alt",
+        "news.Category": "fas fa-folder",
     },
     
     # ========== CUSTOM ACTIONS ==========
@@ -303,36 +311,43 @@ JAZZMIN_SETTINGS = {
                 "icon": "fas fa-upload",
                 "permissions": ["music.add_song"]
             },
+            {
+                "name": "Quick Stats",
+                "url": "/admin/music/quick-stats/",
+                "icon": "fas fa-chart-pie",
+                "permissions": ["music.view_song"]
+            }
+        ],
+        "artists": [
+            {
+                "name": "Featured Artists",
+                "url": "/admin/artists/featured/",
+                "icon": "fas fa-star",
+                "permissions": ["artists.view_artist"]
+            },
+            {
+                "name": "Artist Analytics",
+                "url": "/admin/artists/analytics/",
+                "icon": "fas fa-chart-line",
+                "permissions": ["artists.view_artist"]
+            }
         ],
     },
     
     # ========== UI SETTINGS ==========
-    "show_ui_builder": False,  # Set to False to avoid extra UI elements
+    "show_ui_builder": False,
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
     },
-    "related_modal_active": False,  # Disable modal popups that might cause issues
+    "related_modal_active": False,
     
     # ========== DASHBOARD ==========
     "show_dashboard_stats": True,
-    "dashboard_widgets": [
-        {
-            "type": "app_list",
-            "title": "Quick Access",
-            "icon": "fas fa-rocket",
-            "order": "DESC",
-            "models": ["music.song", "artists.artist", "payments.transaction"]
-        },
-    ],
     
-    # ========== LANGUAGE ==========
-    "language_chooser": False,
-    
-    # ========== IMPORTANT FIXES ==========
-    # Disable Django's default changelist search in favor of Jazzmin's navbar search
-    "show_changelist_search": False,  # This removes duplicate search bars
+    # ========== IMPORTANT: DISABLE GLOBAL SEARCH UI ==========
+    "show_changelist_search": False,
     
     # Header specific fixes
     "navbar_fixed": True,
@@ -343,10 +358,9 @@ JAZZMIN_SETTINGS = {
     "sidebar_nav_small_text": False,
     "sidebar_nav_child_indent": False,
     
-    # Remove problematic features
-    "actions_sticky_top": False,
-    "custom_css": "admin/css/jazzmin_fixes.css",  # We'll create this
-    "custom_js": None,
+    # Custom CSS/JS for app-specific search
+    "custom_css": "admin/css/app_search.css",
+    "custom_js": "admin/js/app_search.js",
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -357,7 +371,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar": "sidebar-dark-primary",
     "sidebar_fixed": True,
     "footer_fixed": False,
-    "actions_sticky_top": False,  # Important: prevents duplicate search bars
+    "actions_sticky_top": False,
 }
 # --------------------------------------------------
 # Default Primary Key
