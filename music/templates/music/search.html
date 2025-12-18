@@ -84,11 +84,7 @@
                     <button class="mdundo-download-btn" onclick="downloadSong({{ song.id }}, this)" title="Download">
                         <i class="fas fa-download"></i>
                     </button>
-                    {% if user.is_authenticated %}
-                    <button class="mdundo-like-btn" onclick="likeSong({{ song.id }}, this)" title="Like">
-                        <i class="far fa-heart"></i>
-                    </button>
-                    {% endif %}
+                   
                 </div>
             </div>
             {% empty %}
