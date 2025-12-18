@@ -140,70 +140,91 @@
 </section>
 
 <!-- Main Content -->
+<!-- Main Content -->
 <main class="main-content">
-
-
-        <!-- New Releases -->
-        <section class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">New Releases</h2>
-                <a href="{% url 'discover' %}" class="see-all">Show all</a>
-            </div>
-            <div class="cards-scroll-container">
-                <div class="cards-scroll">
-                    {% for song in featured_songs|slice:":15" %}
-                    <div class="music-card" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})">
-                        <div class="card-image">
-                            {% if song.cover_image %}
-                            <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
-                            {% else %}
-                            <div class="default-cover">
-                                <i class="fas fa-music"></i>
-                            </div>
-                            {% endif %}
-                            <div class="card-actions">
-                                <button class="play-btn-card" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <button class="download-btn-card" onclick="event.stopPropagation(); downloadSong({{ song.id }})">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
+    <!-- New Releases Section - SIMPLIFIED VERSION -->
+    <section class="content-section">
+        <div class="section-header">
+            <h2 class="section-title">New Releases</h2>
+            <a href="{% url 'discover' %}" class="see-all">Show all</a>
+        </div>
+        <div class="cards-scroll-container">
+            <div class="cards-scroll">
+                {% for song in featured_songs|slice:":15" %}
+                <div class="music-card" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})">
+                    <div class="card-image">
+                        {% if song.cover_image %}
+                        <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
+                        {% else %}
+                        <div class="default-cover">
+                            <i class="fas fa-music"></i>
                         </div>
-                        <div class="card-content">
-                            <h3 class="card-title">{{ song.title }}</h3>
-                            <p class="card-subtitle">{{ song.artist.name }}</p>
-                            <!-- Song Statistics -->
-                            <div class="song-stats">
-                                <div class="stat-item" title="Plays">
-                                    <i class="fas fa-play"></i>
-                                    <span class="plays">{{ song.plays|intcomma }}</span>
-                                </div>
-                                <div class="stat-item" title="Downloads">
-                                    <i class="fas fa-download"></i>
-                                    <span class="downloads">{{ song.downloads|intcomma }}</span>
-                                </div>
+                        {% endif %}
+                        <div class="card-actions">
+                            <button class="play-btn-card" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="download-btn-card" onclick="event.stopPropagation(); downloadSong({{ song.id }})">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">{{ song.title }}</h3>
+                        <!-- SIMPLIFIED: Display artists -->
+                        <div class="card-artists">
+                            <!-- Primary Artist -->
+                            <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                                {{ song.artist.name }}
+                            </a>
+                            
+                            <!-- Featured Artists -->
+                            {% with featured_artists=song.featured_artists.all %}
+                                {% if featured_artists %}
+                                    <span class="ft-text">ft.</span>
+                                    {% for artist in featured_artists %}
+                                        <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                            {{ artist.name }}
+                                        </a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                    <span class="featured-indicator" title="{{ featured_artists|length }} featured artist{{ featured_artists|length|pluralize }}">
+                                        <i class="fas fa-user-friends"></i>
+                                        +{{ featured_artists|length }}
+                                    </span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <!-- Song Statistics -->
+                        <div class="song-stats">
+                            <div class="stat-item" title="Plays">
+                                <i class="fas fa-play"></i>
+                                <span class="plays">{{ song.plays|intcomma }}</span>
+                            </div>
+                            <div class="stat-item" title="Downloads">
+                                <i class="fas fa-download"></i>
+                                <span class="downloads">{{ song.downloads|intcomma }}</span>
                             </div>
                         </div>
                     </div>
-                    {% empty %}
-                    <div class="empty-state">
-                        <i class="fas fa-music"></i>
-                        <p>No songs available</p>
-                    </div>
-                    {% endfor %}
                 </div>
-                <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-music"></i>
+                    <p>No songs available</p>
+                </div>
+                {% endfor %}
             </div>
-        </section>
-        
+            <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+    
     <div class="container">
-        <!-- Top 10 Trending Songs -->
+        <!-- Top 10 Trending Songs - SIMPLIFIED VERSION -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">Top 10 Trending</h2>
@@ -234,7 +255,25 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <p class="chart-song-artist">{{ song.artist.name }}</p>
+                                <!-- SIMPLIFIED: Display artists -->
+                                <div class="chart-song-artist">
+                                    <!-- Primary Artist -->
+                                    <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                                        {{ song.artist.name }}
+                                    </a>
+                                    
+                                    <!-- Featured Artists -->
+                                    {% with featured_artists=song.featured_artists.all %}
+                                        {% if featured_artists %}
+                                            <span class="ft-text">ft.</span>
+                                            {% for artist in featured_artists %}
+                                                <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                                    {{ artist.name }}
+                                                </a>{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
                                 <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
@@ -289,7 +328,25 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <p class="chart-song-artist">{{ song.artist.name }}</p>
+                                <!-- SIMPLIFIED: Display artists -->
+                                <div class="chart-song-artist">
+                                    <!-- Primary Artist -->
+                                    <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                                        {{ song.artist.name }}
+                                    </a>
+                                    
+                                    <!-- Featured Artists -->
+                                    {% with featured_artists=song.featured_artists.all %}
+                                        {% if featured_artists %}
+                                            <span class="ft-text">ft.</span>
+                                            {% for artist in featured_artists %}
+                                                <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                                    {{ artist.name }}
+                                                </a>{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
                                 <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
@@ -321,7 +378,6 @@
                 </div>
             </div>
         </section>
-
 
         <!-- Trending News -->
         <section class="content-section">
@@ -1008,6 +1064,103 @@ body {
 .music-card.playing {
     background: rgba(29, 185, 84, 0.1);
     border: 1px solid var(--spotify-green);
+}
+
+
+/* ===== ARTIST LINKS IN SONGS ===== */
+
+/* Primary artist - White */
+.artist-link.primary-artist {
+    color: orange;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.artist-link.primary-artist:hover {
+    color: var(--spotify-green);
+    text-decoration: underline;
+}
+
+/* Featured artists - Orange */
+.artist-link.featured-artist {
+    color: green;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.artist-link.featured-artist:hover {
+    color: #ffdf4d; /* Lighter orange/yellow on hover */
+    text-decoration: underline;
+}
+
+/* "ft." text styling */
+.ft-text {
+    color: var(--spotify-light-gray);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+/* Featured indicator (icon + number) */
+.featured-indicator {
+    margin-left: 6px;
+    color: var(--spotify-light-gray);
+    font-size: 0.75rem;
+    background: rgba(255, 209, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.featured-indicator i {
+    font-size: 0.7rem;
+}
+
+/* Chart song artist links */
+.chart-song-artist .artist-link.primary-artist {
+    font-size: 0.75rem;
+}
+
+.chart-song-artist .artist-link.featured-artist {
+    font-size: 0.75rem;
+}
+
+/* Compact artist display for charts */
+.chart-song-artist .ft-text {
+    font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.8rem;
+    }
+    
+    .ft-text {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.75rem;
+    }
+    
+    .ft-text {
+        font-size: 0.75rem;
+    }
+    
+    .featured-indicator {
+        display: none; /* Hide on very small screens */
+    }
 }
 
 .card-image {
