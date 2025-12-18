@@ -1,20 +1,68 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MusicCity UG | Uganda's Music Hub{% endblock %}</title>
+    
+    <!-- Basic Meta Tags -->
+    <meta name="description" content="{% block description %}Uganda's Premier Music Platform for Music, News, and Entertainment{% endblock %}">
+    <meta name="keywords" content="music, uganda, african music, artists, songs, entertainment, musiccity">
+    
+    <!-- Open Graph Meta Tags (for Facebook, LinkedIn, WhatsApp, etc.) -->
+    <meta property="og:site_name" content="MusicCity UG">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    
+    <!-- Default OG tags that can be overridden in child templates -->
+    {% block og_tags %}
+    <meta property="og:title" content="MusicCity UG | Uganda's Music Hub">
+    <meta property="og:description" content="Uganda's Premier Music Platform for Music, News, and Entertainment">
+    {% if request.get_host %}
+    <meta property="og:image" content="https://{{ request.get_host }}{% static 'images/logo.jpeg' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    {% else %}
+    <meta property="og:image" content="{% static 'images/logo.jpeg' %}">
+    <meta property="og:url" content="https://musiccityug.com{{ request.path }}">
+    {% endif %}
+    {% endblock %}
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@MusicCityUG">
+    <meta name="twitter:creator" content="@MusicCityUG">
+    
+    {% block twitter_tags %}
+    <meta name="twitter:title" content="MusicCity UG | Uganda's Music Hub">
+    <meta name="twitter:description" content="Uganda's Premier Music Platform for Music, News, and Entertainment">
+    {% if request.get_host %}
+    <meta name="twitter:image" content="https://{{ request.get_host }}{% static 'images/logo.jpeg' %}">
+    {% else %}
+    <meta name="twitter:image" content="{% static 'images/logo.jpeg' %}">
+    {% endif %}
+    {% endblock %}
+    
+    <!-- Additional Meta Tags -->
+    <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID">  <!-- Optional -->
+    <meta name="theme-color" content="#FF6B00">
+    
+    <!-- Icons -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/logo.jpeg' %}">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Your existing body content remains the same -->
     <div class="app-container">
         {% include 'header.html' %}
         
-        
-
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav-menu" id="mobile-nav-menu">
             <div class="mobile-nav-header">
@@ -315,4 +363,4 @@
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
-</html>
+</html>s
