@@ -236,6 +236,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "MusicCityUG",
     "site_logo": "images/logo.jpeg",
     "login_logo": "images/llogo.jpeg",
+    "site_icon": "images/favicon.ico",
     "login_logo_dark": "images/logo.jpeg",
     "welcome_sign": "Welcome to MusicCityUG Administration",
     "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
