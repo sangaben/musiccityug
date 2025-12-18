@@ -226,24 +226,77 @@ LOGGING = {
 }
 
 # --------------------------------------------------
-# Jazzmin Configuration
+# Jazzmin Configuration (Enhanced)
 # --------------------------------------------------
 SITE_URL = "https://musiccityug.com"
 
 JAZZMIN_SETTINGS = {
+    # Branding
     "site_title": "MusicCityUG Admin",
     "site_header": "MusicCityUG",
     "site_brand": "MusicCityUG",
-    "site_url": SITE_URL,   # 👈 enables “View site”
-    "welcome_sign": "Welcome to MusicCityUG Admin Panel",
-    "theme": "darkly",
-    "show_sidebar": True,
-}
+    "site_logo": "images/logo.png",           # optional
+    "login_logo": "images/logo.png",          # optional
+    "login_logo_dark": "images/logo_dark.png",# optional
+    "site_icon": "images/favicon.ico",
 
-JAZZMIN_UI_TWEAKS = {
-    "navbar_fixed": True,
-    "sidebar_fixed": True,
-    "theme": "darkly",
+    # Welcome text
+    "welcome_sign": "Welcome to MusicCityUG Administration",
+    "copyright": "MusicCityUG © 2025",
+
+    # Navigation
+    "site_url": SITE_URL,
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    # Search
+    "search_model": [
+        "auth.User",
+        "artists.Artist",
+        "music.Song",
+        "news.News",
+    ],
+
+    # User menu links
+    "usermenu_links": [
+        {"name": "Visit Website", "url": SITE_URL, "new_window": True},
+        {"model": "auth.user"},
+    ],
+
+    # Apps & models ordering
+    "order_with_respect_to": [
+        "accounts",
+        "artists",
+        "music",
+        "library",
+        "news",
+        "payments",
+        "analytics",
+    ],
+
+    # Icons (FontAwesome)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+
+        "artists.Artist": "fas fa-microphone",
+        "music.Song": "fas fa-music",
+        "library": "fas fa-book",
+        "news.News": "fas fa-newspaper",
+        "payments": "fas fa-credit-card",
+        "analytics": "fas fa-chart-line",
+    },
+
+    # Hide models if needed
+    "hide_models": [],
+
+    # Default permissions
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    # UI tweaks
+    "show_ui_builder": False,
 }
 
 # --------------------------------------------------
