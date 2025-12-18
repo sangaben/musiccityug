@@ -142,7 +142,7 @@
                                     <span class="song-album">{{ song.album.name }}</span>
                                 {% else %}
                                     <span class="album-separator">•</span>
-                                    <span class="song-album">Single</span>
+                
                                 {% endif %}
                             </div>
                         </div>
@@ -183,11 +183,7 @@
                             <i class="fas fa-share-alt"></i>
                         </button>
                         
-                        {% if user.is_authenticated %}
-                        <button class="like-btn {% if song.is_liked %}liked{% endif %}" onclick="likeSong({{ song.id }}, this)">
-                            <i class="{% if song.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
-                        </button>
-                        {% endif %}
+                       
                     </div>
                 </div>
                 {% empty %}
