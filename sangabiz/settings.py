@@ -235,7 +235,7 @@ JAZZMIN_SETTINGS = {
     "site_header": "MusicCityUG",
     "site_brand": "MusicCityUG",
     "site_logo": "images/logo.jpeg",
-    "login_logo": "images/logo.jpeg",
+    "login_logo": "images/llogo.jpeg",
     "login_logo_dark": "images/logo.jpeg",
     "site_logo_classes": "img-circle",
     "site_icon": "admin/img/favicon.ico",
