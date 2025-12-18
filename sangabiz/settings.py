@@ -225,7 +225,7 @@ LOGGING = {
     },
 }
 # --------------------------------------------------
-# Jazzmin Configuration (Spotify-Inspired MusicCityUG Admin)
+# Jazzmin Configuration (Fixed for Single Search Bar)
 # --------------------------------------------------
 SITE_URL = "https://musiccityug.com"
 
@@ -241,10 +241,9 @@ JAZZMIN_SETTINGS = {
     "site_icon": "admin/img/favicon.ico",
     "welcome_sign": "Welcome to MusicCityUG Administration",
     "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
-    "search_model": ["auth.User", "music.Song", "artists.Artist", "news.News", "payments.Transaction"],
     
     # ========== THEME & UI ==========
-    "theme": "darkly",  # Matches Spotify dark theme
+    "theme": "darkly",
     "dark_mode_theme": "darkly",
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -255,72 +254,44 @@ JAZZMIN_SETTINGS = {
         "analytics", "library", "news", "help", "auth"
     ],
     
-    # ========== CUSTOM LINKS ==========
+    # ========== SEARCH CONFIGURATION ==========
+    # IMPORTANT: This controls the global search in navbar
+    "search_model": ["auth.User", "music.Song", "artists.Artist"],
+    
+    # ========== TOP MENU ==========
     "topmenu_links": [
         {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"], "icon": "fas fa-tachometer-alt"},
         {"name": "Visit Website", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
-        {"name": "Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"], "icon": "fas fa-chart-line"},
-        {"name": "Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"], "icon": "fas fa-credit-card"},
-        {"app": "music", "icon": "fas fa-music"},
-        {"app": "artists", "icon": "fas fa-microphone"},
         {"model": "auth.user", "icon": "fas fa-users"},
     ],
     
+    # ========== USER MENU ==========
     "usermenu_links": [
         {"name": "MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
         {"name": "Support", "url": "/admin/help/supportticket/", "icon": "fas fa-question-circle"},
-        {"name": "Settings", "url": "/admin/auth/user/", "icon": "fas fa-cog"},
         {"model": "auth.user", "icon": "fas fa-user"},
     ],
     
-    # ========== ICONS (Music-Themed) ==========
+    # ========== ICONS ==========
     "icons": {
-        # Auth
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-        
-        # Music App
         "music": "fas fa-music",
         "music.Song": "fas fa-file-audio",
-        "music.Album": "fas fa-compact-disc",
-        "music.Genre": "fas fa-tag",
-        "music.Playlist": "fas fa-list-music",
-        "music.SongPlay": "fas fa-play-circle",
-        "music.SongDownload": "fas fa-download",
-        
-        # Artists App
         "artists": "fas fa-microphone-alt",
         "artists.Artist": "fas fa-user-tie",
-        "artists.Band": "fas fa-users",
-        
-        # Accounts
         "accounts": "fas fa-user-circle",
         "accounts.UserProfile": "fas fa-id-card",
-        
-        # Payments
         "payments": "fas fa-credit-card",
         "payments.Transaction": "fas fa-exchange-alt",
-        "payments.Subscription": "fas fa-calendar-check",
-        
-        # Analytics
         "analytics": "fas fa-chart-line",
         "analytics.PlayAnalytic": "fas fa-chart-bar",
-        "analytics.DownloadAnalytic": "fas fa-chart-pie",
-        
-        # Library
         "library": "fas fa-book",
-        "library.Collection": "fas fa-folder",
-        
-        # Help
         "help": "fas fa-question-circle",
         "help.FAQ": "fas fa-comment-dots",
-        "help.SupportTicket": "fas fa-ticket-alt",
-        
-        # News
         "news": "fas fa-newspaper",
         "news.Article": "fas fa-file-alt",
-        "news.Category": "fas fa-folder",
     },
     
     # ========== CUSTOM ACTIONS ==========
@@ -332,49 +303,19 @@ JAZZMIN_SETTINGS = {
                 "icon": "fas fa-upload",
                 "permissions": ["music.add_song"]
             },
-            {
-                "name": "Song Analytics",
-                "url": "/admin/music/song/analytics/",
-                "icon": "fas fa-chart-line",
-                "permissions": ["analytics.view_playanalytic"]
-            },
-            {
-                "name": "Quick Add Song",
-                "url": "/admin/music/song/add/",
-                "icon": "fas fa-plus-circle",
-                "permissions": ["music.add_song"]
-            }
-        ],
-        "artists": [
-            {
-                "name": "Featured Artists",
-                "url": "/admin/artists/artist/?featured=true",
-                "icon": "fas fa-star",
-                "permissions": ["artists.view_artist"]
-            },
-            {
-                "name": "Add New Artist",
-                "url": "/admin/artists/artist/add/",
-                "icon": "fas fa-user-plus",
-                "permissions": ["artists.add_artist"]
-            }
         ],
     },
     
     # ========== UI SETTINGS ==========
-    "show_ui_builder": True,
+    "show_ui_builder": False,  # Set to False to avoid extra UI elements
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
-        "music.song": "horizontal_tabs",
-        "artists.artist": "collapsible",
     },
-    "related_modal_active": True,
-    "custom_css": "admin/css/custom_admin.css",
-    "custom_js": None,  # Remove custom JS for now to test
+    "related_modal_active": False,  # Disable modal popups that might cause issues
     
-    # ========== DASHBOARD WIDGETS ==========
+    # ========== DASHBOARD ==========
     "show_dashboard_stats": True,
     "dashboard_widgets": [
         {
@@ -382,106 +323,41 @@ JAZZMIN_SETTINGS = {
             "title": "Quick Access",
             "icon": "fas fa-rocket",
             "order": "DESC",
-            "models": ["music.song", "artists.artist", "payments.transaction", "analytics.playanalytic"]
-        },
-        {
-            "type": "list",
-            "title": "Recent Songs",
-            "icon": "fas fa-music",
-            "url_name": "admin:music_song_changelist",
-            "limit": 5,
-            "order_by": "-upload_date",
-            "columns": ["title", "artist", "upload_date"]
-        },
-        {
-            "type": "list",
-            "title": "Top Artists",
-            "icon": "fas fa-microphone",
-            "url_name": "admin:artists_artist_changelist",
-            "limit": 5,
-            "order_by": "-total_plays",
-            "columns": ["name", "total_plays", "song_count"]
+            "models": ["music.song", "artists.artist", "payments.transaction"]
         },
     ],
     
     # ========== LANGUAGE ==========
     "language_chooser": False,
     
-    # ========== ADD THESE FIXES ==========
-    "show_sidebar": True,
-    "sidebar_collapsed": False,
-    "sidebar_fixed": True,
-    "sidebar_nav_small_text": False,
-    "sidebar_nav_flat_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_child_indent": False,
+    # ========== IMPORTANT FIXES ==========
+    # Disable Django's default changelist search in favor of Jazzmin's navbar search
+    "show_changelist_search": False,  # This removes duplicate search bars
     
     # Header specific fixes
     "navbar_fixed": True,
     "navbar_small_text": False,
-    "navbar_brand_color": None,
-    "navbar_brand_text": "",
-    "navbar_brand_icon": None,
     
-    # Logo display
-    "logo_classes": None,
-    "logo_image_classes": None,
+    # Sidebar fixes
+    "sidebar_fixed": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_nav_child_indent": False,
     
-    # Text display fixes
-    "body_small_text": False,
-    "brand_small_text": False,
-    "accent": "primary",
-    "actions_sticky_top": True,
+    # Remove problematic features
+    "actions_sticky_top": False,
+    "custom_css": "admin/css/jazzmin_fixes.css",  # We'll create this
+    "custom_js": None,
 }
 
-# Enhanced UI Tweaks for Spotify Theme - SIMPLIFIED
 JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
     "dark_mode_theme": "darkly",
-    
-    # Navbar - FIXED FOR VISIBILITY
     "navbar": "navbar-dark",
     "navbar_fixed": True,
-    "navbar_small_text": False,
-    "navbar_brand_text": "MusicCityUG",
-    
-    # Sidebar
     "sidebar": "sidebar-dark-primary",
     "sidebar_fixed": True,
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    
-    # Footer
     "footer_fixed": False,
-    
-    # Cards
-    "card": "card-outline",
-    "card_border": True,
-    "card_header_border": True,
-    
-    # Buttons - SIMPLIFIED FOR BETTER VISIBILITY
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    },
-    
-    # Brand Colors - HIGH CONTRAST
-    "brand_colors": {
-        "primary": "#1DB954",  # Spotify Green
-        "secondary": "#6c757d",
-        "success": "#28a745",
-        "info": "#17a2b8",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-    },
+    "actions_sticky_top": False,  # Important: prevents duplicate search bars
 }
 # --------------------------------------------------
 # Default Primary Key
