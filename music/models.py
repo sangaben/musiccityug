@@ -1,8 +1,9 @@
-# music/models.py - UPDATED VERSION
+# music/models.py - FIXED VERSION
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.utils import timezone
+from datetime import timedelta
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -24,23 +25,7 @@ class Song(models.Model):
     ]
     
     title = models.CharField(max_length=200)
-    
-    # FIXED: Add manual artist name field
-    artist_name_manual = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        help_text="Enter artist name manually (optional)"
-    )
-    
-    # Existing artist foreign key (can be null/blank now)
-    artist = models.ForeignKey(
-        'artists.Artist', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='songs'
-    )
+    artist = models.ForeignKey('artists.Artist', on_delete=models.CASCADE, related_name='songs')
     
     featured_artists = models.ManyToManyField(
         'artists.Artist',
@@ -88,28 +73,17 @@ class Song(models.Model):
         app_label = 'music'
     
     def __str__(self):
-        # Use the artist name (either manual or from foreign key)
-        artist_display = self.get_artist_display()
+        # FIXED: Simplified to prevent recursion
+        try:
+            artist_name = str(self.artist)
+        except Exception:
+            artist_name = "Unknown Artist"
+            
         featured_count = self.featured_artists.count()
         
         if featured_count > 0:
-            return f"{self.title} - {artist_display} ft. {featured_count} artist(s)"
-        return f"{self.title} - {artist_display}"
-    
-    @property
-    def get_artist_display(self):
-        """Get artist name display - manual takes precedence"""
-        if self.artist_name_manual:
-            return self.artist_name_manual
-        elif self.artist:
-            return str(self.artist)
-        else:
-            return "Unknown Artist"
-    
-    @property
-    def artist_name(self):
-        """Property for backward compatibility"""
-        return self.get_artist_display()
+            return f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
+        return f"{self.title} - {artist_name}"
     
     # Property to get total duration in seconds
     @property
@@ -126,9 +100,7 @@ class Song(models.Model):
     @property
     def all_artists(self):
         """Return list of all artists on the track."""
-        artists = []
-        if self.artist:
-            artists.append(self.artist)
+        artists = [self.artist]
         artists.extend(list(self.featured_artists.all()))
         return artists
     
@@ -161,7 +133,30 @@ class Song(models.Model):
         if user.is_authenticated and hasattr(user, 'userprofile'):
             return user.userprofile.is_premium_active
         return False
+    
 
+
+    def __str__(self):
+        # Use caching to prevent recursion
+        if hasattr(self, '_str_cache'):
+            return self._str_cache
+            
+        try:
+            artist_name = self.artist.name if self.artist else "Unknown Artist"
+        except Exception:
+            artist_name = "Unknown Artist"
+            
+        featured_count = self.featured_artists.count()
+        
+        if featured_count > 0:
+            result = f"{self.title} - {artist_name} ft. {featured_count} artist(s)"
+        else:
+            result = f"{self.title} - {artist_name}"
+            
+        # Cache the result
+        self._str_cache = result
+        return result
+    
 class SongPlay(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='play_history')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='song_plays')
@@ -180,6 +175,7 @@ class SongPlay(models.Model):
         default='standard'
     )
     
+    # ADD THESE FIELDS
     is_anonymous = models.BooleanField(default=False, help_text="True if play is from anonymous user")
     
     class Meta:
@@ -217,7 +213,10 @@ class SongDownload(models.Model):
             models.Index(fields=['-downloaded_at']),
             models.Index(fields=['song', 'downloaded_at']),
         ]
-        app_label = 'music'
+        app_label = 'music'  # Add this line
     
     def __str__(self):
         return f"{self.song.title} downloaded by {self.user.username if self.user else 'Anonymous'}"
+
+# Remove the duplicate Genre definition at the bottom
+# The Genre class is already defined at the top
