@@ -226,77 +226,233 @@ LOGGING = {
 }
 
 # --------------------------------------------------
-# Jazzmin Configuration (Enhanced)
+# Jazzmin Configuration (MusicCityUG Enhanced)
 # --------------------------------------------------
 SITE_URL = "https://musiccityug.com"
 
 JAZZMIN_SETTINGS = {
-    # Branding
-    "site_title": "MusicCityUG Admin",
-    "site_header": "MusicCityUG",
-    "site_brand": "MusicCityUG",
-    "site_logo": "images/logo.png",           # optional
-    "login_logo": "images/logo.png",          # optional
-    "login_logo_dark": "images/logo_dark.png",# optional
-    "site_icon": "images/favicon.ico",
-
-    # Welcome text
-    "welcome_sign": "Welcome to MusicCityUG Administration",
-    "copyright": "MusicCityUG © 2025",
-
-    # Navigation
-    "site_url": SITE_URL,
+    # ========== BRANDING & THEME ==========
+    "site_title": "🎵 MusicCityUG Admin",
+    "site_header": "🎵 MusicCityUG",
+    "site_brand": "🎵 MusicCityUG",
+    "site_logo": None,  # Add your logo to static/admin/img/logo.png
+    "login_logo": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,  # Add favicon to static/admin/img/favicon.ico
+    "welcome_sign": "🎶 Welcome to MusicCityUG Administration",
+    "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
+    "search_model": ["auth.User", "music.Song", "artists.Artist", "news.News"],
+    
+    # ========== THEME & UI ==========
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
     "show_sidebar": True,
     "navigation_expanded": True,
-
-    # Search
-    "search_model": [
-        "auth.User",
-        "artists.Artist",
-        "music.Song",
-        "news.News",
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": [
+        "music", "artists", "accounts", "payments", 
+        "analytics", "library", "news", "help", "auth"
     ],
-
-    # User menu links
-    "usermenu_links": [
-        {"name": "Visit Website", "url": SITE_URL, "new_window": True},
+    
+    # ========== CUSTOM LINKS ==========
+    "topmenu_links": [
+        {"name": "🎵 Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "🌐 View Site", "url": SITE_URL, "new_window": True},
+        {"name": "📊 Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"]},
+        {"name": "💳 Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"]},
+        {"app": "music"},
+        {"app": "artists"},
         {"model": "auth.user"},
     ],
-
-    # Apps & models ordering
-    "order_with_respect_to": [
-        "accounts",
-        "artists",
-        "music",
-        "library",
-        "news",
-        "payments",
-        "analytics",
+    
+    "usermenu_links": [
+        {"name": "🎵 MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
+        {"name": "📞 Support", "url": "/admin/help/", "icon": "fas fa-question-circle"},
+        {"model": "auth.user", "icon": "fas fa-user"},
     ],
-
-    # Icons (FontAwesome)
+    
+    # ========== ICONS (Music-Themed) ==========
     "icons": {
+        # Auth
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
-
-        "artists.Artist": "fas fa-microphone",
-        "music.Song": "fas fa-music",
-        "library": "fas fa-book",
-        "news.News": "fas fa-newspaper",
+        
+        # Music App
+        "music": "fas fa-music",
+        "music.Song": "fas fa-file-audio",
+        "music.Album": "fas fa-compact-disc",
+        "music.Genre": "fas fa-tag",
+        "music.Playlist": "fas fa-list-music",
+        
+        # Artists App
+        "artists": "fas fa-user-tie",
+        "artists.Artist": "fas fa-microphone-alt",
+        "artists.Band": "fas fa-users",
+        
+        # Accounts
+        "accounts": "fas fa-user-circle",
+        "accounts.UserProfile": "fas fa-id-card",
+        
+        # Payments
         "payments": "fas fa-credit-card",
+        "payments.Transaction": "fas fa-exchange-alt",
+        "payments.Subscription": "fas fa-calendar-check",
+        
+        # Analytics
         "analytics": "fas fa-chart-line",
+        "analytics.PlayAnalytic": "fas fa-chart-bar",
+        "analytics.DownloadAnalytic": "fas fa-chart-pie",
+        
+        # Library
+        "library": "fas fa-book",
+        "library.Collection": "fas fa-folder",
+        
+        # Help
+        "help": "fas fa-question-circle",
+        "help.FAQ": "fas fa-comment-dots",
+        "help.SupportTicket": "fas fa-ticket-alt",
+        
+        # News
+        "news": "fas fa-newspaper",
+        "news.Article": "fas fa-file-alt",
+        "news.Category": "fas fa-folder",
     },
+    
+    # ========== CUSTOM ACTIONS ==========
+    "custom_links": {
+        "music": [{
+            "name": "📤 Bulk Upload",
+            "url": "bulk_upload",
+            "icon": "fas fa-upload",
+            "permissions": ["music.add_song"]
+        }, {
+            "name": "📊 Song Analytics",
+            "url": "song_analytics",
+            "icon": "fas fa-chart-line",
+            "permissions": ["analytics.view_playanalytic"]
+        }],
+        "artists": [{
+            "name": "👥 Featured Artists",
+            "url": "featured_artists",
+            "icon": "fas fa-star",
+            "permissions": ["artists.view_artist"]
+        }],
+    },
+    
+    # ========== UI SETTINGS ==========
+    "show_ui_builder": True,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "vertical_tabs",
+        "music.song": "horizontal_tabs",
+    },
+    "related_modal_active": True,
+    "custom_css": "admin/css/custom_admin.css",
+    "custom_js": "admin/js/custom_admin.js",
+    
+    # ========== LANGUAGE ==========
+    "language_chooser": False,
+    
+    # ========== DASHBOARD WIDGETS ==========
+    "show_dashboard_stats": True,
+    "dashboard_widgets": [
+        {
+            "type": "list",
+            "title": "🎵 Recent Songs",
+            "url_name": "admin:music_song_changelist",
+            "limit": 5,
+            "order_by": "-upload_date",
+        },
+        {
+            "type": "chart",
+            "title": "📈 Plays This Week",
+            "url_name": "play_chart_data",
+            "interval": "week",
+        },
+        {
+            "type": "progress",
+            "title": "📊 Approval Status",
+            "url_name": "approval_stats",
+            "color": "success",
+        },
+        {
+            "type": "list",
+            "title": "🌟 Top Artists",
+            "url_name": "admin:artists_artist_changelist",
+            "limit": 5,
+            "order_by": "-total_plays",
+        },
+    ],
+}
 
-    # Hide models if needed
-    "hide_models": [],
-
-    # Default permissions
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-
-    # UI tweaks
-    "show_ui_builder": False,
+# Enhanced UI Tweaks for Music Theme
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    
+    # Navbar
+    "navbar": "navbar-dark navbar-primary",
+    "navbar_fixed": True,
+    "navbar_small_text": False,
+    "navbar_brand_text": "🎵",
+    
+    # Sidebar
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_fixed": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    
+    # Footer
+    "footer_fixed": False,
+    
+    # Cards
+    "card": "card-outline card-primary",
+    "card_border": True,
+    "card_header_border": True,
+    
+    # Buttons
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success"
+    },
+    
+    # Actions
+    "actions_sticky_top": True,
+    
+    # Brand Colors (Music Theme)
+    "brand_colors": {
+        "primary": "#1DB954",  # Spotify Green
+        "secondary": "#535353",
+        "success": "#1DB954",
+        "info": "#36b9cc",
+        "warning": "#f6c23e",
+        "danger": "#e74a3b",
+        "indigo": "#6610f2",
+        "purple": "#6f42c1",
+        "pink": "#e83e8c",
+        "red": "#e74a3b",
+        "orange": "#fd7e14",
+        "yellow": "#f6c23e",
+        "green": "#1DB954",
+        "teal": "#20c9a6",
+        "cyan": "#36b9cc",
+        "white": "#fff",
+        "gray": "#6c757d",
+        "gray-dark": "#343a40",
+        "primary-light": "#e3ebf7",
+        "secondary-light": "#f8f9fa",
+    },
 }
 
 # --------------------------------------------------
