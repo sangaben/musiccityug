@@ -1,4 +1,4 @@
-# music/admin.py - FIXED VERSION
+# music/admin.py - UPDATED VERSION
 from django.contrib import admin
 from django.utils.html import format_html
 from django import forms
@@ -55,25 +55,34 @@ class SongAdmin(admin.ModelAdmin):
     add_form_template = 'admin/music/song/change_form.html'
     
     list_display = [
-        'title', 'artist_safe_display', 'genre', 'formatted_duration_display', 
-        'plays', 'downloads', 'is_approved', 'is_featured', 'upload_date'
+        'title', 'artist_display', 'display_artist_display', 'genre', 
+        'formatted_duration_display', 'plays', 'downloads', 
+        'is_approved', 'is_featured', 'upload_date'
     ]
     list_filter = [
         'is_approved', 'is_featured', 'is_premium_only', 'genre', 
         'upload_date', 'audio_quality'
     ]
-    search_fields = ['title', 'artist__name', 'genre__name', 'lyrics']
-    readonly_fields = ['plays', 'downloads', 'upload_date', 'popularity_score_display', 'all_artists_safe_display']
+    search_fields = [
+        'title', 'artist__name', 'display_artist_name', 
+        'genre__name', 'lyrics'
+    ]
+    readonly_fields = [
+        'plays', 'downloads', 'upload_date', 
+        'popularity_score_display', 'all_artists_safe_display',
+        'actual_vs_display_comparison'
+    ]
     list_editable = ['is_approved', 'is_featured']
     list_per_page = 25
     date_hierarchy = 'upload_date'
     
     filter_horizontal = ['featured_artists']
     
-    # CORRECTED fieldsets - using duration_minutes and duration_seconds
+    # UPDATED fieldsets to include display_artist_name
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'artist', 'featured_artists', 'genre', 'lyrics')
+            'fields': ('title', 'artist', 'display_artist_name', 'featured_artists', 'genre', 'lyrics'),
+            'description': 'Artist: Linked artist object. Display Artist: Optional name to show to users.'
         }),
         ('Duration', {
             'fields': ('duration_minutes', 'duration_seconds'),
@@ -90,7 +99,11 @@ class SongAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Statistics', {
-            'fields': ('plays', 'downloads', 'upload_date', 'popularity_score_display', 'all_artists_safe_display'),
+            'fields': (
+                'plays', 'downloads', 'upload_date', 
+                'popularity_score_display', 'all_artists_safe_display',
+                'actual_vs_display_comparison'
+            ),
             'classes': ('collapse',)
         }),
     )
@@ -100,7 +113,7 @@ class SongAdmin(admin.ModelAdmin):
         if not obj:  # Add form
             return (
                 ('Song Details', {
-                    'fields': ('title', 'artist', 'featured_artists', 'genre'),
+                    'fields': ('title', 'artist', 'display_artist_name', 'featured_artists', 'genre'),
                     'classes': ('wide', 'extrapretty'),
                 }),
                 ('Audio Upload', {
@@ -120,13 +133,30 @@ class SongAdmin(admin.ModelAdmin):
             )
         return super().get_fieldsets(request, obj)
     
-    def artist_safe_display(self, obj):
-        """Safe display without recursion."""
+    def artist_display(self, obj):
+        """Display the linked artist."""
         try:
             return obj.artist.name if obj.artist else "Unknown"
         except Exception:
             return "Unknown"
-    artist_safe_display.short_description = 'Artist'
+    artist_display.short_description = 'Linked Artist'
+    artist_display.admin_order_field = 'artist__name'
+    
+    def display_artist_display(self, obj):
+        """Display the display artist name with styling."""
+        try:
+            display_name = obj.get_display_artist_name()
+            if obj.display_artist_name and obj.display_artist_name != str(obj.artist):
+                # Display name is different from linked artist
+                return format_html(
+                    '<span style="color: #007bff; font-weight: bold;">{}</span>',
+                    display_name
+                )
+            return display_name
+        except Exception:
+            return "Unknown"
+    display_artist_display.short_description = 'Display Name'
+    display_artist_display.admin_order_field = 'display_artist_name'
     
     def formatted_duration_display(self, obj):
         try:
@@ -141,9 +171,16 @@ class SongAdmin(admin.ModelAdmin):
         """Safe display of all artists without recursion."""
         try:
             artists = []
-            if obj.artist:
-                artists.append(f"Primary: {obj.artist.name}")
             
+            # Primary artist
+            if obj.artist:
+                display_name = obj.get_display_artist_name()
+                if obj.display_artist_name and obj.display_artist_name != str(obj.artist):
+                    artists.append(f"Primary: {str(obj.artist)} → <strong>{display_name}</strong>")
+                else:
+                    artists.append(f"Primary: {display_name}")
+            
+            # Featured artists
             featured = obj.featured_artists.all()
             if featured:
                 featured_names = [artist.name for artist in featured]
@@ -152,7 +189,34 @@ class SongAdmin(admin.ModelAdmin):
             return format_html('<br>'.join(artists)) if artists else "-"
         except Exception:
             return "Error loading artists"
-    all_artists_safe_display.short_description = 'All Artists'
+    all_artists_safe_display.short_description = 'All Artists (with display names)'
+    
+    def actual_vs_display_comparison(self, obj):
+        """Show comparison between actual artist and display name."""
+        try:
+            actual_name = str(obj.artist) if obj.artist else "No artist linked"
+            display_name = obj.get_display_artist_name()
+            
+            if obj.display_artist_name and obj.display_artist_name != actual_name:
+                return format_html(
+                    '<div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px;">'
+                    '<strong>Actual:</strong> {}<br>'
+                    '<strong>Display:</strong> <span style="color: #007bff;">{}</span><br>'
+                    '<em style="color: #6c757d;">Display name will be shown to users</em>'
+                    '</div>',
+                    actual_name, display_name
+                )
+            else:
+                return format_html(
+                    '<div style="padding: 10px; background-color: #f8f9fa; border-radius: 5px;">'
+                    '<strong>Actual & Display:</strong> {}<br>'
+                    '<em style="color: #6c757d;">Both names are the same</em>'
+                    '</div>',
+                    actual_name
+                )
+        except Exception:
+            return "Error in comparison"
+    actual_vs_display_comparison.short_description = 'Artist Name Comparison'
     
     def popularity_score_display(self, obj):
         return obj.popularity_score
@@ -162,6 +226,11 @@ class SongAdmin(admin.ModelAdmin):
         # Auto-populate upload date for new songs
         if not obj.pk:
             obj.upload_date = timezone.now()
+        
+        # If display_artist_name is empty, set it to None
+        if obj.display_artist_name == '':
+            obj.display_artist_name = None
+            
         super().save_model(request, obj, form, change)
     
     def get_queryset(self, request):
@@ -170,6 +239,33 @@ class SongAdmin(admin.ModelAdmin):
         ).prefetch_related(
             'featured_artists'
         )
+    
+    # Custom actions for display artist name
+    actions = ['copy_artist_to_display', 'clear_display_names']
+    
+    def copy_artist_to_display(self, request, queryset):
+        """Copy linked artist name to display artist name."""
+        updated_count = 0
+        for song in queryset:
+            if song.artist and not song.display_artist_name:
+                song.display_artist_name = str(song.artist)
+                song.save()
+                updated_count += 1
+        
+        self.message_user(
+            request, 
+            f'Successfully copied artist names to display names for {updated_count} songs.'
+        )
+    copy_artist_to_display.short_description = "Copy linked artist name to display name"
+    
+    def clear_display_names(self, request, queryset):
+        """Clear display artist names (set to None)."""
+        updated_count = queryset.update(display_artist_name=None)
+        self.message_user(
+            request, 
+            f'Successfully cleared display names for {updated_count} songs.'
+        )
+    clear_display_names.short_description = "Clear display artist names"
     
     class Media:
         css = {
