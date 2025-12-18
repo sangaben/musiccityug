@@ -1,6 +1,6 @@
-# 🎵 Sangabiz – Music Streaming Platform
+# 🎵 MusicCityUg – Music Streaming Platform
 
-**Sangabiz** is a Django-based music streaming platform that empowers artists to upload and share their songs while giving users the ability to explore, stream, and download music.  
+**MusicCityUg** is a Django-based music streaming platform that empowers artists to upload and share their songs while giving users the ability to explore, stream, and download music.  
 It’s built to connect artists and fans through an elegant, responsive, and easy-to-use interface.
 
 ---
