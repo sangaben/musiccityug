@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv(
     "django-insecure-p-8cakys+ff2=@ug-r__yilt%sli8bn4%3+hh30+c9$j$=^z*%"
 )
 
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG =True
 
 ALLOWED_HOSTS = [
     "musiccityug.com",
