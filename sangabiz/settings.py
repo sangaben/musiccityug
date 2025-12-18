@@ -267,7 +267,7 @@ JAZZMIN_SETTINGS = {
     # ========== USER MENU ==========
     "usermenu_links": [
         {"name": "MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
-        {"name": "Support", "url": "/admin/help/supportticket/", "icon": "fas fa-question-circle"},
+        {"name": "Support", "icon": "fas fa-question-circle"},
         {"model": "auth.user", "icon": "fas fa-user"},
     ],
     
