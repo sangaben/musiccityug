@@ -470,41 +470,79 @@ def song_detail(request, song_id):
         'play_stats': play_stats,
     }
     return render(request, 'music/song_detail.html', context)
-
 def search(request):
-    """Search functionality"""
+    """Smart search that handles phrases and individual words"""
     query = request.GET.get('q', '').strip()
     
     if not query:
         return redirect('discover')
     
-    # Search songs
+    # Check if query contains common separators
+    common_separators = [' by ', ' ft ', ' featuring ', ' feat ', ' vs ', ' and ']
+    
+    # Try to split by common separators first
+    phrase_parts = [query]
+    for separator in common_separators:
+        if separator in query.lower():
+            phrase_parts = query.lower().split(separator)
+            break
+    
+    # Also split by spaces for individual words
+    all_search_terms = []
+    for part in phrase_parts:
+        all_search_terms.extend(part.strip().split())
+    
+    # Remove duplicates but preserve order
+    from collections import OrderedDict
+    search_terms = list(OrderedDict.fromkeys(all_search_terms))
+    
+    print(f"🔍 Search terms: {search_terms}")
+    print(f"🔍 Original query: '{query}'")
+    
+    # Build Q objects
+    from django.db.models import Q
+    
+    # First try exact phrase match
+    exact_phrase_q = Q(title__icontains=query) | \
+                     Q(artist__name__icontains=query) | \
+                     Q(lyrics__icontains=query)
+    
+    # Then try individual terms
+    individual_terms_q = Q()
+    for term in search_terms:
+        if len(term) > 2:  # Only search for terms longer than 2 characters
+            individual_terms_q |= Q(title__icontains=term) | \
+                                 Q(artist__name__icontains=term) | \
+                                 Q(genre__name__icontains=term) | \
+                                 Q(lyrics__icontains=term) | \
+                                 Q(featured_artists__name__icontains=term)
+    
+    # Combine both (exact phrase gets priority)
+    final_q = exact_phrase_q | individual_terms_q
+    
+    # Apply filter
     songs = Song.objects.filter(
-        Q(title__icontains=query) | 
-        Q(artist__name__icontains=query) |
-        Q(genre__name__icontains=query) |
-        Q(lyrics__icontains=query),
+        final_q,
         is_approved=True
-    ).select_related('artist', 'genre').distinct().order_by('-plays')[:50]
+    ).select_related('artist', 'genre').prefetch_related('featured_artists').distinct().order_by('-plays')[:50]
     
     # Get related artists
     from artists.models import Artist
-    related_artists = Artist.objects.filter(
-        Q(name__icontains=query) |
-        Q(bio__icontains=query) |
-        Q(songs__title__icontains=query)
-    ).distinct().annotate(
-        song_count=Count('songs', filter=Q(songs__is_approved=True))
-    ).filter(song_count__gt=0).order_by('-song_count')[:10]
+    
+    artist_q = Q()
+    for term in search_terms:
+        if len(term) > 2:
+            artist_q |= Q(name__icontains=term) | Q(bio__icontains=term)
+    
+    related_artists = Artist.objects.filter(artist_q).distinct()[:10]
     
     # Get related genres
-    related_genres = Genre.objects.filter(
-        Q(name__icontains=query) |
-        Q(description__icontains=query) |
-        Q(songs__title__icontains=query)
-    ).distinct().annotate(
-        song_count=Count('songs', filter=Q(songs__is_approved=True))
-    ).filter(song_count__gt=0).order_by('-song_count')[:8]
+    genre_q = Q()
+    for term in search_terms:
+        if len(term) > 2:
+            genre_q |= Q(name__icontains=term) | Q(description__icontains=term)
+    
+    related_genres = Genre.objects.filter(genre_q).distinct()[:8]
     
     context = {
         'songs': songs,
@@ -512,9 +550,10 @@ def search(request):
         'related_genres': related_genres,
         'query': query,
         'results_count': len(songs) + len(related_artists) + len(related_genres),
+        'search_terms_debug': search_terms,  # For debugging
     }
+    
     return render(request, 'music/search.html', context)
-
 def genres(request):
     """All genres page"""
     genres = Genre.objects.annotate(
