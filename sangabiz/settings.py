@@ -224,7 +224,6 @@ LOGGING = {
         "django": {"handlers": ["file", "console"], "level": "ERROR"},
     },
 }
-
 # --------------------------------------------------
 # Jazzmin Configuration (Spotify-Inspired MusicCityUG Admin)
 # --------------------------------------------------
@@ -232,15 +231,15 @@ SITE_URL = "https://musiccityug.com"
 
 JAZZMIN_SETTINGS = {
     # ========== BRANDING & THEME ==========
-    "site_title": "🎵 MusicCityUG Admin",
-    "site_header": "🎵 MusicCityUG",
-    "site_brand": "🎵 MusicCityUG",
+    "site_title": "MusicCityUG Admin",
+    "site_header": "MusicCityUG",
+    "site_brand": "MusicCityUG",
     "site_logo": "admin/img/logo.png",
     "login_logo": "admin/img/logo.png",
     "login_logo_dark": "admin/img/logo_dark.png",
     "site_logo_classes": "img-circle",
     "site_icon": "admin/img/favicon.ico",
-    "welcome_sign": "🎶 Welcome to MusicCityUG Administration",
+    "welcome_sign": "Welcome to MusicCityUG Administration",
     "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
     "search_model": ["auth.User", "music.Song", "artists.Artist", "news.News", "payments.Transaction"],
     
@@ -258,19 +257,19 @@ JAZZMIN_SETTINGS = {
     
     # ========== CUSTOM LINKS ==========
     "topmenu_links": [
-        {"name": "📊 Dashboard", "url": "admin:index", "permissions": ["auth.view_user"], "icon": "fas fa-tachometer-alt"},
-        {"name": "🌍 Visit Website", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
-        {"name": "📈 Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"], "icon": "fas fa-chart-line"},
-        {"name": "💳 Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"], "icon": "fas fa-credit-card"},
+        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"], "icon": "fas fa-tachometer-alt"},
+        {"name": "Visit Website", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
+        {"name": "Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"], "icon": "fas fa-chart-line"},
+        {"name": "Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"], "icon": "fas fa-credit-card"},
         {"app": "music", "icon": "fas fa-music"},
         {"app": "artists", "icon": "fas fa-microphone"},
         {"model": "auth.user", "icon": "fas fa-users"},
     ],
     
     "usermenu_links": [
-        {"name": "🎵 MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
-        {"name": "📞 Support", "url": "/admin/help/supportticket/", "icon": "fas fa-question-circle"},
-        {"name": "⚙️ Settings", "url": "/admin/auth/user/", "icon": "fas fa-cog"},
+        {"name": "MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
+        {"name": "Support", "url": "/admin/help/supportticket/", "icon": "fas fa-question-circle"},
+        {"name": "Settings", "url": "/admin/auth/user/", "icon": "fas fa-cog"},
         {"model": "auth.user", "icon": "fas fa-user"},
     ],
     
@@ -328,19 +327,19 @@ JAZZMIN_SETTINGS = {
     "custom_links": {
         "music": [
             {
-                "name": "📤 Bulk Upload",
+                "name": "Bulk Upload",
                 "url": "/admin/music/song/bulk-upload/",
                 "icon": "fas fa-upload",
                 "permissions": ["music.add_song"]
             },
             {
-                "name": "📊 Song Analytics",
+                "name": "Song Analytics",
                 "url": "/admin/music/song/analytics/",
                 "icon": "fas fa-chart-line",
                 "permissions": ["analytics.view_playanalytic"]
             },
             {
-                "name": "🎼 Quick Add Song",
+                "name": "Quick Add Song",
                 "url": "/admin/music/song/add/",
                 "icon": "fas fa-plus-circle",
                 "permissions": ["music.add_song"]
@@ -348,13 +347,13 @@ JAZZMIN_SETTINGS = {
         ],
         "artists": [
             {
-                "name": "🌟 Featured Artists",
+                "name": "Featured Artists",
                 "url": "/admin/artists/artist/?featured=true",
                 "icon": "fas fa-star",
                 "permissions": ["artists.view_artist"]
             },
             {
-                "name": "👥 Add New Artist",
+                "name": "Add New Artist",
                 "url": "/admin/artists/artist/add/",
                 "icon": "fas fa-user-plus",
                 "permissions": ["artists.add_artist"]
@@ -373,21 +372,21 @@ JAZZMIN_SETTINGS = {
     },
     "related_modal_active": True,
     "custom_css": "admin/css/custom_admin.css",
-    "custom_js": "admin/js/custom_admin.js",
+    "custom_js": None,  # Remove custom JS for now to test
     
     # ========== DASHBOARD WIDGETS ==========
     "show_dashboard_stats": True,
     "dashboard_widgets": [
         {
             "type": "app_list",
-            "title": "🚀 Quick Access",
+            "title": "Quick Access",
             "icon": "fas fa-rocket",
             "order": "DESC",
             "models": ["music.song", "artists.artist", "payments.transaction", "analytics.playanalytic"]
         },
         {
             "type": "list",
-            "title": "🎵 Recent Songs",
+            "title": "Recent Songs",
             "icon": "fas fa-music",
             "url_name": "admin:music_song_changelist",
             "limit": 5,
@@ -396,44 +395,62 @@ JAZZMIN_SETTINGS = {
         },
         {
             "type": "list",
-            "title": "🌟 Top Artists",
+            "title": "Top Artists",
             "icon": "fas fa-microphone",
             "url_name": "admin:artists_artist_changelist",
             "limit": 5,
             "order_by": "-total_plays",
             "columns": ["name", "total_plays", "song_count"]
         },
-        {
-            "type": "chart",
-            "title": "📈 Daily Plays",
-            "icon": "fas fa-chart-line",
-            "url_name": "admin:daily_plays_chart",
-            "interval": "day",
-            "limit": 7
-        },
     ],
     
     # ========== LANGUAGE ==========
     "language_chooser": False,
+    
+    # ========== ADD THESE FIXES ==========
+    "show_sidebar": True,
+    "sidebar_collapsed": False,
+    "sidebar_fixed": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_nav_flat_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_child_indent": False,
+    
+    # Header specific fixes
+    "navbar_fixed": True,
+    "navbar_small_text": False,
+    "navbar_brand_color": None,
+    "navbar_brand_text": "",
+    "navbar_brand_icon": None,
+    
+    # Logo display
+    "logo_classes": None,
+    "logo_image_classes": None,
+    
+    # Text display fixes
+    "body_small_text": False,
+    "brand_small_text": False,
+    "accent": "primary",
+    "actions_sticky_top": True,
 }
 
-# Enhanced UI Tweaks for Spotify Theme
+# Enhanced UI Tweaks for Spotify Theme - SIMPLIFIED
 JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
     "dark_mode_theme": "darkly",
     
-    # Navbar
-    "navbar": "navbar-dark navbar-primary",
+    # Navbar - FIXED FOR VISIBILITY
+    "navbar": "navbar-dark",
     "navbar_fixed": True,
     "navbar_small_text": False,
-    "navbar_brand_text": "🎵",
+    "navbar_brand_text": "MusicCityUG",
     
     # Sidebar
     "sidebar": "sidebar-dark-primary",
     "sidebar_fixed": True,
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": True,
+    "sidebar_nav_child_indent": False,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
@@ -442,40 +459,28 @@ JAZZMIN_UI_TWEAKS = {
     "footer_fixed": False,
     
     # Cards
-    "card": "card-outline card-primary",
+    "card": "card-outline",
     "card_border": True,
     "card_header_border": True,
     
-    # Buttons
+    # Buttons - SIMPLIFIED FOR BETTER VISIBILITY
     "button_classes": {
-        "primary": "btn-outline-primary",
-        "secondary": "btn-outline-secondary",
-        "info": "btn-outline-info",
-        "warning": "btn-outline-warning",
-        "danger": "btn-outline-danger",
-        "success": "btn-outline-success"
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
     },
     
-    # Brand Colors (Spotify Theme)
+    # Brand Colors - HIGH CONTRAST
     "brand_colors": {
         "primary": "#1DB954",  # Spotify Green
-        "secondary": "#535353",
-        "success": "#1DB954",
-        "info": "#36b9cc",
-        "warning": "#f6c23e",
-        "danger": "#e74a3b",
-        "indigo": "#6610f2",
-        "purple": "#6f42c1",
-        "pink": "#e83e8c",
-        "red": "#e74a3b",
-        "orange": "#fd7e14",
-        "yellow": "#f6c23e",
-        "green": "#1DB954",
-        "teal": "#20c9a6",
-        "cyan": "#36b9cc",
-        "white": "#fff",
-        "gray": "#6c757d",
-        "gray-dark": "#343a40",
+        "secondary": "#6c757d",
+        "success": "#28a745",
+        "info": "#17a2b8",
+        "warning": "#ffc107",
+        "danger": "#dc3545",
     },
 }
 # --------------------------------------------------
