@@ -226,7 +226,7 @@ LOGGING = {
 }
 
 # --------------------------------------------------
-# Jazzmin Configuration (MusicCityUG Enhanced)
+# Jazzmin Configuration (Spotify-Inspired MusicCityUG Admin)
 # --------------------------------------------------
 SITE_URL = "https://musiccityug.com"
 
@@ -235,16 +235,17 @@ JAZZMIN_SETTINGS = {
     "site_title": "🎵 MusicCityUG Admin",
     "site_header": "🎵 MusicCityUG",
     "site_brand": "🎵 MusicCityUG",
-    "site_logo": None,  # Add your logo to static/admin/img/logo.png
-    "login_logo": None,
+    "site_logo": "admin/img/logo.png",
+    "login_logo": "admin/img/logo.png",
+    "login_logo_dark": "admin/img/logo_dark.png",
     "site_logo_classes": "img-circle",
-    "site_icon": None,  # Add favicon to static/admin/img/favicon.ico
+    "site_icon": "admin/img/favicon.ico",
     "welcome_sign": "🎶 Welcome to MusicCityUG Administration",
     "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
-    "search_model": ["auth.User", "music.Song", "artists.Artist", "news.News"],
+    "search_model": ["auth.User", "music.Song", "artists.Artist", "news.News", "payments.Transaction"],
     
     # ========== THEME & UI ==========
-    "theme": "darkly",
+    "theme": "darkly",  # Matches Spotify dark theme
     "dark_mode_theme": "darkly",
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -257,18 +258,19 @@ JAZZMIN_SETTINGS = {
     
     # ========== CUSTOM LINKS ==========
     "topmenu_links": [
-        {"name": "🎵 Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "🌐 View Site", "url": SITE_URL, "new_window": True},
-        {"name": "📊 Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"]},
-        {"name": "💳 Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"]},
-        {"app": "music"},
-        {"app": "artists"},
-        {"model": "auth.user"},
+        {"name": "📊 Dashboard", "url": "admin:index", "permissions": ["auth.view_user"], "icon": "fas fa-tachometer-alt"},
+        {"name": "🌍 Visit Website", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
+        {"name": "📈 Analytics", "url": "/admin/analytics/", "permissions": ["analytics.view_analytic"], "icon": "fas fa-chart-line"},
+        {"name": "💳 Payments", "url": "/admin/payments/", "permissions": ["payments.view_transaction"], "icon": "fas fa-credit-card"},
+        {"app": "music", "icon": "fas fa-music"},
+        {"app": "artists", "icon": "fas fa-microphone"},
+        {"model": "auth.user", "icon": "fas fa-users"},
     ],
     
     "usermenu_links": [
         {"name": "🎵 MusicCityUG", "url": SITE_URL, "new_window": True, "icon": "fas fa-globe"},
-        {"name": "📞 Support", "url": "/admin/help/", "icon": "fas fa-question-circle"},
+        {"name": "📞 Support", "url": "/admin/help/supportticket/", "icon": "fas fa-question-circle"},
+        {"name": "⚙️ Settings", "url": "/admin/auth/user/", "icon": "fas fa-cog"},
         {"model": "auth.user", "icon": "fas fa-user"},
     ],
     
@@ -285,10 +287,12 @@ JAZZMIN_SETTINGS = {
         "music.Album": "fas fa-compact-disc",
         "music.Genre": "fas fa-tag",
         "music.Playlist": "fas fa-list-music",
+        "music.SongPlay": "fas fa-play-circle",
+        "music.SongDownload": "fas fa-download",
         
         # Artists App
-        "artists": "fas fa-user-tie",
-        "artists.Artist": "fas fa-microphone-alt",
+        "artists": "fas fa-microphone-alt",
+        "artists.Artist": "fas fa-user-tie",
         "artists.Band": "fas fa-users",
         
         # Accounts
@@ -322,23 +326,40 @@ JAZZMIN_SETTINGS = {
     
     # ========== CUSTOM ACTIONS ==========
     "custom_links": {
-        "music": [{
-            "name": "📤 Bulk Upload",
-            "url": "bulk_upload",
-            "icon": "fas fa-upload",
-            "permissions": ["music.add_song"]
-        }, {
-            "name": "📊 Song Analytics",
-            "url": "song_analytics",
-            "icon": "fas fa-chart-line",
-            "permissions": ["analytics.view_playanalytic"]
-        }],
-        "artists": [{
-            "name": "👥 Featured Artists",
-            "url": "featured_artists",
-            "icon": "fas fa-star",
-            "permissions": ["artists.view_artist"]
-        }],
+        "music": [
+            {
+                "name": "📤 Bulk Upload",
+                "url": "/admin/music/song/bulk-upload/",
+                "icon": "fas fa-upload",
+                "permissions": ["music.add_song"]
+            },
+            {
+                "name": "📊 Song Analytics",
+                "url": "/admin/music/song/analytics/",
+                "icon": "fas fa-chart-line",
+                "permissions": ["analytics.view_playanalytic"]
+            },
+            {
+                "name": "🎼 Quick Add Song",
+                "url": "/admin/music/song/add/",
+                "icon": "fas fa-plus-circle",
+                "permissions": ["music.add_song"]
+            }
+        ],
+        "artists": [
+            {
+                "name": "🌟 Featured Artists",
+                "url": "/admin/artists/artist/?featured=true",
+                "icon": "fas fa-star",
+                "permissions": ["artists.view_artist"]
+            },
+            {
+                "name": "👥 Add New Artist",
+                "url": "/admin/artists/artist/add/",
+                "icon": "fas fa-user-plus",
+                "permissions": ["artists.add_artist"]
+            }
+        ],
     },
     
     # ========== UI SETTINGS ==========
@@ -348,47 +369,55 @@ JAZZMIN_SETTINGS = {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
         "music.song": "horizontal_tabs",
+        "artists.artist": "collapsible",
     },
     "related_modal_active": True,
     "custom_css": "admin/css/custom_admin.css",
     "custom_js": "admin/js/custom_admin.js",
     
-    # ========== LANGUAGE ==========
-    "language_chooser": False,
-    
     # ========== DASHBOARD WIDGETS ==========
     "show_dashboard_stats": True,
     "dashboard_widgets": [
         {
+            "type": "app_list",
+            "title": "🚀 Quick Access",
+            "icon": "fas fa-rocket",
+            "order": "DESC",
+            "models": ["music.song", "artists.artist", "payments.transaction", "analytics.playanalytic"]
+        },
+        {
             "type": "list",
             "title": "🎵 Recent Songs",
+            "icon": "fas fa-music",
             "url_name": "admin:music_song_changelist",
             "limit": 5,
             "order_by": "-upload_date",
-        },
-        {
-            "type": "chart",
-            "title": "📈 Plays This Week",
-            "url_name": "play_chart_data",
-            "interval": "week",
-        },
-        {
-            "type": "progress",
-            "title": "📊 Approval Status",
-            "url_name": "approval_stats",
-            "color": "success",
+            "columns": ["title", "artist", "upload_date"]
         },
         {
             "type": "list",
             "title": "🌟 Top Artists",
+            "icon": "fas fa-microphone",
             "url_name": "admin:artists_artist_changelist",
             "limit": 5,
             "order_by": "-total_plays",
+            "columns": ["name", "total_plays", "song_count"]
+        },
+        {
+            "type": "chart",
+            "title": "📈 Daily Plays",
+            "icon": "fas fa-chart-line",
+            "url_name": "admin:daily_plays_chart",
+            "interval": "day",
+            "limit": 7
         },
     ],
+    
+    # ========== LANGUAGE ==========
+    "language_chooser": False,
 }
 
-# Enhanced UI Tweaks for Music Theme
+# Enhanced UI Tweaks for Spotify Theme
 JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
     "dark_mode_theme": "darkly",
@@ -427,10 +456,7 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-outline-success"
     },
     
-    # Actions
-    "actions_sticky_top": True,
-    
-    # Brand Colors (Music Theme)
+    # Brand Colors (Spotify Theme)
     "brand_colors": {
         "primary": "#1DB954",  # Spotify Green
         "secondary": "#535353",
@@ -450,11 +476,8 @@ JAZZMIN_UI_TWEAKS = {
         "white": "#fff",
         "gray": "#6c757d",
         "gray-dark": "#343a40",
-        "primary-light": "#e3ebf7",
-        "secondary-light": "#f8f9fa",
     },
 }
-
 # --------------------------------------------------
 # Default Primary Key
 # --------------------------------------------------
