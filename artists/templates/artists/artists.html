@@ -11,63 +11,6 @@
         <p>Discover amazing artists on MusicCity UG</p>
     </div>
 
-    <!-- Popular Artists Section -->
-    <section class="content-section">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-fire"></i>
-                Most Popular
-            </h2>
-            <a href="{% url 'artists' %}?sort=popular" class="see-all">Show all</a>
-        </div>
-        
-        <div class="horizontal-scroll-section">
-            <div class="scroll-container">
-                <div class="scroll-content">
-                    {% for artist in popular_artists %}
-                    <div class="artist-card" onclick="viewArtist({{ artist.id }})">
-                        <div class="card-image">
-                            <div class="artist-image">
-                                {% if artist.image %}
-                                    <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
-                                {% else %}
-                                    <div class="artist-placeholder">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                {% endif %}
-                                {% if artist.is_verified %}
-                                <div class="verified-badge">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-actions">
-                                <button class="play-btn-card" onclick="event.stopPropagation(); playArtist({{ artist.id }})">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="artist-name">{{ artist.name }}</h3>
-                            <p class="artist-genre">{{ artist.genre.name|default:"Artist" }}</p>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="empty-scroll-state">
-                        <i class="fas fa-users"></i>
-                        <p>No popular artists found</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <button class="scroll-nav-btn scroll-prev" onclick="scrollSection(this, -1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="scroll-nav-btn scroll-next" onclick="scrollSection(this, 1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    </section>
 
     <!-- New Artists Section -->
     <section class="content-section">
