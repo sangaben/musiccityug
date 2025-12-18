@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Search - Sangabiz{% endblock %}
+{% block title %}Search - MusicCityUg{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -33,11 +33,34 @@
                 <div class="song-details">
                     <div class="song-title-artist">
                         <h4 class="song-title">{{ song.title }}</h4>
-                        <p class="song-artist">{{ song.artist.name }}</p>
+                        <!-- UPDATED: Display artists with featured indicator -->
+                        <div class="song-artist">
+                            <!-- Primary Artist -->
+                            <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                                {{ song.artist.name }}
+                            </a>
+                            
+                            <!-- Featured Artists -->
+                            {% with featured_artists=song.featured_artists.all %}
+                                {% if featured_artists %}
+                                    <span class="ft-text">ft.</span>
+                                    {% for artist in featured_artists %}
+                                        <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                            {{ artist.name }}
+                                        </a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
                     </div>
                     <div class="song-meta-info">
                         <span class="song-genre">{{ song.genre.name }}</span>
-                        <span class="song-duration">{{ song.duration|time:"i:s" }}</span>
+                        <span class="song-duration">{{ song.formatted_duration }}</span>
+                        {% if song.featured_artists.exists %}
+                        <span class="featured-count-badge" title="{{ song.featured_artists.count }} featured artist{{ song.featured_artists.count|pluralize }}">
+                            <i class="fas fa-user-friends"></i> +{{ song.featured_artists.count }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -274,21 +297,48 @@
     text-overflow: ellipsis;
 }
 
+/* Featured Artists Styles */
 .song-artist {
     font-size: 14px;
     color: var(--primary);
-    margin: 0;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 2px 0 0 0;
+    line-height: 1.3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+}
+
+.song-artist a.artist-link {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.song-artist a.primary-artist {
+    color: var(--light);
+    font-weight: 600;
+}
+
+.song-artist a.artist-link:hover {
+    color: var(--primary-light);
+    text-decoration: underline;
+}
+
+.song-artist .ft-text {
+    font-size: 12px;
+    margin: 0 3px;
+    color: var(--gray);
+    opacity: 0.7;
 }
 
 .song-meta-info {
     display: flex;
+    align-items: center;
     gap: 15px;
     font-size: 12px;
     color: var(--gray-light);
+    flex-wrap: wrap;
 }
 
 .song-genre {
@@ -303,6 +353,29 @@
 .song-duration {
     color: var(--gray);
     font-weight: 500;
+}
+
+/* Featured Count Badge */
+.featured-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(108, 92, 231, 0.2);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: default;
+    transition: var(--transition);
+}
+
+.featured-count-badge:hover {
+    background: rgba(108, 92, 231, 0.3);
+}
+
+.featured-count-badge i {
+    font-size: 10px;
 }
 
 /* Song Stats - Always Visible */
@@ -637,6 +710,25 @@
         height: 50px;
     }
     
+    .song-artist {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+    
+    .song-artist a {
+        white-space: normal;
+        word-break: break-word;
+    }
+    
+    .song-artist .ft-text {
+        font-size: 11px;
+    }
+    
+    .featured-count-badge {
+        font-size: 10px;
+        padding: 1px 6px;
+    }
+    
     .song-stats {
         gap: 15px;
         margin: 0 15px;
@@ -684,6 +776,7 @@
     .mdundo-song-item {
         padding: 10px 12px;
         gap: 12px;
+        flex-wrap: wrap;
     }
     
     .song-image {
@@ -691,17 +784,33 @@
         height: 45px;
     }
     
+    .song-details {
+        flex: 1;
+        min-width: 180px;
+    }
+    
     .song-title {
         font-size: 15px;
     }
     
     .song-artist {
-        font-size: 13px;
+        font-size: 11px;
+        line-height: 1.3;
+    }
+    
+    .song-artist .ft-text {
+        font-size: 10px;
+        margin: 0 2px;
+    }
+    
+    .featured-count-badge {
+        font-size: 9px;
+        padding: 1px 5px;
     }
     
     .song-stats {
         gap: 12px;
-        margin: 0 10px;
+        margin: 0 10px 0 auto;
     }
     
     .stat {
@@ -710,6 +819,7 @@
     
     .song-actions {
         gap: 6px;
+        margin-left: auto;
     }
     
     .mdundo-play-btn,
@@ -732,9 +842,13 @@
         height: 42px;
     }
     
+    .song-details {
+        min-width: 150px;
+    }
+    
     .song-stats {
         gap: 10px;
-        margin: 0 8px;
+        margin: 0 8px 0 auto;
     }
     
     .song-actions {
@@ -754,90 +868,255 @@
 
 {% block extra_js %}
 <script>
-// Initialize playlist with search songs for base.html player
-const searchSongs = [
-    {% for song in songs %}
-    {
-        id: {{ song.id }},
-        title: "{{ song.title|escapejs }}",
-        artist: "{{ song.artist.name|escapejs }}",
-        audio: "{{ song.audio_file.url }}",
-        cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
-        duration: {{ song.duration }},
-        plays: {{ song.plays }},
-        downloads: {{ song.downloads }},
-        genre: "{{ song.genre.name|escapejs }}"
-    },
-    {% endfor %}
-];
+// Global variable to track if play has been counted for current song
+window.playCountedForSong = {};
+window.currentSongId = null;
 
-// Store the search playlist globally for the base player to use
-window.searchPlaylist = searchSongs;
+// Initialize the search page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSearchPlaylist();
+    ensureMobileStatsVisibility();
+    
+    // Also update on window resize
+    window.addEventListener('resize', ensureMobileStatsVisibility);
+});
 
-// Play song from card using base.html player
+// Ensure stats are always visible on mobile
+function ensureMobileStatsVisibility() {
+    const statsElements = document.querySelectorAll('.song-stats');
+    statsElements.forEach(stats => {
+        stats.style.display = 'flex';
+    });
+}
+
+// Initialize playlist with search songs for the base.html player
+function initializeSearchPlaylist() {
+    const searchSongs = [
+        {% for song in songs %}
+        {
+            id: {{ song.id }},
+            title: "{{ song.title|escapejs }}",
+            artist: "{{ song.artist.name|escapejs }}",
+            audio: "{{ song.audio_file.url }}",
+            cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
+            duration: {{ song.duration }},
+            plays: {{ song.plays }},
+            downloads: {{ song.downloads }},
+            genre: "{{ song.genre.name|escapejs }}",
+            // Add featured artists data for display
+            featured_artists: [
+                {% for artist in song.featured_artists.all %}
+                {
+                    id: {{ artist.id }},
+                    name: "{{ artist.name|escapejs }}"
+                },
+                {% endfor %}
+            ]
+        },
+        {% endfor %}
+    ];
+    
+    // Store the search playlist globally for the base player to use
+    window.searchPlaylist = searchSongs;
+}
+
+// ========== Play song from card using base.html player ==========
 function playSongFromCard(songId) {
     // Get the song data from our search playlist
     const song = window.searchPlaylist?.find(s => s.id === songId);
     
     if (song && typeof window.playSong === 'function') {
+        // Set current song ID
+        window.currentSongId = songId;
+        
+        // Reset play tracking for this song
+        window.playCountedForSong[songId] = false;
+        
         // Use the base.html player function
         window.playSong(song, window.searchPlaylist, window.searchPlaylist.findIndex(s => s.id === songId));
         
-        // Track the play
-        trackSongPlay(songId);
-        
-        // Update UI play count
-        updatePlayCount(songId);
+        // Update the UI play count immediately
+        updateSongPlayCount(songId);
     } else {
         console.error('Song not found or player not available');
     }
 }
 
-// Track song play in the database
+// ========== Track song play in the database ==========
 function trackSongPlay(songId) {
-    fetch(`/track-play/${songId}/`, {
+    console.log(`🎵 Tracking play for song ID: ${songId}`);
+    
+    // Don't track if already counted
+    if (window.playCountedForSong[songId]) {
+        console.log(`⏭️ Play already counted for song ${songId}, skipping`);
+        return;
+    }
+    
+    // Mark as counted immediately to prevent duplicates
+    window.playCountedForSong[songId] = true;
+    
+    // Use the track-play endpoint (POST)
+    fetch(`/api/track-play/${songId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json',
         },
-    }).catch(error => {
-        console.error('Error tracking play:', error);
-    });
-}
-
-// Update play count in the UI
-function updatePlayCount(songId) {
-    const playElements = document.querySelectorAll(`[data-song-id="${songId}"] .stat-count`);
-    playElements.forEach(element => {
-        const currentCount = parseInt(element.textContent) || 0;
-        element.textContent = currentCount + 1;
-    });
-}
-
-// Download song function - integrates with base.html download function
-function downloadSong(songId, buttonElement = null) {
-    if (typeof window.downloadWithWatermark === 'function') {
-        const song = window.searchPlaylist?.find(s => s.id === songId);
-        if (song) {
-            window.downloadWithWatermark(song.audio, song.title, song.artist);
-            
-            // Update download count in UI
-            updateDownloadCount(songId);
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (response.status === 403) {
+            // Premium content restriction
+            return response.json().then(data => {
+                console.log('Premium content restriction:', data);
+                if (data.error) {
+                    showNotification(data.error, 'error');
+                }
+                // Reset since play was blocked
+                window.playCountedForSong[songId] = false;
+                return null;
+            });
         }
-    } else {
-        // Fallback to direct download
-        window.open(`/download-song/${songId}/`, '_blank');
-        updateDownloadCount(songId);
+        
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        if (data) {
+            console.log('Play tracked successfully:', data);
+            
+            // Update the UI with the new play count
+            if (data.success && data.new_plays !== undefined) {
+                updatePlayCountInUI(songId, data.new_plays);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error tracking play:', error);
+        // Reset since tracking failed
+        window.playCountedForSong[songId] = false;
+        
+        // Try fallback endpoint
+        fetch(`/api/track-anonymous-play/${songId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.plays !== undefined) {
+                updatePlayCountInUI(songId, data.plays);
+            }
+        })
+        .catch(fallbackError => {
+            console.error('Fallback also failed:', fallbackError);
+        });
+    });
+}
+
+// ========== Update play count in the UI ==========
+function updatePlayCountInUI(songId, newPlayCount) {
+    console.log(`📈 Updating UI for song ${songId} to ${newPlayCount} plays`);
+    
+    // Find all elements with this song ID and update their play count
+    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+    
+    songCards.forEach(card => {
+        // Update plays data attribute
+        card.setAttribute('data-plays', newPlayCount);
+        
+        // Find play count elements inside this card
+        const playElements = card.querySelectorAll('.stat-count');
+        playElements.forEach(element => {
+            // Format number with commas
+            const formattedPlays = new Intl.NumberFormat().format(newPlayCount);
+            element.textContent = formattedPlays;
+        });
+    });
+    
+    // Also update the global search playlist data
+    if (window.searchPlaylist) {
+        const songIndex = window.searchPlaylist.findIndex(s => s.id === songId);
+        if (songIndex !== -1) {
+            window.searchPlaylist[songIndex].plays = newPlayCount;
+        }
     }
 }
 
-// Update download count in the UI
-function updateDownloadCount(songId) {
-    const downloadElements = document.querySelectorAll(`[data-song-id="${songId}"] .stat-count`);
-    downloadElements.forEach(element => {
-        const currentCount = parseInt(element.textContent) || 0;
-        element.textContent = currentCount + 1;
+// ========== Update a specific song's play count ==========
+function updateSongPlayCount(songId) {
+    // First, increment the local count immediately for better UX
+    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+    
+    songCards.forEach(card => {
+        const currentPlays = parseInt(card.getAttribute('data-plays') || '0');
+        const newPlays = currentPlays + 1;
+        
+        // Update data attribute
+        card.setAttribute('data-plays', newPlays);
+        
+        // Update UI immediately
+        const playElements = card.querySelectorAll('.stat-count');
+        playElements.forEach(element => {
+            const formattedPlays = new Intl.NumberFormat().format(newPlays);
+            element.textContent = formattedPlays;
+        });
+    });
+    
+    // Then track in database
+    trackSongPlay(songId);
+}
+
+// ========== Download song function ==========
+function downloadSong(songId, buttonElement = null) {
+    // Show loading state if button provided
+    if (buttonElement) {
+        const originalHTML = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        buttonElement.disabled = true;
+    }
+    
+    // Update download count in UI immediately
+    updateSongDownloadCount(songId);
+    
+    // Open download in new tab (this will trigger the Django view)
+    window.open(`/download-song/${songId}/`, '_blank');
+    
+    // Restore button state if button provided
+    if (buttonElement) {
+        setTimeout(() => {
+            buttonElement.innerHTML = '<i class="fas fa-download"></i>';
+            buttonElement.disabled = false;
+        }, 1000);
+    }
+    
+    // Trigger download event for analytics
+    triggerSongDownloaded(songId);
+}
+
+// ========== Update a specific song's download count ==========
+function updateSongDownloadCount(songId) {
+    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+    
+    songCards.forEach(card => {
+        const currentDownloads = parseInt(card.getAttribute('data-downloads') || '0');
+        const newDownloads = currentDownloads + 1;
+        
+        // Update data attribute
+        card.setAttribute('data-downloads', newDownloads);
+        
+        // Update UI
+        const downloadElements = card.querySelectorAll('.stat-count');
+        downloadElements.forEach(element => {
+            const formattedDownloads = new Intl.NumberFormat().format(newDownloads);
+            element.textContent = formattedDownloads;
+        });
     });
 }
 
@@ -956,6 +1235,12 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }, 3000);
     }
+}
+
+// Trigger custom event for download
+function triggerSongDownloaded(songId) {
+    const event = new CustomEvent('songDownloaded', { detail: { songId } });
+    document.dispatchEvent(event);
 }
 
 // Make functions globally available for base.html integration
