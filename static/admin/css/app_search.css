@@ -1,0 +1,181 @@
+/* App-Specific Search in Sidebar */
+
+/* Hide all global search elements */
+.navbar form[role="search"],
+#navbar-search,
+.navbar-search-container {
+    display: none !important;
+}
+
+/* Style for app-specific search containers */
+.app-search-container {
+    padding: 10px 15px;
+    margin: 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: none; /* Hidden by default */
+}
+
+.app-search-container.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Search input styles inside sidebar */
+.app-search-container .app-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.app-search-container .app-search-input:focus {
+    outline: none;
+    border-color: #1DB954;
+    box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2);
+}
+
+.app-search-container .app-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Search button in sidebar nav items */
+.nav-sidebar .nav-item.has-search > .nav-link {
+    position: relative;
+    padding-right: 40px !important;
+}
+
+.nav-sidebar .nav-item.has-search > .nav-link::after {
+    content: "🔍";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.nav-sidebar .nav-item.has-search.search-active > .nav-link::after {
+    content: "✕";
+    opacity: 1;
+}
+
+.nav-sidebar .nav-item.has-search > .nav-link:hover::after {
+    opacity: 1;
+}
+
+/* Search results styling */
+.app-search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 5px;
+}
+
+.app-search-result-item {
+    padding: 8px 12px;
+    margin: 2px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.app-search-result-item:hover {
+    background: rgba(29, 185, 84, 0.2);
+    transform: translateX(5px);
+}
+
+.app-search-result-item i {
+    margin-right: 8px;
+    color: #1DB954;
+}
+
+/* No results message */
+.app-search-no-results {
+    padding: 10px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+/* Search header */
+.app-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-search-header h6 {
+    margin: 0;
+    color: #1DB954;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.app-search-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.app-search-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Active search indicator */
+.search-active-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #1DB954;
+    border-radius: 50%;
+    margin-left: 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .app-search-container {
+        margin: 5px 10px;
+        padding: 8px 12px;
+    }
+    
+    .app-search-input {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+}
