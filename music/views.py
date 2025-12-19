@@ -59,7 +59,12 @@ def create_branded_cover(song, logo_path, output_path):
                 
                 # Resize logo to be large and centered (400x400)
                 logo = logo.resize((400, 400), Image.Resampling.LANCZOS)
-        
+
+                # Create circular mask for logo
+                mask = Image.new('L', (400, 400), 0)
+                draw_mask = ImageDraw.Draw(mask)
+                draw_mask.ellipse([(0, 0), (400, 400)], fill=255)
+                
                 
                 # Apply slight blur to edges for smooth look
                 mask = mask.filter(ImageFilter.GaussianBlur(2))
