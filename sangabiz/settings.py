@@ -305,24 +305,6 @@ JAZZMIN_SETTINGS = {
         "news.Category": "fas fa-folder",
     },
     
-    # ========== CUSTOM ACTIONS ==========
-    "custom_links": {
-        "artists": [
-            {
-                "name": "Featured Artists",
-                "url": "/admin/artists/featured/",
-                "icon": "fas fa-star",
-                "permissions": ["artists.view_artist"]
-            },
-            {
-                "name": "Artist Analytics",
-                "url": "/admin/artists/analytics/",
-                "icon": "fas fa-chart-line",
-                "permissions": ["artists.view_artist"]
-            }
-        ],
-    },
-    
     # ========== UI SETTINGS ==========
     "show_ui_builder": False,
     "changeform_format": "horizontal_tabs",
