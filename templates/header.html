@@ -7,7 +7,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <a href="{% url 'home' %}" class="logo">
-                <img src="{% static 'images/logo.jpeg' %}" alt="MusicCity UG Logo" onerror="this.style.display='none'">
+                <img src="{% static 'images/logo.jpeg' %}" alt="MusicCenter UG Logo" onerror="this.style.display='none'">
                 <span class="logo-text">MusicCenter<span class="logo-highlight">UG</span></span>
             </a>
             
@@ -28,7 +28,7 @@
                     {% elif request.resolver_match.url_name == 'genres' %}
                         Genres
                     {% else %}
-                        MusicCityUG
+                        MusicCenterUG
                     {% endif %}
                 </h1>
             </div>
