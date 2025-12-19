@@ -142,7 +142,7 @@
 <!-- Main Content -->
 <!-- Main Content -->
 <main class="main-content">
-    <!-- New Releases Section - SIMPLIFIED VERSION -->
+    <!-- New Releases Section - UPDATED VERSION -->
     <section class="content-section">
         <div class="section-header">
             <h2 class="section-title">New Releases</h2>
@@ -171,11 +171,11 @@
                     </div>
                     <div class="card-content">
                         <h3 class="card-title">{{ song.title }}</h3>
-                        <!-- SIMPLIFIED: Display artists -->
+                        <!-- UPDATED: Display artists with display_artist_name -->
                         <div class="card-artists">
-                            <!-- Primary Artist -->
+                            <!-- Primary Artist with display name -->
                             <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                                {{ song.artist.name }}
+                                {{ song.display_artist }}
                             </a>
                             
                             <!-- Featured Artists -->
@@ -194,6 +194,17 @@
                                 {% endif %}
                             {% endwith %}
                         </div>
+                        
+                        <!-- Show original artist name if different from display name -->
+                        {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                        <div class="original-artist-note">
+                            <small class="original-artist">
+                                <i class="fas fa-info-circle"></i> 
+                                Original: {{ song.artist.name }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
                         <!-- Song Statistics -->
                         <div class="song-stats">
                             <div class="stat-item" title="Plays">
@@ -224,7 +235,7 @@
     </section>
     
     <div class="container">
-        <!-- Top 10 Trending Songs - SIMPLIFIED VERSION -->
+        <!-- Top 10 Trending Songs - UPDATED VERSION -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">Top 10 Trending</h2>
@@ -255,11 +266,11 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <!-- SIMPLIFIED: Display artists -->
+                                <!-- UPDATED: Display artists with display_artist_name -->
                                 <div class="chart-song-artist">
-                                    <!-- Primary Artist -->
+                                    <!-- Primary Artist with display name -->
                                     <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                                        {{ song.artist.name }}
+                                        {{ song.display_artist }}
                                     </a>
                                     
                                     <!-- Featured Artists -->
@@ -274,6 +285,17 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
+                                
+                                <!-- Show original artist name if different from display name -->
+                                {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                                <div class="original-artist-note">
+                                    <small class="original-artist">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Original: {{ song.artist.name }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                                
                                 <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
@@ -328,11 +350,11 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <!-- SIMPLIFIED: Display artists -->
+                                <!-- UPDATED: Display artists with display_artist_name -->
                                 <div class="chart-song-artist">
-                                    <!-- Primary Artist -->
+                                    <!-- Primary Artist with display name -->
                                     <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                                        {{ song.artist.name }}
+                                        {{ song.display_artist }}
                                     </a>
                                     
                                     <!-- Featured Artists -->
@@ -347,6 +369,17 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
+                                
+                                <!-- Show original artist name if different from display name -->
+                                {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                                <div class="original-artist-note">
+                                    <small class="original-artist">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Original: {{ song.artist.name }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                                
                                 <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
@@ -770,6 +803,97 @@ body {
     transform: scale(1.05);
 }
 
+/* ===== ARTIST LINKS STYLING ===== */
+
+/* Primary artist with display name - Orange */
+.artist-link.primary-artist {
+    color: var(--uganda-yellow);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.artist-link.primary-artist:hover {
+    color: #ffdf4d; /* Lighter orange/yellow on hover */
+    text-decoration: underline;
+}
+
+/* Featured artists - Green */
+.artist-link.featured-artist {
+    color: var(--spotify-green);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.artist-link.featured-artist:hover {
+    color: #1ed760; /* Lighter green on hover */
+    text-decoration: underline;
+}
+
+/* "ft." text styling */
+.ft-text {
+    color: var(--spotify-light-gray);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+/* Featured indicator (icon + number) */
+.featured-indicator {
+    margin-left: 6px;
+    color: var(--spotify-light-gray);
+    font-size: 0.75rem;
+    background: rgba(255, 209, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.featured-indicator i {
+    font-size: 0.7rem;
+}
+
+/* Original artist note */
+.original-artist-note {
+    margin-top: 4px;
+}
+
+.original-artist {
+    color: var(--spotify-text-secondary);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+}
+
+.original-artist i {
+    font-size: 0.7rem;
+}
+
+/* Chart song artist links */
+.chart-song-artist .artist-link.primary-artist {
+    font-size: 0.75rem;
+}
+
+.chart-song-artist .artist-link.featured-artist {
+    font-size: 0.75rem;
+}
+
+/* Compact artist display for charts */
+.chart-song-artist .ft-text {
+    font-size: 0.75rem;
+}
+
+.chart-song-artist .original-artist {
+    font-size: 0.7rem;
+}
+
 /* ===== MAIN CONTENT ===== */
 .main-content {
     background: var(--spotify-black);
@@ -1064,103 +1188,6 @@ body {
 .music-card.playing {
     background: rgba(29, 185, 84, 0.1);
     border: 1px solid var(--spotify-green);
-}
-
-
-/* ===== ARTIST LINKS IN SONGS ===== */
-
-/* Primary artist - White */
-.artist-link.primary-artist {
-    color: orange;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
-}
-
-.artist-link.primary-artist:hover {
-    color: var(--spotify-green);
-    text-decoration: underline;
-}
-
-/* Featured artists - Orange */
-.artist-link.featured-artist {
-    color: green;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
-}
-
-.artist-link.featured-artist:hover {
-    color: #ffdf4d; /* Lighter orange/yellow on hover */
-    text-decoration: underline;
-}
-
-/* "ft." text styling */
-.ft-text {
-    color: var(--spotify-light-gray);
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin: 0 4px;
-}
-
-/* Featured indicator (icon + number) */
-.featured-indicator {
-    margin-left: 6px;
-    color: var(--spotify-light-gray);
-    font-size: 0.75rem;
-    background: rgba(255, 209, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.featured-indicator i {
-    font-size: 0.7rem;
-}
-
-/* Chart song artist links */
-.chart-song-artist .artist-link.primary-artist {
-    font-size: 0.75rem;
-}
-
-.chart-song-artist .artist-link.featured-artist {
-    font-size: 0.75rem;
-}
-
-/* Compact artist display for charts */
-.chart-song-artist .ft-text {
-    font-size: 0.75rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.8rem;
-    }
-    
-    .ft-text {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.75rem;
-    }
-    
-    .ft-text {
-        font-size: 0.75rem;
-    }
-    
-    .featured-indicator {
-        display: none; /* Hide on very small screens */
-    }
 }
 
 .card-image {
@@ -1797,6 +1824,20 @@ body {
     .song-stats .stat-item i {
         font-size: 0.65rem;
     }
+    
+    /* Adjust artist links for mobile */
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.8rem;
+    }
+    
+    .ft-text {
+        font-size: 0.8rem;
+    }
+    
+    .original-artist {
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1847,6 +1888,24 @@ body {
     .song-stats-below .stat-item {
         justify-content: center;
     }
+    
+    /* Adjust artist links for very small screens */
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.75rem;
+    }
+    
+    .ft-text {
+        font-size: 0.75rem;
+    }
+    
+    .featured-indicator {
+        display: none; /* Hide on very small screens */
+    }
+    
+    .original-artist {
+        font-size: 0.65rem;
+    }
 }
 </style>
 {% endblock %}
@@ -1892,12 +1951,23 @@ function initializeHomePlaylist() {
             id: {{ song.id }},
             title: "{{ song.title|escapejs }}",
             artist: "{{ song.artist.name|escapejs }}",
+            display_artist: "{{ song.display_artist|escapejs }}",
+            original_artist: "{{ song.artist.name|escapejs }}",
+            has_display_name: {% if song.display_artist_name and song.display_artist_name != song.artist.name %}true{% else %}false{% endif %},
             audio: "{{ song.audio_file.url }}",
             cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
             duration: {{ song.duration }},
             plays: {{ song.plays }},
             downloads: {{ song.downloads }},
-            genre: "{{ song.genre.name|escapejs }}"
+            genre: "{{ song.genre.name|escapejs }}",
+            featured_artists: [
+                {% for artist in song.featured_artists.all %}
+                {
+                    id: {{ artist.id }},
+                    name: "{{ artist.name|escapejs }}"
+                },
+                {% endfor %}
+            ]
         },
         {% endfor %}
     ];
@@ -2104,6 +2174,28 @@ function downloadSong(songId, buttonElement = null) {
     // Open download in new tab (this will trigger the Django view)
     window.open(`/download-song/${songId}/`, '_blank');
     
+    // Track download analytics
+    fetch('/api/track-download/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            song_id: songId,
+            song_title: getSongTitle(songId),
+            artist_name: getDisplayArtistName(songId),
+            original_artist_name: getOriginalArtistName(songId)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Download tracked:', data);
+    })
+    .catch(error => {
+        console.error('Error tracking download:', error);
+    });
+    
     // Restore button state if button provided
     if (buttonElement) {
         setTimeout(() => {
@@ -2114,6 +2206,41 @@ function downloadSong(songId, buttonElement = null) {
     
     // Trigger download event for analytics
     triggerSongDownloaded(songId);
+}
+
+// Helper function to get song title from data attributes
+function getSongTitle(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const titleElement = card.querySelector('.card-title, .chart-song-title');
+        return titleElement ? titleElement.textContent.trim() : 'Unknown Song';
+    }
+    return 'Unknown Song';
+}
+
+// Helper function to get display artist name from data attributes
+function getDisplayArtistName(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const artistElement = card.querySelector('.artist-link.primary-artist');
+        return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
+    }
+    return 'Unknown Artist';
+}
+
+// Helper function to get original artist name from data attributes
+function getOriginalArtistName(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const originalNote = card.querySelector('.original-artist');
+        if (originalNote) {
+            // Extract original artist name from the note
+            const text = originalNote.textContent.trim();
+            const match = text.match(/Original:\s*(.+)/);
+            return match ? match[1].trim() : 'Unknown Artist';
+        }
+    }
+    return 'Unknown Artist';
 }
 
 // Utility function to get CSRF token
