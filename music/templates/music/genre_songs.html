@@ -109,11 +109,6 @@
                             <button class="download-btn" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)" title="Download">
                                 <i class="fas fa-download"></i>
                             </button>
-                            {% if user.is_authenticated %}
-                            <button class="action-btn" onclick="event.stopPropagation(); likeSong({{ song.id }}, this)" title="Like">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
