@@ -59,11 +59,7 @@ def create_branded_cover(song, logo_path, output_path):
                 
                 # Resize logo to be large and centered (400x400)
                 logo = logo.resize((400, 400), Image.Resampling.LANCZOS)
-                
-                # Create circular mask for logo
-                mask = Image.new('L', (400, 400), 0)
-                draw_mask = ImageDraw.Draw(mask)
-                draw_mask.ellipse([(0, 0), (400, 400)], fill=255)
+        
                 
                 # Apply slight blur to edges for smooth look
                 mask = mask.filter(ImageFilter.GaussianBlur(2))
@@ -110,7 +106,7 @@ def create_branded_cover(song, logo_path, output_path):
                  fill='#FFFFFF', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
         
         # Add "Sangabiz" in green
-        draw.text((300, 580), "MusicCityUg", 
+        draw.text((300, 580), "MusicCenterUg", 
                  fill='#1DB954', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
         
         # Add song info at the top
@@ -147,7 +143,7 @@ def create_branded_cover(song, logo_path, output_path):
         from PIL import Image, ImageDraw
         img = Image.new('RGB', (600, 600), color='#1DB954')
         draw = ImageDraw.Draw(img)
-        draw.text((300, 250), "MusicCityUg", 
+        draw.text((300, 250), "MusicCenterUg", 
                  fill='white', font=ImageFont.load_default(), anchor="mm")
         draw.text((300, 300), song.title[:20], 
                  fill='white', font=ImageFont.load_default(), anchor="mm")
