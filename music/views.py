@@ -29,9 +29,10 @@ def get_client_ip(request):
 
 # ========== COMPLETE HELPER FUNCTIONS ==========
 def create_branded_cover(song, logo_path, output_path):
-    """Create branded cover art with ONLY MusicCityUg logo (replaces song cover)"""
+    """Create branded cover art with MusicCenterUg logo"""
     try:
         from PIL import Image, ImageDraw, ImageFont, ImageFilter
+        import os
         
         print(f"🎨 Creating branded cover for: {song.title}")
         print(f"🏷️ Using logo: {logo_path}")
@@ -47,7 +48,7 @@ def create_branded_cover(song, logo_path, output_path):
             b = int(18 + (i / 600) * 30)
             draw.line([(0, i), (600, i)], fill=(r, g, b))
         
-        # Add Sangabiz logo as the MAIN element
+        # Load and add logo
         if logo_path and os.path.exists(logo_path):
             try:
                 print(f"🏷️ Loading logo: {logo_path}")
@@ -57,48 +58,62 @@ def create_branded_cover(song, logo_path, output_path):
                 if logo.mode != 'RGBA':
                     logo = logo.convert('RGBA')
                 
-                # Resize logo to be large and centered (400x400)
-                logo = logo.resize((400, 400), Image.Resampling.LANCZOS)
-
-                # Create circular mask for logo
-                mask = Image.new('L', (400, 400), 0)
-                draw_mask = ImageDraw.Draw(mask)
-                draw_mask.ellipse([(0, 0), (400, 400)], fill=255)
+                # Calculate optimal logo size (70% of image width)
+                logo_size = int(600 * 0.7)  # 420x420
                 
+                # Resize logo while maintaining aspect ratio
+                logo_aspect = logo.width / logo.height
+                if logo_aspect > 1:  # Wider than tall
+                    new_width = logo_size
+                    new_height = int(logo_size / logo_aspect)
+                else:  # Taller than wide or square
+                    new_height = logo_size
+                    new_width = int(logo_size * logo_aspect)
                 
-                # Apply slight blur to edges for smooth look
-                mask = mask.filter(ImageFilter.GaussianBlur(2))
+                logo = logo.resize((new_width, new_height), Image.Resampling.LANCZOS)
                 
-                # Paste logo in the center
-                img.paste(logo, (100, 100), mask)
+                # Calculate position to center the logo
+                x_position = (600 - new_width) // 2
+                y_position = (600 - new_height) // 2 - 30  # Slightly higher for text space
                 
-                # Add glow effect around logo
-                for i in range(1, 5):
-                    draw.ellipse([(100-i, 100-i), (500+i, 500+i)], 
-                                outline='rgba(29, 185, 84, 0.2)', width=1)
+                # Create a subtle shadow/glow effect for the logo
+                shadow_size = 5
+                shadow = Image.new('RGBA', (new_width + shadow_size*2, new_height + shadow_size*2), (0, 0, 0, 0))
+                shadow.paste(logo, (shadow_size, shadow_size), logo if logo.mode == 'RGBA' else None)
+                shadow = shadow.filter(ImageFilter.GaussianBlur(10))
                 
-                print("✅ Logo added as main cover element")
+                # Paste shadow first
+                img.paste(shadow, (x_position - shadow_size, y_position - shadow_size), shadow)
+                
+                # Paste the actual logo
+                if logo.mode == 'RGBA':
+                    img.paste(logo, (x_position, y_position), logo)
+                else:
+                    img.paste(logo, (x_position, y_position))
+                
+                print(f"✅ Logo added ({new_width}x{new_height})")
                 
             except Exception as e:
                 print(f"⚠️ Error loading logo: {e}")
-                # Fallback: Create music note design
-                draw.ellipse([(150, 150), (450, 450)], 
-                           outline='#1DB954', width=10)
+                # Fallback: Simple text-based logo
                 try:
-                    font = ImageFont.truetype("arial.ttf", 120)
+                    font_large = ImageFont.truetype("arial.ttf", 120)
                 except:
-                    font = ImageFont.load_default()
-                draw.text((300, 300), "♪", fill='#1DB954', font=font, anchor="mm")
+                    font_large = ImageFont.load_default()
+                
+                # Draw MusicCenterUg as text
+                text = "MusicCenterUg"
+                draw.text((300, 250), text, fill='#1DB954', font=font_large, anchor="mm")
         else:
-            print("⚠️ No logo found, creating default design")
-            # Create default music note design
-            draw.ellipse([(150, 150), (450, 450)], 
-                       outline='#1DB954', width=10)
+            print("⚠️ No logo found, creating text-based logo")
             try:
-                font = ImageFont.truetype("arial.ttf", 120)
+                font_large = ImageFont.truetype("arial.ttf", 120)
             except:
-                font = ImageFont.load_default()
-            draw.text((300, 300), "♪", fill='#1DB954', font=font, anchor="mm")
+                font_large = ImageFont.load_default()
+            
+            # Draw MusicCenterUg as text
+            text = "MusicCenterUg"
+            draw.text((300, 250), text, fill='#1DB954', font=font_large, anchor="mm")
         
         # Add branding text at the bottom
         try:
@@ -107,37 +122,61 @@ def create_branded_cover(song, logo_path, output_path):
             font_brand = ImageFont.load_default()
         
         # Add "Downloaded from" text
-        draw.text((300, 550), "Downloaded from", 
-                 fill='#FFFFFF', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
+        draw.text((300, 520), "Downloaded from", 
+                 fill='#FFFFFF', font=font_brand, anchor="mm")
         
-        # Add "Sangabiz" in green
-        draw.text((300, 580), "MusicCenterUg", 
-                 fill='#1DB954', font=font_brand, anchor="mm", stroke_width=1, stroke_fill='black')
+        # Add "MusicCenterUg" in green
+        draw.text((300, 550), "MusicCenterUg", 
+                 fill='#1DB954', font=font_brand, anchor="mm")
         
-        # Add song info at the top
+        # Add song info at the top with better styling
         try:
-            font_info = ImageFont.truetype("arial.ttf", 20)
+            font_title = ImageFont.truetype("arial.ttf", 26)
+            font_artist = ImageFont.truetype("arial.ttf", 22)
         except:
-            font_info = ImageFont.load_default()
+            font_title = ImageFont.load_default()
+            font_artist = ImageFont.load_default()
         
         # Song title (truncate if too long)
         title = song.title
-        if len(title) > 25:
-            title = title[:22] + "..."
+        if len(title) > 30:
+            title = title[:27] + "..."
+        
+        # Add subtle background for title
+        title_bbox = draw.textbbox((0, 0), title, font=font_title)
+        title_width = title_bbox[2] - title_bbox[0]
+        title_height = title_bbox[3] - title_bbox[1]
+        
+        # Draw title with slight background
+        draw.rectangle([(300 - title_width//2 - 10, 30), 
+                       (300 + title_width//2 + 10, 30 + title_height + 10)], 
+                      fill='rgba(0, 0, 0, 150)')
         draw.text((300, 40), title, 
-                 fill='white', font=font_info, anchor="mm", stroke_width=1, stroke_fill='black')
+                 fill='white', font=font_title, anchor="mm")
         
         # Artist name
-        artist = song.artist.name
-        if len(artist) > 25:
-            artist = artist[:22] + "..."
-        draw.text((300, 65), f"by {artist}", 
-                 fill='#1DB954', font=font_info, anchor="mm", stroke_width=1, stroke_fill='black')
+        artist = song.display_artist
+        if len(artist) > 30:
+            artist = artist[:27] + "..."
+        
+        # Draw artist with slight background
+        artist_bbox = draw.textbbox((0, 0), f"by {artist}", font=font_artist)
+        artist_width = artist_bbox[2] - artist_bbox[0]
+        
+        draw.rectangle([(300 - artist_width//2 - 10, 70), 
+                       (300 + artist_width//2 + 10, 70 + title_height + 10)], 
+                      fill='rgba(29, 185, 84, 100)')
+        draw.text((300, 80), f"by {artist}", 
+                 fill='white', font=font_artist, anchor="mm")
+        
+        # Add subtle border
+        draw.rectangle([(5, 5), (595, 595)], outline='#1DB954', width=2)
         
         # Save the image
-        img.save(output_path, 'JPEG', quality=95)
+        img.save(output_path, 'JPEG', quality=95, optimize=True)
         print(f"✅ Branded cover saved to: {output_path}")
         print(f"📏 Cover size: {os.path.getsize(output_path)} bytes")
+        print(f"🎯 Cover dimensions: {img.size}")
         
     except Exception as e:
         print(f"❌ Error creating branded cover: {e}")
@@ -145,15 +184,27 @@ def create_branded_cover(song, logo_path, output_path):
         traceback.print_exc()
         
         # Create ultra-simple fallback cover
-        from PIL import Image, ImageDraw
-        img = Image.new('RGB', (600, 600), color='#1DB954')
-        draw = ImageDraw.Draw(img)
-        draw.text((300, 250), "MusicCenterUg", 
-                 fill='white', font=ImageFont.load_default(), anchor="mm")
-        draw.text((300, 300), song.title[:20], 
-                 fill='white', font=ImageFont.load_default(), anchor="mm")
-        img.save(output_path, 'JPEG')
-        print(f"⚠️ Created fallback cover: {output_path}")
+        try:
+            from PIL import Image, ImageDraw, ImageFont
+            img = Image.new('RGB', (600, 600), color='#121212')
+            draw = ImageDraw.Draw(img)
+            
+            try:
+                font = ImageFont.truetype("arial.ttf", 40)
+            except:
+                font = ImageFont.load_default()
+            
+            draw.text((300, 250), "MusicCenterUg", 
+                     fill='#1DB954', font=font, anchor="mm")
+            draw.text((300, 300), song.title[:20], 
+                     fill='white', font=font, anchor="mm")
+            draw.text((300, 550), "Downloaded from MusicCenterUg", 
+                     fill='#1DB954', font=font, anchor="mm")
+            
+            img.save(output_path, 'JPEG', quality=90)
+            print(f"⚠️ Created fallback cover: {output_path}")
+        except:
+            print("❌ Failed to create fallback cover")
 
 def add_metadata_to_audio(audio_path, song, cover_path, logo_path):
     """Add metadata and branding to audio file"""
@@ -226,7 +277,7 @@ def add_metadata_to_audio(audio_path, song, cover_path, logo_path):
                 print("ℹ️ No cover art to add")
             
             # Add branding comment
-            comment_text = f"Downloaded from MusicCityUg - Uganda's Music Hub\n{song.artist.name} - {song.title}"
+            comment_text = f"Downloaded from MusicCenterUgUg - Uganda's Music Hub\n{song.artist.name} - {song.title}"
             audio['COMM'] = COMM(encoding=3, lang='eng', desc='', text=[comment_text])
             
             # Save metadata
@@ -878,7 +929,7 @@ def download_song(request, song_id):
         if not safe_artist:
             safe_artist = "artist"
         
-        filename = f"{safe_title} - {safe_artist} - MusicCityUg.mp3"
+        filename = f"{safe_title} - {safe_artist} - MusicCenterUg.mp3"
         
         # Serve the file
         response = FileResponse(
