@@ -33,11 +33,11 @@
                 <div class="song-details">
                     <div class="song-title-artist">
                         <h4 class="song-title">{{ song.title }}</h4>
-                        <!-- UPDATED: Display artists with featured indicator -->
+                        <!-- UPDATED: Display artists with display_artist_name -->
                         <div class="song-artist">
-                            <!-- Primary Artist -->
+                            <!-- Primary Artist with display name -->
                             <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                                {{ song.artist.name }}
+                                {{ song.display_artist }}
                             </a>
                             
                             <!-- Featured Artists -->
@@ -52,9 +52,21 @@
                                 {% endif %}
                             {% endwith %}
                         </div>
+                        
+                        <!-- Show original artist name if different from display name -->
+                        {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                        <div class="original-artist-note">
+                            <small class="original-artist">
+                                <i class="fas fa-info-circle"></i> 
+                                Original: {{ song.artist.name }}
+                            </small>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="song-meta-info">
+                        {% if song.genre %}
                         <span class="song-genre">{{ song.genre.name }}</span>
+                        {% endif %}
                         <span class="song-duration">{{ song.formatted_duration }}</span>
                         {% if song.featured_artists.exists %}
                         <span class="featured-count-badge" title="{{ song.featured_artists.count }} featured artist{{ song.featured_artists.count|pluralize }}">
@@ -84,7 +96,11 @@
                     <button class="mdundo-download-btn" onclick="downloadSong({{ song.id }}, this)" title="Download">
                         <i class="fas fa-download"></i>
                     </button>
-                   
+                    {% if user.is_authenticated %}
+                    <button class="mdundo-like-btn" onclick="likeSong({{ song.id }}, this)" title="Like">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}
@@ -158,7 +174,7 @@
                     </div>
                     <div class="genre-info">
                         <h4 class="genre-name">{{ genre.name }}</h4>
-                        <p class="genre-count">{{ genre.song_count }} songs</p>
+                        <p class="genre-count">{{ genre.songs.count }} songs</p>
                     </div>
                     <i class="fas fa-chevron-right"></i>
                 </a>
@@ -305,27 +321,59 @@
     gap: 3px;
 }
 
-.song-artist a.artist-link {
+/* Artist Links Styling */
+.artist-link {
     color: var(--primary);
     text-decoration: none;
     transition: var(--transition);
 }
 
-.song-artist a.primary-artist {
-    color: var(--light);
+.artist-link.primary-artist {
+    color: var(--uganda-yellow); /* Orange color for display artist name */
     font-weight: 600;
 }
 
-.song-artist a.artist-link:hover {
-    color: var(--primary-light);
+.artist-link.featured-artist {
+    color: var(--spotify-green); /* Green color for featured artists */
+    font-weight: 500;
+}
+
+.artist-link:hover {
     text-decoration: underline;
+}
+
+.artist-link.primary-artist:hover {
+    color: #ffdf4d; /* Lighter orange on hover */
+}
+
+.artist-link.featured-artist:hover {
+    color: #1ed760; /* Lighter green on hover */
 }
 
 .song-artist .ft-text {
     font-size: 12px;
     margin: 0 3px;
-    color: var(--gray);
+    color: var(--spotify-light-gray);
     opacity: 0.7;
+}
+
+/* Original Artist Note */
+.original-artist-note {
+    margin-top: 4px;
+    width: 100%;
+}
+
+.original-artist {
+    color: var(--spotify-text-secondary);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+}
+
+.original-artist i {
+    font-size: 0.7rem;
 }
 
 .song-meta-info {
@@ -711,13 +759,17 @@
         line-height: 1.4;
     }
     
-    .song-artist a {
+    .artist-link {
         white-space: normal;
         word-break: break-word;
     }
     
     .song-artist .ft-text {
         font-size: 11px;
+    }
+    
+    .original-artist {
+        font-size: 0.7rem;
     }
     
     .featured-count-badge {
@@ -794,9 +846,18 @@
         line-height: 1.3;
     }
     
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.75rem;
+    }
+    
     .song-artist .ft-text {
         font-size: 10px;
         margin: 0 2px;
+    }
+    
+    .original-artist {
+        font-size: 0.65rem;
     }
     
     .featured-count-badge {
@@ -893,13 +954,15 @@ function initializeSearchPlaylist() {
             id: {{ song.id }},
             title: "{{ song.title|escapejs }}",
             artist: "{{ song.artist.name|escapejs }}",
+            display_artist: "{{ song.display_artist|escapejs }}",
+            original_artist: "{{ song.artist.name|escapejs }}",
+            has_display_name: {% if song.display_artist_name and song.display_artist_name != song.artist.name %}true{% else %}false{% endif %},
             audio: "{{ song.audio_file.url }}",
             cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
             duration: {{ song.duration }},
             plays: {{ song.plays }},
             downloads: {{ song.downloads }},
             genre: "{{ song.genre.name|escapejs }}",
-            // Add featured artists data for display
             featured_artists: [
                 {% for artist in song.featured_artists.all %}
                 {
@@ -1084,6 +1147,28 @@ function downloadSong(songId, buttonElement = null) {
     // Open download in new tab (this will trigger the Django view)
     window.open(`/download-song/${songId}/`, '_blank');
     
+    // Track download analytics
+    fetch('/api/track-download/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            song_id: songId,
+            song_title: getSongTitle(songId),
+            artist_name: getDisplayArtistName(songId),
+            original_artist_name: getOriginalArtistName(songId)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Download tracked:', data);
+    })
+    .catch(error => {
+        console.error('Error tracking download:', error);
+    });
+    
     // Restore button state if button provided
     if (buttonElement) {
         setTimeout(() => {
@@ -1116,6 +1201,41 @@ function updateSongDownloadCount(songId) {
     });
 }
 
+// Helper function to get song title from data attributes
+function getSongTitle(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const titleElement = card.querySelector('.song-title');
+        return titleElement ? titleElement.textContent.trim() : 'Unknown Song';
+    }
+    return 'Unknown Song';
+}
+
+// Helper function to get display artist name from data attributes
+function getDisplayArtistName(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const artistElement = card.querySelector('.artist-link.primary-artist');
+        return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
+    }
+    return 'Unknown Artist';
+}
+
+// Helper function to get original artist name from data attributes
+function getOriginalArtistName(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const originalNote = card.querySelector('.original-artist');
+        if (originalNote) {
+            // Extract original artist name from the note
+            const text = originalNote.textContent.trim();
+            const match = text.match(/Original:\s*(.+)/);
+            return match ? match[1].trim() : 'Unknown Artist';
+        }
+    }
+    return 'Unknown Artist';
+}
+    
 // Like song function
 function likeSong(songId, buttonElement) {
     fetch(`/like-song/${songId}/`, {
