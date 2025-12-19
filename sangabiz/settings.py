@@ -27,8 +27,8 @@ SECRET_KEY = os.getenv(
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "musiccityug.com",
-    "www.musiccityug.com",
+    "musiccenterug.com",
+    "www.musiccenterug.com",
     "sangabiz.com",
     "www.sangabiz.com",
     "31.220.78.100",
@@ -306,12 +306,6 @@ JAZZMIN_SETTINGS = {
     # ========== CUSTOM ACTIONS ==========
     "custom_links": {
         "music": [
-            {
-                "name": "Bulk Upload",
-                "url": "/admin/music/song/bulk-upload/",
-                "icon": "fas fa-upload",
-                "permissions": ["music.add_song"]
-            },
             {
                 "name": "Quick Stats",
                 "url": "/admin/music/quick-stats/",
