@@ -29,6 +29,8 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "musiccenterug.com",
     "www.musiccenterug.com",
+    "musiccityug.com"
+    "www.musiccityug.com"
     "sangabiz.com",
     "www.sangabiz.com",
     "31.220.78.100",
