@@ -4,37 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MusicCity UG | Uganda's Music Hub{% endblock %}</title>
+    <title>{% block title %}MusicCenter UG | Uganda's Music Hub{% endblock %}</title>
     
     <!-- Basic Meta Tags -->
     <meta name="description" content="{% block description %}Uganda's Premier Music Platform for Music, News, and Entertainment{% endblock %}">
     <meta name="keywords" content="music, uganda, african music, artists, songs, entertainment, musiccity">
     
     <!-- Open Graph Meta Tags (for Facebook, LinkedIn, WhatsApp, etc.) -->
-    <meta property="og:site_name" content="MusicCity UG">
+    <meta property="og:site_name" content="MusisCenter UG">
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="website">
     
     <!-- Default OG tags that can be overridden in child templates -->
     {% block og_tags %}
-    <meta property="og:title" content="MusicCity UG | Uganda's Music Hub">
+    <meta property="og:title" content="MusicCenter UG | Uganda's Music Hub">
     <meta property="og:description" content="Uganda's Premier Music Platform for Music, News, and Entertainment">
     {% if request.get_host %}
     <meta property="og:image" content="https://{{ request.get_host }}{% static 'images/logo.jpeg' %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     {% else %}
     <meta property="og:image" content="{% static 'images/logo.jpeg' %}">
-    <meta property="og:url" content="https://musiccityug.com{{ request.path }}">
+    <meta property="og:url" content="https://musiccenterug.com{{ request.path }}">
     {% endif %}
     {% endblock %}
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@MusicCityUG">
-    <meta name="twitter:creator" content="@MusicCityUG">
+    <meta name="twitter:site" content="@MusicCenterUG">
+    <meta name="twitter:creator" content="@MusicCenterUG">
     
     {% block twitter_tags %}
-    <meta name="twitter:title" content="MusicCity UG | Uganda's Music Hub">
+    <meta name="twitter:title" content="MusicCenter UG | Uganda's Music Hub">
     <meta name="twitter:description" content="Uganda's Premier Music Platform for Music, News, and Entertainment">
     {% if request.get_host %}
     <meta name="twitter:image" content="https://{{ request.get_host }}{% static 'images/logo.jpeg' %}">
@@ -67,8 +67,8 @@
         <div class="mobile-nav-menu" id="mobile-nav-menu">
             <div class="mobile-nav-header">
                 <div class="logo">
-                    <img src="{% static 'images/logo.jpeg' %}" alt="MusicCity UG Logo" onerror="this.style.display='none'">
-                    <span class="logo-text">MusicCity UG</span>
+                    <img src="{% static 'images/logo.jpeg' %}" alt="MusicCenter UG Logo" onerror="this.style.display='none'">
+                    <span class="logo-text">MusicCenter UG</span>
                 </div>
                 <button class="nav-btn" id="close-mobile-nav">
                     <i class="fas fa-times"></i>
@@ -203,7 +203,7 @@
                             </div>
 
                             <div class="help-contacts">
-                                <a href="https://wa.me/256759803935?text=Hello%20MusicCity%20UG%20Team,%20I%20need%20help%20uploading%20my%20music" 
+                                <a href="https://wa.me/256759803935?text=Hello%20MusicCenter%20UG%20Team,%20I%20need%20help%20uploading%20my%20music" 
                                    target="_blank" 
                                    class="contact-item whatsapp">
                                     <div class="contact-icon">
@@ -223,7 +223,7 @@
                                     </div>
                                 </a>
 
-                                <a href="mailto:musiccityug@gmail.com?subject=Music%20Upload%20Support%20-%20MusicCity%20UG&body=Hello%20MusicCity%20UG%20Team,%0A%0AI%20need%20assistance%20with:%0A%0A-%20Music%20upload%20process%0A-%20File%20format%20requirements%0A-%20Technical%20issues%0A-%20Other%20queries%0A%0APlease%20provide%20your%20guidance.%0A%0AThank you." 
+                                <a href="mailto:musiccityug@gmail.com?subject=Music%20Upload%20Support%20-%20Musiccenter%20UG&body=Hello%20MusicCity%20UG%20Team,%0A%0AI%20need%20assistance%20with:%0A%0A-%20Music%20upload%20process%0A-%20File%20format%20requirements%0A-%20Technical%20issues%0A-%20Other%20queries%0A%0APlease%20provide%20your%20guidance.%0A%0AThank you." 
                                    class="contact-item email">
                                     <div class="contact-icon">
                                         <i class="fas fa-envelope"></i>
