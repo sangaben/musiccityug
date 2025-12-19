@@ -234,16 +234,16 @@ SITE_URL = "https://musiccityug.com"
 
 JAZZMIN_SETTINGS = {
     # ========== BRANDING & THEME ==========
-    "site_title": "MusicCityUG Admin",
-    "site_header": "MusicCityUG",
-    "site_brand": "MusicCityUG",
+    "site_title": "MusicCenterUG Admin",
+    "site_header": "MusicCenterUG",
+    "site_brand": "MusicCenterUG",
     "site_logo": "images/logo.jpeg",
     "site_icon": "images/favicon.ico",
     "login_logo": "images/favicon.ico",
     "login_logo_dark": "images/favicon.ico",
     "site_logo_classes": "img-circle",
-    "welcome_sign": "Welcome to MusicCityUG Administration",
-    "copyright": "© 2025 MusicCityUG | Uganda's Sound, Your Playlist",
+    "welcome_sign": "Welcome to MusicCenterUG Administration",
+    "copyright": "© 2026 MusicCenterUG | Uganda's Sound, Your Playlist",
     
     # ========== THEME & UI ==========
     "theme": "darkly",
@@ -307,14 +307,6 @@ JAZZMIN_SETTINGS = {
     
     # ========== CUSTOM ACTIONS ==========
     "custom_links": {
-        "music": [
-            {
-                "name": "Quick Stats",
-                "url": "/admin/music/quick-stats/",
-                "icon": "fas fa-chart-pie",
-                "permissions": ["music.view_song"]
-            }
-        ],
         "artists": [
             {
                 "name": "Featured Artists",
