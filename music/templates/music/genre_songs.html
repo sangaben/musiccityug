@@ -39,41 +39,145 @@
             </div>
         </div>
 
-
-       <!-- Update the list view section -->
-<div id="list-view-container" class="mdundo-song-list">
-    {% for song in songs %}
-    <div class="mdundo-song-item" data-song-id="{{ song.id }}">
-        <!-- ... existing code ... -->
-        <div class="song-details">
-            <div class="song-title-artist">
-                <h4 class="song-title">{{ song.title }}</h4>
-                <!-- UPDATED: Show artists with featured artists -->
-                <div class="song-artist">
-                    <!-- Primary Artist -->
-                    <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                        {{ song.artist.name }}
-                    </a>
+        <!-- Grid View -->
+        <div id="genre-songs-grid" class="featured-grid" style="display: none;">
+            {% for song in songs %}
+            <div class="song-card" data-song-id="{{ song.id }}" onclick="playSongFromCard({{ song.id }})">
+                <div class="card-image" style="background-image: url('{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}');">
+                    <div class="play-overlay">
+                        <button class="play-btn-large" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3>{{ song.title }}</h3>
+                    <!-- UPDATED: Display artists with display_artist_name -->
+                    <div class="song-artists">
+                        <!-- Primary Artist with display name -->
+                        <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                            {{ song.display_artist }}
+                        </a>
+                        
+                        <!-- Featured Artists -->
+                        {% with featured_artists=song.featured_artists.all %}
+                            {% if featured_artists %}
+                                <span class="ft-text">ft.</span>
+                                {% for artist in featured_artists %}
+                                    <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                        {{ artist.name }}
+                                    </a>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                <span class="featured-indicator" title="{{ featured_artists|length }} featured artist{{ featured_artists|length|pluralize }}">
+                                    <i class="fas fa-user-friends"></i>
+                                    +{{ featured_artists|length }}
+                                </span>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
                     
-                    <!-- Featured Artists -->
-                    {% with featured_artists=song.featured_artists.all %}
-                        {% if featured_artists %}
-                            <span class="ft-text">ft.</span>
-                            {% for artist in featured_artists %}
-                                <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
-                                    {{ artist.name }}
-                                </a>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+                    <!-- Show original artist name if different from display name -->
+                    {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                    <div class="original-artist-note">
+                        <small class="original-artist">
+                            <i class="fas fa-info-circle"></i> 
+                            Original: {{ song.artist.name }}
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Song Statistics -->
+                    <div class="song-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-play"></i>
+                            <span class="plays-count">{{ song.plays }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-download"></i>
+                            <span class="downloads-count">{{ song.downloads }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ song.formatted_duration }}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="play-btn" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="action-buttons">
+                            <button class="download-btn" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            {% if user.is_authenticated %}
+                            <button class="action-btn" onclick="event.stopPropagation(); likeSong({{ song.id }}, this)" title="Like">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="song-meta-info">
-                <span class="song-genre">{{ song.genre.name }}</span>
-                <span class="song-duration">{{ song.duration|time:"i:s" }}</span>
+            {% empty %}
+            <div class="no-results" style="display: block;">
+                <i class="fas fa-music"></i>
+                <h3>No songs found in this genre</h3>
+                <p>Check back later for new {{ genre.name }} songs</p>
             </div>
+            {% endfor %}
         </div>
-        <!-- ... rest of existing code ... -->
+
+        <!-- List View -->
+        <div id="list-view-container" class="mdundo-song-list">
+            {% for song in songs %}
+            <div class="mdundo-song-item" data-song-id="{{ song.id }}" onclick="playSongFromCard({{ song.id }})">
+                <!-- Song Image -->
+                <div class="song-image">
+                    <img src="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}" 
+                         alt="{{ song.title }}" 
+                         onerror="this.src='{% static 'images/default-cover.jpg' %}'"
+                         loading="lazy">
+                </div>
+                
+                <!-- Song Details -->
+                <div class="song-details">
+                    <div class="song-title-artist">
+                        <h4 class="song-title">{{ song.title }}</h4>
+                        <!-- UPDATED: Display artists with display_artist_name -->
+                        <div class="song-artist">
+                            <!-- Primary Artist with display name -->
+                            <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                                {{ song.display_artist }}
+                            </a>
+                            
+                            <!-- Featured Artists -->
+                            {% with featured_artists=song.featured_artists.all %}
+                                {% if featured_artists %}
+                                    <span class="ft-text">ft.</span>
+                                    {% for artist in featured_artists %}
+                                        <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                            {{ artist.name }}
+                                        </a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        
+                        <!-- Show original artist name if different from display name -->
+                        {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                        <div class="original-artist-note">
+                            <small class="original-artist">
+                                <i class="fas fa-info-circle"></i> 
+                                Original: {{ song.artist.name }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="song-meta-info">
+                        <span class="song-genre">{{ song.genre.name }}</span>
+                        <span class="song-duration">{{ song.formatted_duration }}</span>
+                    </div>
+                </div>
                 
                 <!-- Song Stats -->
                 <div class="song-stats">
@@ -89,13 +193,17 @@
                 
                 <!-- Action Buttons -->
                 <div class="song-actions">
-                    <button class="mdundo-play-btn" onclick="playSongFromCard({{ song.id }})" title="Play">
+                    <button class="mdundo-play-btn" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})" title="Play">
                         <i class="fas fa-play"></i>
                     </button>
-                    <button class="mdundo-download-btn" onclick="downloadSong({{ song.id }}, this)" title="Download">
+                    <button class="mdundo-download-btn" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)" title="Download">
                         <i class="fas fa-download"></i>
                     </button>
-                    
+                    {% if user.is_authenticated %}
+                    <button class="mdundo-like-btn" onclick="event.stopPropagation(); likeSong({{ song.id }}, this)" title="Like">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}
@@ -127,7 +235,7 @@
             <a href="{% url 'genre_songs' other_genre.id %}" class="genre-link">
                 <div class="genre-card" style="background: {{ other_genre.color|default:'linear-gradient(135deg, #6c5ce7, #fd79a8)' }};">
                     <span class="genre-name">{{ other_genre.name }}</span>
-                    <div class="genre-count">{{ other_genre.song_count }} songs</div>
+                    <div class="genre-count">{{ other_genre.songs.count }} songs</div>
                 </div>
             </a>
             {% endfor %}
@@ -161,9 +269,9 @@
     min-height: 20px;
 }
 
-/* Primary artist - White */
+/* Primary artist - Orange */
 .artist-link.primary-artist {
-    color: var(--light);
+    color: var(--uganda-yellow);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
@@ -171,13 +279,13 @@
 }
 
 .artist-link.primary-artist:hover {
-    color: var(--primary);
+    color: #ffdf4d; /* Lighter orange on hover */
     text-decoration: underline;
 }
 
-/* Featured artists - Orange */
+/* Featured artists - Green */
 .artist-link.featured-artist {
-    color: #ff9900; /* Orange color for featured artists */
+    color: var(--spotify-green);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
@@ -185,16 +293,35 @@
 }
 
 .artist-link.featured-artist:hover {
-    color: #ffcc00; /* Lighter orange on hover */
+    color: #1ed760; /* Lighter green on hover */
     text-decoration: underline;
 }
 
 /* "ft." text styling */
 .ft-text {
-    color: var(--gray);
+    color: var(--spotify-light-gray);
     font-size: 0.85rem;
     font-weight: 500;
     margin: 0 4px;
+}
+
+/* Original artist note */
+.original-artist-note {
+    margin-top: 4px;
+    width: 100%;
+}
+
+.original-artist {
+    color: var(--spotify-text-secondary);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+}
+
+.original-artist i {
+    font-size: 0.7rem;
 }
 
 /* Genre badge */
@@ -211,9 +338,9 @@
 /* Featured indicator (icon + number) */
 .featured-indicator {
     margin-left: 6px;
-    color: var(--gray);
+    color: var(--spotify-light-gray);
     font-size: 0.75rem;
-    background: rgba(255, 153, 0, 0.1); /* Orange tint */
+    background: rgba(255, 209, 0, 0.1);
     padding: 2px 6px;
     border-radius: 10px;
     display: inline-flex;
@@ -223,7 +350,7 @@
 
 .featured-indicator i {
     font-size: 0.7rem;
-    color: #ff9900;
+    color: var(--uganda-yellow);
 }
 
 /* List View Specific Styles */
@@ -239,16 +366,23 @@
 .mdundo-song-list .artist-link.primary-artist {
     font-size: 14px;
     font-weight: 500;
+    color: var(--uganda-yellow);
 }
 
 .mdundo-song-list .artist-link.featured-artist {
     font-size: 14px;
-    color: #ff9900;
+    color: var(--spotify-green);
 }
 
 .mdundo-song-list .ft-text {
     font-size: 13px;
     margin: 0 3px;
+    color: var(--spotify-light-gray);
+}
+
+.mdundo-song-list .original-artist-note {
+    width: 100%;
+    margin-top: 2px;
 }
 
 /* Grid View Specific Styles */
@@ -258,48 +392,17 @@
 
 .song-card .artist-link.primary-artist {
     font-size: 14px;
+    color: var(--uganda-yellow);
 }
 
 .song-card .artist-link.featured-artist {
     font-size: 14px;
-    color: #ff9900;
+    color: var(--spotify-green);
 }
 
 .song-card .ft-text {
     font-size: 13px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.85rem;
-    }
-    
-    .mdundo-song-list .song-artist {
-        font-size: 13px;
-    }
-    
-    .featured-indicator {
-        display: none; /* Hide on smaller screens */
-    }
-}
-
-@media (max-width: 480px) {
-    .song-artists {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-    }
-    
-    .genre-badge {
-        margin-left: 0;
-        margin-top: 5px;
-    }
-    
-    .mdundo-song-list .song-artist {
-        font-size: 12px;
-    }
+    color: var(--spotify-light-gray);
 }
 
 /* Section Header */
@@ -431,16 +534,6 @@
     font-weight: 600;
     margin: 0;
     color: var(--light);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.song-artist {
-    font-size: 14px;
-    color: var(--primary);
-    margin: 0;
-    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -627,13 +720,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.card-content p {
-    font-size: 14px;
-    color: var(--gray);
-    margin: 0 0 15px 0;
-    line-height: 1.4;
 }
 
 .song-stats {
@@ -859,6 +945,20 @@
         padding: 8px;
     }
     
+    /* Adjust artist display for mobile */
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.8rem;
+    }
+    
+    .ft-text {
+        font-size: 0.8rem;
+    }
+    
+    .original-artist {
+        font-size: 0.7rem;
+    }
+    
     .genres-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 15px;
@@ -901,6 +1001,24 @@
         font-size: 13px;
         padding: 6px;
     }
+    
+    /* Adjust artist links for very small screens */
+    .artist-link.primary-artist,
+    .artist-link.featured-artist {
+        font-size: 0.75rem;
+    }
+    
+    .ft-text {
+        font-size: 0.75rem;
+    }
+    
+    .featured-indicator {
+        display: none; /* Hide on very small screens */
+    }
+    
+    .original-artist {
+        font-size: 0.65rem;
+    }
 }
 </style>
 {% endblock %}
@@ -925,13 +1043,24 @@ function initializeGenrePlaylist() {
             id: {{ song.id }},
             title: "{{ song.title|escapejs }}",
             artist: "{{ song.artist.name|escapejs }}",
+            display_artist: "{{ song.display_artist|escapejs }}",
+            original_artist: "{{ song.artist.name|escapejs }}",
+            has_display_name: {% if song.display_artist_name and song.display_artist_name != song.artist.name %}true{% else %}false{% endif %},
             genre: "{{ song.genre.name|escapejs }}",
             cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
             audio: "{{ song.audio_file.url }}",
             duration: {{ song.duration }},
             plays: {{ song.plays }},
             downloads: {{ song.downloads }},
-            upload_date: "{{ song.upload_date|date:'Y-m-d' }}"
+            upload_date: "{{ song.upload_date|date:'Y-m-d' }}",
+            featured_artists: [
+                {% for artist in song.featured_artists.all %}
+                {
+                    id: {{ artist.id }},
+                    name: "{{ artist.name|escapejs }}"
+                },
+                {% endfor %}
+            ]
         },
         {% endfor %}
     ];
@@ -1138,7 +1267,8 @@ function downloadSong(songId, buttonElement = null) {
         body: JSON.stringify({
             song_id: songId,
             song_title: getSongTitle(songId),
-            artist_name: getArtistName(songId)
+            artist_name: getDisplayArtistName(songId),
+            original_artist_name: getOriginalArtistName(songId)
         })
     })
     .then(response => response.json())
@@ -1168,12 +1298,27 @@ function getSongTitle(songId) {
     return 'Unknown Song';
 }
 
-// Helper function to get artist name from data attributes
-function getArtistName(songId) {
+// Helper function to get display artist name from data attributes
+function getDisplayArtistName(songId) {
     const card = document.querySelector(`[data-song-id="${songId}"]`);
     if (card) {
-        const artistElement = card.querySelector('.song-artist, p');
+        const artistElement = card.querySelector('.artist-link.primary-artist');
         return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
+    }
+    return 'Unknown Artist';
+}
+
+// Helper function to get original artist name from data attributes
+function getOriginalArtistName(songId) {
+    const card = document.querySelector(`[data-song-id="${songId}"]`);
+    if (card) {
+        const originalNote = card.querySelector('.original-artist');
+        if (originalNote) {
+            // Extract original artist name from the note
+            const text = originalNote.textContent.trim();
+            const match = text.match(/Original:\s*(.+)/);
+            return match ? match[1].trim() : 'Unknown Artist';
+        }
     }
     return 'Unknown Artist';
 }
