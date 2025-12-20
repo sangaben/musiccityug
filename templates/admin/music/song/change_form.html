@@ -20,6 +20,7 @@
         --hover-bg: #252525;
         --upload-bg: rgba(138, 43, 226, 0.1);
         --upload-border: rgba(138, 43, 226, 0.3);
+        --song-name-color: #ffffff;
     }
 
     /* Global dark theme */
@@ -36,7 +37,51 @@
         background: var(--dark-bg) !important;
     }
 
-    /* Form container - Dark with gradient */
+    /* FIX: Song name input styling - make it clearly visible */
+    input[name="name"],
+    input[name="title"],
+    input[name="song_name"] {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 2px solid var(--accent-color) !important;
+        color: var(--song-name-color) !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        padding: 15px 20px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.2) !important;
+        transition: all 0.3s !important;
+    }
+
+    input[name="name"]:focus,
+    input[name="title"]:focus,
+    input[name="song_name"]:focus {
+        background: rgba(255, 255, 255, 0.18) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 25px rgba(0, 212, 255, 0.3) !important;
+        outline: none !important;
+    }
+
+    /* Song name label styling */
+    label[for="id_name"],
+    label[for="id_title"],
+    label[for="id_song_name"] {
+        color: var(--primary-color) !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 15px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    label[for="id_name"]:before,
+    label[for="id_title"]:before,
+    label[for="id_song_name"]:before {
+        content: "🎵";
+        font-size: 1.2rem;
+    }
+
+    /* Form container */
     .form-container {
         background: linear-gradient(135deg, var(--darker-bg) 0%, #1a0033 100%);
         padding: 30px;
@@ -137,6 +182,131 @@
         font-size: 1.2rem;
     }
 
+    /* FIX: Featured Artists Selector - Responsive and better styling */
+    .selector {
+        background: var(--card-bg) !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Fix for selector layout on mobile */
+    .selector .selector-available,
+    .selector .selector-chosen {
+        width: 100% !important;
+        margin-bottom: 15px !important;
+    }
+
+    .selector .selector-chooser {
+        clear: both !important;
+        padding: 15px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background: var(--darker-bg) !important;
+    }
+
+    .selector .selector-chooser ul {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 15px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .selector .selector-chooser li {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .selector .selector-add,
+    .selector .selector-remove {
+        background: var(--accent-color) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 12px 20px !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s !important;
+        min-width: 120px !important;
+        text-align: center !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    .selector .selector-add:hover,
+    .selector .selector-remove:hover {
+        background: var(--accent-hover) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4) !important;
+    }
+
+    .selector .selector-add:active,
+    .selector .selector-remove:active {
+        transform: translateY(0) !important;
+    }
+
+    .selector h2 {
+        background: linear-gradient(135deg, var(--accent-color), #6a0dad) !important;
+        color: white !important;
+        padding: 15px 20px !important;
+        margin: 0 !important;
+        border: none !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .selector select {
+        background: var(--darker-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        min-height: 150px !important;
+        width: 100% !important;
+    }
+
+    .selector option {
+        background: var(--darker-bg) !important;
+        color: var(--text-primary) !important;
+        padding: 12px 15px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        cursor: pointer !important;
+        transition: all 0.2s !important;
+    }
+
+    .selector option:hover {
+        background: var(--hover-bg) !important;
+        color: var(--primary-color) !important;
+    }
+
+    .selector option:checked {
+        background: var(--accent-color) !important;
+        color: white !important;
+        font-weight: 600 !important;
+    }
+
+    /* Selected artists counter */
+    .selected-counter {
+        background: var(--primary-color);
+        color: var(--dark-bg);
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-left: 10px;
+    }
+
     /* Dark form rows */
     .form-row {
         margin-bottom: 20px;
@@ -162,13 +332,6 @@
         font-size: 0.95rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-
-    .form-row label:after {
-        content: " *";
-        color: var(--error-color);
-        font-weight: bold;
-        margin-left: 3px;
     }
 
     /* Dark input fields */
@@ -203,7 +366,7 @@
         opacity: 0.6;
     }
 
-    /* DARK FILE UPLOAD SECTION - SPECIFIC STYLING */
+    /* Dark file upload */
     .file-upload-container {
         background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(0, 212, 255, 0.05));
         border: 3px dashed var(--upload-border);
@@ -224,12 +387,6 @@
         box-shadow: 0 10px 40px rgba(138, 43, 226, 0.2);
     }
 
-    .file-upload-container.drag-over {
-        background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 212, 255, 0.1));
-        border-color: var(--primary-color);
-        box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-    }
-
     .file-upload-icon {
         font-size: 64px;
         color: var(--accent-color);
@@ -238,26 +395,12 @@
         transition: all 0.3s;
     }
 
-    .file-upload-container:hover .file-upload-icon {
-        transform: scale(1.1) rotate(5deg);
-        color: var(--primary-color);
-    }
-
     .file-upload-title {
         color: var(--text-primary);
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 10px;
         letter-spacing: 0.5px;
-    }
-
-    .file-upload-subtitle {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        margin-bottom: 25px;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
     }
 
     .file-upload-button {
@@ -276,138 +419,6 @@
         box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
     }
 
-    .file-upload-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
-        background: linear-gradient(135deg, var(--accent-hover), #7b1fd9);
-    }
-
-    .file-upload-info {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-        margin-top: 20px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        border-left: 3px solid var(--primary-color);
-    }
-
-    /* Audio preview section - Dark theme */
-    .audio-preview-container {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 12px;
-        padding: 25px;
-        margin-top: 20px;
-        border: 2px solid rgba(138, 43, 226, 0.3);
-        position: relative;
-    }
-
-    .audio-preview-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .audio-preview-title {
-        color: var(--primary-color);
-        font-size: 1.1rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .audio-info {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-top: 15px;
-    }
-
-    .audio-info-item {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .audio-info-item i {
-        color: var(--accent-color);
-    }
-
-    /* Custom audio player - Dark theme */
-    audio {
-        width: 100%;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.2);
-        padding: 10px;
-    }
-
-    audio::-webkit-media-controls-panel {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-    }
-
-    audio::-webkit-media-controls-current-time-display,
-    audio::-webkit-media-controls-time-remaining-display {
-        color: var(--text-primary) !important;
-    }
-
-    /* Checkboxes */
-    .checkbox-row {
-        display: flex;
-        gap: 25px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-    }
-
-    .checkbox-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .checkbox-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        transform: translateY(-2px);
-    }
-
-    .checkbox-item input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-        border: 2px solid var(--border-color);
-        background: rgba(255, 255, 255, 0.1);
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .checkbox-item input[type="checkbox"]:checked {
-        background: var(--accent-color);
-        border-color: var(--accent-color);
-    }
-
-    .checkbox-item label {
-        color: var(--text-primary);
-        cursor: pointer;
-        margin: 0;
-        font-weight: 500;
-        text-transform: none;
-        letter-spacing: normal;
-    }
-
     /* Dark submit button */
     .submit-row {
         background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(15, 15, 15, 0.9));
@@ -421,16 +432,6 @@
         position: relative;
         overflow: hidden;
         backdrop-filter: blur(10px);
-    }
-
-    .submit-row::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
     }
 
     .submit-row input[type="submit"] {
@@ -450,87 +451,7 @@
         box-shadow: 0 6px 25px rgba(138, 43, 226, 0.4);
     }
 
-    .submit-row input[type="submit"]:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 35px rgba(138, 43, 226, 0.6);
-        background: linear-gradient(135deg, var(--accent-hover), #00e5ff);
-    }
-
-    .submit-row input[type="submit"]:active {
-        transform: translateY(-1px);
-    }
-
-    /* Dark help text */
-    .help {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        margin-top: 10px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        border-left: 4px solid var(--primary-color);
-        line-height: 1.6;
-    }
-
-    /* Dark error styling */
-    .errorlist {
-        color: var(--error-color);
-        margin: 10px 0 0 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    .errorlist li {
-        padding: 12px 15px;
-        background: rgba(255, 71, 87, 0.1);
-        border-radius: 8px;
-        margin-bottom: 8px;
-        border-left: 4px solid var(--error-color);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .errorlist li:before {
-        content: '⚠️';
-        font-size: 1rem;
-    }
-
-    /* Featured artists selector - Dark theme */
-    .selector {
-        background: var(--darker-bg) !important;
-        border: 2px solid var(--border-color) !important;
-        border-radius: 12px !important;
-        overflow: hidden !important;
-    }
-
-    .selector h2 {
-        background: linear-gradient(135deg, var(--accent-color), #6a0dad) !important;
-        color: white !important;
-        padding: 15px 20px !important;
-        margin: 0 !important;
-        border: none !important;
-        font-weight: 600 !important;
-    }
-
-    .selector select {
-        background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-
-    .selector option {
-        background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
-        padding: 12px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-
-    .selector option:hover {
-        background: var(--hover-bg) !important;
-    }
-
-    /* Responsive design */
+    /* FIX: Mobile responsive for Featured Artists */
     @media (max-width: 768px) {
         .form-container {
             padding: 20px;
@@ -540,16 +461,67 @@
             padding: 20px;
         }
         
+        /* Featured Artists mobile fix */
+        .selector {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        .selector .selector-available,
+        .selector .selector-chosen {
+            width: 100% !important;
+            margin: 0 0 15px 0 !important;
+            float: none !important;
+        }
+        
+        .selector .selector-chooser {
+            order: 2 !important;
+            margin: 15px 0 !important;
+        }
+        
+        .selector .selector-chooser ul {
+            flex-direction: row !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+        }
+        
+        .selector .selector-add,
+        .selector .selector-remove {
+            min-width: 100px !important;
+            padding: 10px 15px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .selector select {
+            min-height: 120px !important;
+            font-size: 14px !important;
+        }
+        
+        .selector option {
+            padding: 10px !important;
+            font-size: 14px !important;
+        }
+        
+        /* Make song name more prominent on mobile */
+        input[name="name"],
+        input[name="title"],
+        input[name="song_name"] {
+            font-size: 14px !important;
+            padding: 12px 15px !important;
+        }
+        
+        label[for="id_name"],
+        label[for="id_title"],
+        label[for="id_song_name"] {
+            font-size: 1rem !important;
+        }
+        
         .file-upload-container {
             padding: 30px 20px;
         }
         
         .file-upload-icon {
             font-size: 48px;
-        }
-        
-        .checkbox-row {
-            gap: 15px;
         }
         
         .submit-row {
@@ -561,11 +533,45 @@
         .submit-row input[type="submit"] {
             width: 100%;
         }
-        
-        .audio-info {
-            flex-direction: column;
-            gap: 10px;
+    }
+
+    /* Extra small screens */
+    @media (max-width: 480px) {
+        .selector .selector-chooser ul {
+            flex-direction: column !important;
+            gap: 10px !important;
         }
+        
+        .selector .selector-add,
+        .selector .selector-remove {
+            width: 100% !important;
+            max-width: 200px !important;
+        }
+        
+        .selector select {
+            min-height: 100px !important;
+        }
+        
+        .form-section {
+            padding: 15px;
+        }
+        
+        .form-row {
+            padding: 15px;
+        }
+    }
+
+    /* FIX: Make selected artists easier to see */
+    .selector-chosen option:checked {
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color)) !important;
+        color: white !important;
+        position: relative !important;
+    }
+
+    .selector-chosen option:checked::before {
+        content: "✓ " !important;
+        margin-right: 5px !important;
+        font-weight: bold !important;
     }
 
     /* Scrollbar styling */
@@ -585,10 +591,6 @@
         border: 3px solid var(--darker-bg);
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, var(--accent-hover), #00e5ff);
-    }
-
     /* Selection color */
     ::selection {
         background-color: rgba(138, 43, 226, 0.5);
@@ -602,13 +604,13 @@
     <div class="form-header">
         <h1>
             <i class="fas fa-cloud-upload-alt"></i>
-            {% if add %}Upload Music Track{% else %}Edit Track Details{% endif %}
+            {% if add %}Upload Music Track{% else %}Edit "{{ original.name|default:original.title }}"{% endif %}
         </h1>
         <p>
             {% if add %}
                 Upload your music to <span class="brand-highlight">MusicCenterUG</span>. Supports MP3, WAV, FLAC formats.
             {% else %}
-                Edit your track information on <span class="brand-highlight">MusicCenterUG</span>.
+                Edit track details on <span class="brand-highlight">MusicCenterUG</span>
             {% endif %}
         </p>
     </div>
@@ -633,7 +635,7 @@
         <i class="fas fa-sliders-h"></i>
       {% elif fieldset.name == "Additional Information" %}
         <i class="fas fa-info-circle"></i>
-      {% elif fieldset.name == "Featured Artists" %}
+      {% elif "artist" in fieldset.name|lower or "featured" in fieldset.name|lower %}
         <i class="fas fa-user-friends"></i>
       {% elif fieldset.name == "Genre & Mood" %}
         <i class="fas fa-theater-masks"></i>
@@ -705,7 +707,83 @@
 <script>
 (function($) {
     $(document).ready(function() {
-        // Enhanced dark file upload with drag & drop
+        // FIX: Make song name field more prominent
+        function enhanceSongNameField() {
+            var songNameField = $('input[name="name"], input[name="title"], input[name="song_name"]').first();
+            if (songNameField.length) {
+                // Add placeholder if empty
+                if (!songNameField.attr('placeholder')) {
+                    songNameField.attr('placeholder', 'Enter song title (e.g., "Summer Vibes")');
+                }
+                
+                // Add character counter
+                var counter = $('<div class="char-counter" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px; text-align: right;"></div>');
+                songNameField.after(counter);
+                
+                function updateCounter() {
+                    var length = songNameField.val().length;
+                    var max = songNameField.attr('maxlength') || 255;
+                    counter.text(length + ' / ' + max + ' characters');
+                    
+                    if (length > max * 0.8) {
+                        counter.css('color', 'var(--error-color)');
+                    } else if (length > max * 0.6) {
+                        counter.css('color', 'orange');
+                    } else {
+                        counter.css('color', 'var(--text-secondary)');
+                    }
+                }
+                
+                songNameField.on('input', updateCounter);
+                updateCounter();
+            }
+        }
+        
+        // FIX: Enhanced Featured Artists selector for mobile
+        function enhanceFeaturedArtists() {
+            var selector = $('.selector');
+            if (selector.length) {
+                // Add selected artists counter
+                var chosenSelect = selector.find('.selector-chosen select');
+                if (chosenSelect.length) {
+                    var counter = $('<span class="selected-counter">0</span>');
+                    selector.find('.selector-chosen h2').append(counter);
+                    
+                    function updateSelectedCounter() {
+                        var count = chosenSelect.find('option').length;
+                        counter.text(count);
+                        
+                        if (count === 0) {
+                            counter.css('background', 'var(--error-color)');
+                        } else if (count <= 3) {
+                            counter.css('background', 'var(--success-color)');
+                        } else {
+                            counter.css('background', 'var(--primary-color)');
+                        }
+                    }
+                    
+                    chosenSelect.on('change', updateSelectedCounter);
+                    updateSelectedCounter();
+                }
+                
+                // Make options easier to select on mobile
+                selector.find('option').css({
+                    'padding': '12px 15px',
+                    'margin': '2px 0',
+                    'border-radius': '6px',
+                    'cursor': 'pointer'
+                });
+                
+                // Add touch feedback
+                selector.find('option').on('touchstart', function() {
+                    $(this).css('background', 'var(--hover-bg)');
+                }).on('touchend', function() {
+                    $(this).css('background', '');
+                });
+            }
+        }
+        
+        // File upload functionality
         $('.file-upload-container').each(function() {
             var container = $(this);
             var fileInput = container.find('input[type="file"]');
@@ -806,6 +884,15 @@
             $('.file-upload-container').after(audioPreview);
         }
         
+        // Initialize enhancements
+        enhanceSongNameField();
+        enhanceFeaturedArtists();
+        
+        // Update featured artists counter when buttons are clicked
+        $(document).on('click', '.selector-add, .selector-remove', function() {
+            setTimeout(enhanceFeaturedArtists, 100);
+        });
+        
         // Form submission with loading animation
         $('#song_form').on('submit', function(e) {
             var submitBtn = $('.submit-row input[type="submit"]');
@@ -829,12 +916,6 @@
                     .text('@keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }')
                     .appendTo('head');
             }
-        });
-        
-        // Duration validation
-        $('[name*="duration"], [name*="seconds"], [name*="minutes"]').on('input', function() {
-            var value = $(this).val();
-            if (value < 0) $(this).val(0);
         });
         
         // Show file size warning
