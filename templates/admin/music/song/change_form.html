@@ -5,24 +5,41 @@
 {{ block.super }}
 <style>
     :root {
-        --primary-bg: #f8f9fa;
-        --primary-color: #3f51b5;
-        --primary-hover: #303f9f;
-        --accent-color: #ff4081;
-        --success-color: #4caf50;
-        --text-primary: #333;
-        --text-secondary: #666;
-        --border-color: #ddd;
-        --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        --hover-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        --dark-bg: #121212;
+        --darker-bg: #0a0a0a;
+        --card-bg: #1e1e1e;
+        --card-border: #333;
+        --accent-color: #bb86fc;
+        --accent-hover: #9d65d9;
+        --primary-color: #03dac6;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --border-color: #444;
+        --success-color: #00c853;
+        --error-color: #cf6679;
+        --hover-bg: #2a2a2a;
+    }
+
+    /* Dark theme for the entire form area */
+    body {
+        background: var(--dark-bg);
+        color: var(--text-primary);
+    }
+
+    #content {
+        background: var(--dark-bg);
+    }
+
+    #content-main {
+        background: var(--dark-bg);
     }
 
     /* Form container */
     .form-container {
-        background: var(--primary-bg);
-        padding: 20px;
-        margin: -20px -20px 20px -20px;
-        border-bottom: 3px solid var(--primary-color);
+        background: var(--darker-bg);
+        padding: 25px;
+        margin: -20px -20px 25px -20px;
+        border-bottom: 3px solid var(--accent-color);
     }
 
     .form-header {
@@ -30,34 +47,43 @@
     }
 
     .form-header h1 {
-        color: var(--primary-color);
+        color: var(--accent-color);
         margin: 0;
         font-size: 1.8rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
     }
 
     .form-header p {
         color: var(--text-secondary);
-        margin: 5px 0 0 0;
+        margin: 8px 0 0 0;
+        font-size: 0.95rem;
     }
 
-    /* Form sections */
+    /* Form sections - dark cards */
     .form-section {
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        border-color: var(--accent-color);
     }
 
     .form-section h2 {
         color: var(--primary-color);
         margin-top: 0;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--accent-color);
         font-size: 1.2rem;
         display: flex;
         align-items: center;
@@ -66,15 +92,16 @@
 
     /* Form rows */
     .form-row {
-        margin-bottom: 15px;
-        padding: 15px;
-        background: #fafafa;
-        border-radius: 6px;
+        margin-bottom: 20px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
         border-left: 3px solid var(--primary-color);
+        transition: background 0.2s;
     }
 
     .form-row:hover {
-        background: #f5f5f5;
+        background: rgba(255, 255, 255, 0.08);
     }
 
     .form-row label {
@@ -82,150 +109,282 @@
         color: var(--text-primary);
         margin-bottom: 8px;
         display: block;
+        font-size: 0.9rem;
     }
 
-    /* Input fields */
+    /* Dark input fields */
     input[type="text"],
     input[type="number"],
     input[type="file"],
     select,
     textarea {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
         border: 1px solid var(--border-color);
-        border-radius: 4px;
+        border-radius: 6px;
         font-size: 14px;
-        transition: border-color 0.3s;
+        color: var(--text-primary);
+        transition: all 0.3s;
     }
 
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus,
     textarea:focus {
-        border-color: var(--primary-color);
+        border-color: var(--accent-color);
         outline: none;
-        box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+        box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
+        background: rgba(255, 255, 255, 0.15);
     }
 
-    /* File upload */
+    /* Placeholder text */
+    ::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    /* Dark file upload */
     .file-upload {
-        border: 2px dashed var(--primary-color);
+        border: 2px dashed var(--accent-color);
         border-radius: 8px;
-        padding: 30px;
+        padding: 35px;
         text-align: center;
-        background: rgba(63, 81, 181, 0.05);
+        background: rgba(187, 134, 252, 0.05);
         cursor: pointer;
         transition: all 0.3s;
     }
 
     .file-upload:hover {
-        background: rgba(63, 81, 181, 0.1);
+        background: rgba(187, 134, 252, 0.1);
+        border-color: var(--accent-hover);
+        transform: translateY(-2px);
+    }
+
+    .file-upload i {
+        color: var(--accent-color);
+        font-size: 32px;
+        margin-bottom: 15px;
+        display: block;
     }
 
     /* Checkboxes */
     .checkbox-row {
         display: flex;
-        gap: 20px;
+        gap: 25px;
         flex-wrap: wrap;
+        margin-top: 15px;
     }
 
     .checkbox-item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        transition: background 0.2s;
     }
 
-    /* Submit button */
+    .checkbox-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .checkbox-item label {
+        color: var(--text-primary);
+        cursor: pointer;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-color);
+        cursor: pointer;
+    }
+
+    /* Dark submit button */
     .submit-row {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        margin-top: 20px;
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 10px;
+        margin-top: 30px;
         display: flex;
         justify-content: flex-end;
-        border-top: 2px solid var(--primary-color);
+        border-top: 3px solid var(--accent-color);
     }
 
     .submit-row input[type="submit"] {
-        background: var(--primary-color);
-        color: white;
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+        color: #000;
         border: none;
-        padding: 10px 30px;
-        border-radius: 4px;
+        padding: 12px 40px;
+        border-radius: 6px;
         font-weight: 600;
+        font-size: 1rem;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.3s;
+        letter-spacing: 0.5px;
     }
 
     .submit-row input[type="submit"]:hover {
-        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(187, 134, 252, 0.4);
     }
 
     /* Help text */
     .help {
         color: var(--text-secondary);
-        font-size: 13px;
-        margin-top: 5px;
-        font-style: italic;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        border-left: 3px solid var(--primary-color);
     }
 
     /* Error styling */
     .errorlist {
-        color: #d32f2f;
-        margin: 5px 0 0 0;
+        color: var(--error-color);
+        margin: 8px 0 0 0;
         padding: 0;
         list-style: none;
     }
 
     .errorlist li {
-        padding: 5px;
-        background: rgba(211, 47, 47, 0.1);
+        padding: 8px 12px;
+        background: rgba(207, 102, 121, 0.1);
         border-radius: 4px;
-        margin-bottom: 2px;
+        margin-bottom: 5px;
+        border-left: 3px solid var(--error-color);
     }
 
-    /* Featured artists selector */
+    /* Featured artists selector - dark theme */
     .selector {
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 8px !important;
         overflow: hidden;
     }
 
     .selector h2 {
-        background: var(--primary-color);
-        color: white;
-        padding: 10px 15px;
-        margin: 0;
-        font-size: 14px;
+        background: var(--darker-bg) !important;
+        color: var(--text-primary) !important;
+        padding: 12px 15px !important;
+        margin: 0 !important;
+        border-bottom: 2px solid var(--accent-color) !important;
     }
 
     .selector select {
-        border: none;
-        min-height: 150px;
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
     }
 
-    /* Responsive */
+    .selector option {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        padding: 10px !important;
+    }
+
+    .selector option:hover {
+        background: var(--hover-bg) !important;
+    }
+
+    /* Select styling */
+    select {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    select option {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        padding: 10px;
+    }
+
+    /* Textarea specific */
+    textarea {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        font-family: monospace;
+    }
+
+    /* Readonly fields */
+    .readonly {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        border-radius: 4px;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Duration fields */
+    .duration-fields {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .duration-field {
+        flex: 1;
+    }
+
+    /* MusicCenterUG branding */
+    .brand-highlight {
+        color: var(--accent-color);
+        font-weight: bold;
+    }
+
+    /* Responsive design */
     @media (max-width: 768px) {
         .form-container {
-            padding: 15px;
+            padding: 20px 15px;
         }
         
         .form-section {
-            padding: 15px;
+            padding: 20px;
         }
         
         .checkbox-row {
-            gap: 10px;
+            gap: 15px;
         }
         
         .submit-row {
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
         
         .submit-row input[type="submit"] {
             width: 100%;
         }
+        
+        .duration-fields {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--darker-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
     }
 </style>
 {% endblock %}
@@ -235,9 +394,15 @@
     <div class="form-header">
         <h1>
             <i class="fas fa-music"></i>
-            {% if add %}Add New Song{% else %}Edit Song{% endif %}
+            {% if add %}Upload New Song{% else %}Edit Song{% endif %}
         </h1>
-        <p>{% if add %}Upload a new track to MusicCenterUG{% else %}Edit song details{% endif %}</p>
+        <p>
+            {% if add %}
+                Add a new track to <span class="brand-highlight">MusicCenterUG</span>
+            {% else %}
+                Edit song details on <span class="brand-highlight">MusicCenterUG</span>
+            {% endif %}
+        </p>
     </div>
 </div>
 
@@ -253,11 +418,15 @@
       {% elif fieldset.name == "Duration" %}
         <i class="fas fa-clock"></i>
       {% elif fieldset.name == "Audio Upload" or fieldset.name == "Media Files" %}
-        <i class="fas fa-file-audio"></i>
+        <i class="fas fa-file-upload"></i>
       {% elif fieldset.name == "Content Settings" %}
         <i class="fas fa-cog"></i>
       {% elif fieldset.name == "Additional Information" %}
         <i class="fas fa-plus-circle"></i>
+      {% elif fieldset.name == "Featured Artists" %}
+        <i class="fas fa-users"></i>
+      {% elif fieldset.name == "Statistics" %}
+        <i class="fas fa-chart-bar"></i>
       {% else %}
         <i class="fas fa-folder"></i>
       {% endif %}
@@ -320,9 +489,9 @@
                 
                 // Add new preview
                 var preview = $(
-                    '<div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 4px;">' +
-                    '<strong>Preview:</strong><br>' +
-                    '<audio controls style="width: 100%; margin-top: 5px;">' +
+                    '<div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid var(--border-color);">' +
+                    '<strong style="color: var(--primary-color); margin-bottom: 8px; display: block;">Audio Preview:</strong>' +
+                    '<audio controls style="width: 100%;">' +
                     '<source src="' + url + '" type="' + file.type + '">' +
                     'Audio preview not supported' +
                     '</audio>' +
@@ -335,9 +504,31 @@
 
         // Form submission loading state
         $('#song_form').on('submit', function() {
-            $('.submit-row input[type="submit"]')
-                .val('Processing...')
-                .prop('disabled', true);
+            var submitBtn = $('.submit-row input[type="submit"]');
+            submitBtn.val('Uploading...')
+                   .prop('disabled', true)
+                   .css('opacity', '0.8');
+            
+            // Add loading animation
+            submitBtn.css({
+                'background': 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
+                'position': 'relative',
+                'overflow': 'hidden'
+            });
+            
+            submitBtn.after('<div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: loading 1.5s infinite;"></div>');
+        });
+
+        // Add CSS for loading animation
+        $('<style>').text('@keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }').appendTo('head');
+
+        // Duration validation
+        $('[name$="seconds"]').on('input', function() {
+            var seconds = parseInt($(this).val()) || 0;
+            if (seconds >= 60) {
+                alert('Seconds cannot be 60 or more. Use minutes field instead.');
+                $(this).val('59');
+            }
         });
     });
 })(django.jQuery);
