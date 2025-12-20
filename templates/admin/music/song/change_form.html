@@ -9,6 +9,9 @@
         --darker-bg: #050505;
         --card-bg: #151515;
         --card-border: #2a2a2a;
+        --input-bg: #1a1a1a;
+        --input-border: #404040;
+        --input-focus: #7c3aed;
         --accent-color: #7c3aed;
         --accent-hover: #8b5cf6;
         --primary-color: #00e0ff;
@@ -39,6 +42,58 @@
         background: var(--dark-bg) !important;
     }
 
+    /* DARK THEME FOR ALL TEXT INPUTS */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="date"],
+    input[type="datetime-local"],
+    input[type="month"],
+    input[type="week"],
+    input[type="time"],
+    select,
+    textarea {
+        background-color: var(--input-bg) !important;
+        border: 2px solid var(--input-border) !important;
+        color: var(--text-primary) !important;
+        border-radius: 8px !important;
+        padding: 12px 15px !important;
+        font-size: 14px !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="url"]:focus,
+    input[type="tel"]:focus,
+    input[type="search"]:focus,
+    input[type="date"]:focus,
+    input[type="datetime-local"]:focus,
+    input[type="month"]:focus,
+    input[type="week"]:focus,
+    input[type="time"]:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--input-focus) !important;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2) !important;
+        outline: none !important;
+        background-color: #1e1e1e !important;
+    }
+
+    /* Placeholder text */
+    ::placeholder {
+        color: var(--text-secondary) !important;
+        opacity: 0.7 !important;
+    }
+
     /* Form container */
     .form-container {
         background: linear-gradient(135deg, #0a0a0a 0%, #1e0033 100%);
@@ -59,12 +114,6 @@
         background: 
             radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
             radial-gradient(circle at 80% 70%, rgba(0, 224, 255, 0.1) 0%, transparent 50%);
-        animation: pulse 10s ease-in-out infinite alternate;
-    }
-
-    @keyframes pulse {
-        0% { opacity: 0.5; }
-        100% { opacity: 0.8; }
     }
 
     .form-header {
@@ -82,14 +131,6 @@
         gap: 15px;
         font-weight: 700;
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .form-header h1 i {
-        color: var(--accent-color);
-        background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
     }
 
     .brand-highlight {
@@ -132,7 +173,24 @@
         font-weight: 600;
     }
 
-    /* DARK AUDIO UPLOAD SECTION */
+    /* Form rows */
+    .form-row {
+        margin-bottom: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        border-left: 3px solid var(--accent-color);
+    }
+
+    .form-row label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    /* AUDIO UPLOAD SECTION */
     .audio-upload-section {
         background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(25, 25, 25, 0.95));
         border-radius: 15px;
@@ -142,13 +200,13 @@
         overflow: hidden;
     }
 
-    .audio-upload-header {
+    .upload-header {
         background: linear-gradient(135deg, var(--accent-color), #6d28d9);
         padding: 20px 25px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .audio-upload-header h3 {
+    .upload-header h3 {
         color: white;
         margin: 0;
         font-size: 1.1rem;
@@ -158,11 +216,7 @@
         font-weight: 600;
     }
 
-    .audio-upload-header h3 i {
-        font-size: 1.2rem;
-    }
-
-    .audio-upload-body {
+    .upload-body {
         padding: 30px;
     }
 
@@ -235,10 +289,52 @@
         box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
     }
 
-    .upload-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
-        background: linear-gradient(135deg, var(--accent-hover), #9333ea);
+    /* COVER IMAGE UPLOAD SECTION */
+    .cover-upload-section {
+        background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(25, 25, 25, 0.95));
+        border-radius: 15px;
+        padding: 0;
+        margin: 20px 0;
+        border: 2px solid var(--card-border);
+        overflow: hidden;
+    }
+
+    .cover-upload-container {
+        background: rgba(255, 255, 255, 0.05);
+        border: 3px dashed var(--upload-border);
+        border-radius: 12px;
+        padding: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin: 15px 0;
+    }
+
+    .cover-upload-container:hover {
+        background: rgba(124, 58, 237, 0.1);
+        border-color: var(--accent-color);
+    }
+
+    .cover-preview-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .cover-preview {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 12px;
+        border: 3px solid var(--card-border);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        margin: 0 auto;
+        display: none;
+    }
+
+    .cover-info {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        border: 1px solid var(--border-color);
     }
 
     /* File info display */
@@ -305,43 +401,6 @@
         border: 2px solid rgba(124, 58, 237, 0.3);
     }
 
-    .audio-preview-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .audio-preview-header i {
-        color: var(--accent-color);
-        font-size: 1.2rem;
-    }
-
-    .audio-preview-header h4 {
-        color: var(--primary-color);
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    /* Custom audio player */
-    .custom-audio-player {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 10px;
-        padding: 15px;
-        border: 1px solid var(--border-color);
-    }
-
-    audio {
-        width: 100%;
-        border-radius: 8px;
-    }
-
-    audio::-webkit-media-controls-panel {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 8px;
-    }
-
     /* QUALITY BADGES */
     .quality-badge {
         display: inline-flex;
@@ -369,7 +428,7 @@
         color: white;
     }
 
-    /* FEATURED ARTISTS SECTION - IMPROVED STYLING */
+    /* FEATURED ARTISTS SECTION */
     .featured-artists-section {
         background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(25, 25, 25, 0.95));
         border-radius: 15px;
@@ -377,30 +436,6 @@
         margin: 20px 0;
         border: 2px solid var(--card-border);
         overflow: hidden;
-    }
-
-    .featured-header {
-        background: linear-gradient(135deg, var(--accent-color), #6d28d9);
-        padding: 20px 25px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .featured-header h3 {
-        color: white;
-        margin: 0;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-    }
-
-    .featured-header h3 i {
-        font-size: 1.2rem;
-    }
-
-    .featured-body {
-        padding: 25px;
     }
 
     /* Two-column layout for artists */
@@ -477,21 +512,6 @@
         font-size: 0.9rem;
     }
 
-    .artist-info {
-        flex: 1;
-    }
-
-    .artist-name {
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-
-    .artist-genre {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-    }
-
     /* Selected artists box */
     .selected-artists {
         background: rgba(255, 255, 255, 0.05);
@@ -549,12 +569,6 @@
         }
     }
 
-    .selected-artist-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
     .remove-artist {
         background: rgba(239, 68, 68, 0.2);
         color: var(--error-color);
@@ -568,12 +582,6 @@
         cursor: pointer;
         transition: all 0.3s;
         font-size: 0.9rem;
-    }
-
-    .remove-artist:hover {
-        background: var(--error-color);
-        color: white;
-        transform: scale(1.1);
     }
 
     /* Action buttons */
@@ -617,59 +625,11 @@
         color: white;
     }
 
-    .remove-button:hover {
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-    }
-
     .empty-message {
         color: var(--text-secondary);
         text-align: center;
         padding: 40px 20px;
         font-style: italic;
-    }
-
-    /* Form rows */
-    .form-row {
-        margin-bottom: 15px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 8px;
-        border-left: 3px solid var(--accent-color);
-    }
-
-    .form-row label {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 8px;
-        display: block;
-        font-size: 0.9rem;
-    }
-
-    /* Input fields */
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-        width: 100%;
-        padding: 12px 15px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 14px;
-        color: var(--text-primary);
-        transition: all 0.3s;
-    }
-
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    select:focus,
-    textarea:focus {
-        border-color: var(--accent-color);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
-        background: rgba(255, 255, 255, 0.12);
     }
 
     /* Submit button */
@@ -712,6 +672,68 @@
         border-left: 3px solid var(--primary-color);
     }
 
+    /* Checkboxes and radio buttons - DARK THEME */
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-color);
+        cursor: pointer;
+    }
+
+    /* Checkbox rows */
+    .checkbox-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .checkbox-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .checkbox-item label {
+        color: var(--text-primary);
+        cursor: pointer;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Django admin specific selectors */
+    .selector select {
+        background-color: var(--input-bg) !important;
+        border: 2px solid var(--input-border) !important;
+        color: var(--text-primary) !important;
+        border-radius: 8px !important;
+    }
+
+    .selector option {
+        background-color: var(--input-bg) !important;
+        color: var(--text-primary) !important;
+        padding: 10px !important;
+    }
+
+    /* Calendar and time pickers */
+    .calendar,
+    .clockbox {
+        background-color: var(--input-bg) !important;
+        border: 2px solid var(--input-border) !important;
+        color: var(--text-primary) !important;
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
         .form-container {
@@ -722,8 +744,7 @@
             padding: 20px;
         }
         
-        .audio-upload-body,
-        .featured-body {
+        .upload-body {
             padding: 20px;
         }
         
@@ -765,10 +786,6 @@
         border-radius: 4px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-hover);
-    }
-
     /* Hide default file input */
     input[type="file"] {
         display: none;
@@ -802,10 +819,10 @@
     {% if "Audio" in fieldset.name or "File" in fieldset.name or "audio" in fieldset.name|lower %}
       <!-- Custom Audio Upload Section -->
       <div class="audio-upload-section">
-        <div class="audio-upload-header">
+        <div class="upload-header">
           <h3><i class="fas fa-file-audio"></i> Audio Upload</h3>
         </div>
-        <div class="audio-upload-body">
+        <div class="upload-body">
           <div class="upload-area" id="uploadArea">
             <div class="upload-icon">
               <i class="fas fa-cloud-upload-alt"></i>
@@ -815,7 +832,7 @@
               <p>Drag & drop your audio file here or click to browse</p>
               <p class="help" style="margin-top: 10px; text-align: center;">
                 <i class="fas fa-info-circle"></i> 
-                Supported formats: MP3, WAV, FLAC, AAC, OGG
+                Quality audio files. Supported formats: MP3, WAV, FLAC
               </p>
             </div>
             <button type="button" class="upload-button">
@@ -826,7 +843,7 @@
           <div class="file-info" id="fileInfo" style="display: none;">
             <div class="file-info-header">
               <i class="fas fa-check-circle"></i>
-              <h5>Selected File</h5>
+              <h5>Selected file</h5>
             </div>
             <div class="file-details">
               <div class="detail-item">
@@ -861,13 +878,58 @@
           </div>
         </div>
       </div>
+    {% elif "Cover" in fieldset.name or "Image" in fieldset.name or "cover" in fieldset.name|lower %}
+      <!-- Custom Cover Image Upload Section -->
+      <div class="cover-upload-section">
+        <div class="upload-header">
+          <h3><i class="fas fa-image"></i> Album Cover</h3>
+        </div>
+        <div class="upload-body">
+          <div class="cover-upload-container" id="coverUploadArea">
+            <div class="upload-icon">
+              <i class="fas fa-image"></i>
+            </div>
+            <div class="upload-text">
+              <h4>Upload Cover Image</h4>
+              <p>Drag & drop your cover image here or click to browse</p>
+              <p class="help" style="margin-top: 10px; text-align: center;">
+                <i class="fas fa-info-circle"></i> 
+                Recommended: 1000x1000px, JPG/PNG, Max 5MB
+              </p>
+            </div>
+            <button type="button" class="upload-button">
+              <i class="fas fa-upload"></i> Browse Images
+            </button>
+          </div>
+          
+          <div class="cover-preview-container" id="coverPreviewContainer" style="display: none;">
+            <img id="coverPreview" class="cover-preview" alt="Cover Preview">
+            <div class="cover-info" id="coverInfo">
+              <div class="file-details">
+                <div class="detail-item">
+                  <span class="detail-label">Image Size:</span>
+                  <span class="detail-value" id="imageDimensions"></span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">File Size:</span>
+                  <span class="detail-value" id="imageSize"></span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Format:</span>
+                  <span class="detail-value" id="imageFormat"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     {% elif "artist" in fieldset.name|lower or "featured" in fieldset.name|lower %}
       <!-- Custom Featured Artists Section -->
       <div class="featured-artists-section">
-        <div class="featured-header">
+        <div class="upload-header">
           <h3><i class="fas fa-user-friends"></i> Featured Artists</h3>
         </div>
-        <div class="featured-body">
+        <div class="upload-body">
           <div class="artists-container">
             <!-- Available Artists -->
             <div class="available-artists">
@@ -876,7 +938,6 @@
                 <span id="availableCount" class="selected-counter">0</span>
               </h4>
               <div class="artists-list" id="availableArtists">
-                <!-- Will be populated by JavaScript -->
                 <div class="empty-message">Loading artists...</div>
               </div>
             </div>
@@ -941,9 +1002,13 @@
                   <div class="readonly">{{ field.contents }}</div>
                 {% else %}
                   {% if field.field.name == 'audio_file' or field.field.name == 'file' %}
-                    <!-- Hidden file input that will be triggered by custom UI -->
+                    <!-- Hidden audio file input -->
                     <input type="file" name="{{ field.field.name }}" id="{{ field.field.auto_id }}" 
                            accept="audio/*" style="display: none;">
+                  {% elif 'cover' in field.field.name|lower or 'image' in field.field.name|lower %}
+                    <!-- Hidden cover image input -->
+                    <input type="file" name="{{ field.field.name }}" id="{{ field.field.auto_id }}" 
+                           accept="image/*" style="display: none;">
                   {% elif 'featured_artists' in field.field.name %}
                     <!-- Hidden select for featured artists -->
                     <select name="{{ field.field.name }}" id="{{ field.field.auto_id }}" 
@@ -978,49 +1043,49 @@
 (function($) {
     $(document).ready(function() {
         // ===== AUDIO UPLOAD FUNCTIONALITY =====
-        const uploadArea = $('#uploadArea');
-        const fileInput = $('#id_audio_file, #id_file').first();
+        const audioUploadArea = $('#uploadArea');
+        const audioFileInput = $('#id_audio_file, #id_file').first();
         const fileInfo = $('#fileInfo');
         const audioPreview = $('#audioPreview');
         const audioPlayer = $('#audioPlayer')[0];
         
         // Make upload area clickable
-        uploadArea.on('click', function() {
-            fileInput.click();
+        audioUploadArea.on('click', function() {
+            audioFileInput.click();
         });
         
         // Drag and drop functionality
-        uploadArea.on('dragover', function(e) {
+        audioUploadArea.on('dragover', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            uploadArea.addClass('drag-over');
+            audioUploadArea.addClass('drag-over');
         });
         
-        uploadArea.on('dragleave', function(e) {
+        audioUploadArea.on('dragleave', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            uploadArea.removeClass('drag-over');
+            audioUploadArea.removeClass('drag-over');
         });
         
-        uploadArea.on('drop', function(e) {
+        audioUploadArea.on('drop', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            uploadArea.removeClass('drag-over');
+            audioUploadArea.removeClass('drag-over');
             
             const files = e.originalEvent.dataTransfer.files;
             if (files.length > 0) {
-                handleFileSelect(files[0]);
+                handleAudioFileSelect(files[0]);
             }
         });
         
         // File input change handler
-        fileInput.on('change', function(e) {
+        audioFileInput.on('change', function(e) {
             if (this.files.length > 0) {
-                handleFileSelect(this.files[0]);
+                handleAudioFileSelect(this.files[0]);
             }
         });
         
-        function handleFileSelect(file) {
+        function handleAudioFileSelect(file) {
             if (!file.type.startsWith('audio/')) {
                 alert('Please select an audio file (MP3, WAV, FLAC, etc.)');
                 return;
@@ -1029,7 +1094,7 @@
             // Update file input
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
-            fileInput[0].files = dataTransfer.files;
+            audioFileInput[0].files = dataTransfer.files;
             
             // Show file info
             const fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
@@ -1042,7 +1107,7 @@
             if (file.type.includes('flac') || file.type.includes('wav')) {
                 quality = 'Lossless';
                 qualityClass = 'quality-lossless';
-            } else if (file.size > 10 * 1024 * 1024) { // > 10MB
+            } else if (file.size > 10 * 1024 * 1024) {
                 quality = 'High';
                 qualityClass = 'quality-high';
             } else {
@@ -1068,12 +1133,99 @@
             audioPreview.show();
             
             // Update upload area text
-            uploadArea.find('.upload-text h4').html(
+            audioUploadArea.find('.upload-text h4').html(
                 `<i class="fas fa-check-circle" style="color: var(--success-color); margin-right: 8px;"></i>
-                 File Ready for Upload`
+                 Audio File Ready`
             );
             
-            uploadArea.css({
+            audioUploadArea.css({
+                'background': 'rgba(16, 185, 129, 0.1)',
+                'border-color': 'var(--success-color)'
+            });
+        }
+        
+        // ===== COVER IMAGE UPLOAD FUNCTIONALITY =====
+        const coverUploadArea = $('#coverUploadArea');
+        const coverFileInput = $('input[type="file"][accept="image/*"], #id_cover, #id_image').first();
+        const coverPreviewContainer = $('#coverPreviewContainer');
+        const coverPreview = $('#coverPreview');
+        
+        // Make upload area clickable
+        coverUploadArea.on('click', function() {
+            coverFileInput.click();
+        });
+        
+        // Drag and drop functionality
+        coverUploadArea.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            coverUploadArea.addClass('drag-over');
+        });
+        
+        coverUploadArea.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            coverUploadArea.removeClass('drag-over');
+        });
+        
+        coverUploadArea.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            coverUploadArea.removeClass('drag-over');
+            
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                handleCoverFileSelect(files[0]);
+            }
+        });
+        
+        // File input change handler
+        coverFileInput.on('change', function(e) {
+            if (this.files.length > 0) {
+                handleCoverFileSelect(this.files[0]);
+            }
+        });
+        
+        function handleCoverFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file (JPG, PNG, etc.)');
+                return;
+            }
+            
+            // Update file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            coverFileInput[0].files = dataTransfer.files;
+            
+            // Create image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                coverPreview.attr('src', e.target.result);
+                coverPreviewContainer.show();
+                
+                // Get image dimensions
+                const img = new Image();
+                img.onload = function() {
+                    $('#imageDimensions').text(`${this.width} × ${this.height}px`);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Update file info
+            const fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            const fileType = file.type.split('/')[1]?.toUpperCase() || 'IMAGE';
+            
+            $('#imageSize').text(fileSize);
+            $('#imageFormat').text(fileType);
+            
+            // Update upload area text
+            coverUploadArea.find('.upload-text h4').html(
+                `<i class="fas fa-check-circle" style="color: var(--success-color); margin-right: 8px;"></i>
+                 Cover Image Ready`
+            );
+            
+            coverUploadArea.css({
                 'background': 'rgba(16, 185, 129, 0.1)',
                 'border-color': 'var(--success-color)'
             });
@@ -1090,7 +1242,6 @@
         
         // Initialize artists lists
         function initializeArtists() {
-            // Clear containers
             availableArtists.empty();
             selectedArtists.empty();
             
@@ -1098,7 +1249,7 @@
             const allOptions = featuredArtistsSelect.find('option');
             const selectedValues = featuredArtistsSelect.val() || [];
             
-            // Populate available artists (not selected)
+            // Populate available artists
             let availableCountNum = 0;
             allOptions.each(function() {
                 const option = $(this);
@@ -1106,10 +1257,8 @@
                 const text = option.text();
                 
                 if (selectedValues.includes(value)) {
-                    // Add to selected list
                     addSelectedArtist(value, text);
                 } else {
-                    // Add to available list
                     addAvailableArtist(value, text);
                     availableCountNum++;
                 }
@@ -1134,10 +1283,8 @@
         }
         
         function addAvailableArtist(value, text) {
-            // Parse artist name and genre from text
             const parts = text.split(' - ');
             const artistName = parts[0] || text;
-            const genre = parts[1] || 'Artist';
             
             const artistItem = $(
                 `<div class="artist-item" data-value="${value}">
@@ -1146,7 +1293,7 @@
                     </div>
                     <div class="artist-info">
                         <div class="artist-name">${artistName}</div>
-                        <div class="artist-genre">${genre}</div>
+                        ${parts[1] ? `<div class="artist-genre">${parts[1]}</div>` : ''}
                     </div>
                 </div>`
             );
@@ -1159,9 +1306,7 @@
             // Double click to add
             artistItem.on('dblclick', function() {
                 const value = $(this).data('value');
-                const text = $(this).find('.artist-name').text() + 
-                           ($(this).find('.artist-genre').text() ? 
-                            ' - ' + $(this).find('.artist-genre').text() : '');
+                const text = $(this).find('.artist-name').text();
                 moveArtistToSelected(value, text);
             });
             
@@ -1169,10 +1314,8 @@
         }
         
         function addSelectedArtist(value, text) {
-            // Parse artist name and genre from text
             const parts = text.split(' - ');
             const artistName = parts[0] || text;
-            const genre = parts[1] || 'Artist';
             
             const selectedArtist = $(
                 `<div class="selected-artist" data-value="${value}">
@@ -1182,7 +1325,7 @@
                         </div>
                         <div class="artist-info">
                             <div class="artist-name">${artistName}</div>
-                            <div class="artist-genre">${genre}</div>
+                            ${parts[1] ? `<div class="artist-genre">${parts[1]}</div>` : ''}
                         </div>
                     </div>
                     <button type="button" class="remove-artist" title="Remove artist">
@@ -1194,9 +1337,7 @@
             // Remove button handler
             selectedArtist.find('.remove-artist').on('click', function() {
                 const value = selectedArtist.data('value');
-                const text = selectedArtist.find('.artist-name').text() + 
-                           (selectedArtist.find('.artist-genre').text() ? 
-                            ' - ' + selectedArtist.find('.artist-genre').text() : '');
+                const text = selectedArtist.find('.artist-name').text();
                 moveArtistToAvailable(value, text);
                 selectedArtist.remove();
                 updateSelectedList();
@@ -1207,10 +1348,7 @@
         }
         
         function moveArtistToSelected(value, text) {
-            // Remove from available
             $(`.artist-item[data-value="${value}"]`).remove();
-            
-            // Add to selected
             addSelectedArtist(value, text);
             
             // Update select field
@@ -1220,15 +1358,11 @@
                 featuredArtistsSelect.val(currentValues);
             }
             
-            // Update counters
             updateCounters();
         }
         
         function moveArtistToAvailable(value, text) {
-            // Remove from selected
             $(`.selected-artist[data-value="${value}"]`).remove();
-            
-            // Add to available
             addAvailableArtist(value, text);
             
             // Update select field
@@ -1239,7 +1373,6 @@
                 featuredArtistsSelect.val(currentValues);
             }
             
-            // Update counters
             updateCounters();
             updateSelectedList();
         }
@@ -1268,9 +1401,7 @@
             const selectedItems = availableArtists.find('.artist-item.selected');
             selectedItems.each(function() {
                 const value = $(this).data('value');
-                const text = $(this).find('.artist-name').text() + 
-                           ($(this).find('.artist-genre').text() ? 
-                            ' - ' + $(this).find('.artist-genre').text() : '');
+                const text = $(this).find('.artist-name').text();
                 moveArtistToSelected(value, text);
             });
         });
@@ -1280,29 +1411,33 @@
             const selectedItems = selectedArtists.find('.selected-artist');
             selectedItems.each(function() {
                 const value = $(this).data('value');
-                const text = $(this).find('.artist-name').text() + 
-                           ($(this).find('.artist-genre').text() ? 
-                            ' - ' + $(this).find('.artist-genre').text() : '');
+                const text = $(this).find('.artist-name').text();
                 moveArtistToAvailable(value, text);
             });
         });
         
         // Search functionality for available artists
-        const searchInput = $('<input type="text" placeholder="Search artists..." style="width: 100%; padding: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">');
+        const searchInput = $('<input type="text" placeholder="Search artists..." style="width: 100%; padding: 10px; margin-bottom: 15px; background: var(--input-bg); border: 2px solid var(--input-border); border-radius: 6px; color: var(--text-primary);">');
         availableArtists.before(searchInput);
         
         searchInput.on('input', function() {
             const searchTerm = $(this).val().toLowerCase();
             availableArtists.find('.artist-item').each(function() {
                 const artistName = $(this).find('.artist-name').text().toLowerCase();
-                const artistGenre = $(this).find('.artist-genre').text().toLowerCase();
-                const matches = artistName.includes(searchTerm) || artistGenre.includes(searchTerm);
+                const matches = artistName.includes(searchTerm);
                 $(this).toggle(matches);
             });
         });
         
         // Initialize everything
-        initializeArtists();
+        if (featuredArtistsSelect.length) {
+            initializeArtists();
+        }
+        
+        // Update featured artists counter when buttons are clicked
+        $(document).on('click', '.selector-add, .selector-remove', function() {
+            setTimeout(initializeArtists, 100);
+        });
         
         // ===== FORM SUBMISSION =====
         $('#song_form').on('submit', function(e) {
@@ -1312,33 +1447,16 @@
                     .prop('disabled', true)
                     .css('opacity', '0.8');
             
-            // Show loading state
             submitBtn.html(
                 '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Uploading...'
             );
         });
         
-        // ===== QUALITY INDICATOR FOR FILE SIZE =====
-        fileInput.on('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const sizeMB = file.size / (1024 * 1024);
-                const qualityIndicator = $('<div class="help" style="margin-top: 10px;"></div>');
-                
-                let message = '';
-                if (sizeMB > 30) {
-                    message = '<i class="fas fa-check-circle" style="color: var(--success-color);"></i> Excellent quality (Lossless/WAV)';
-                } else if (sizeMB > 10) {
-                    message = '<i class="fas fa-check" style="color: var(--warning-color);"></i> Good quality (High bitrate MP3)';
-                } else if (sizeMB > 5) {
-                    message = '<i class="fas fa-info-circle" style="color: var(--text-secondary);"></i> Standard quality';
-                } else {
-                    message = '<i class="fas fa-exclamation-triangle" style="color: var(--error-color);"></i> Low quality - Consider uploading higher quality audio';
-                }
-                
-                qualityIndicator.html(message);
-                $(this).closest('.form-row').find('.help').remove();
-                $(this).after(qualityIndicator);
+        // ===== ENHANCE ALL TEXT INPUTS =====
+        // Apply dark theme to all inputs on page load
+        $('input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"])').each(function() {
+            if (!$(this).hasClass('upload-button') && !$(this).hasClass('action-button')) {
+                $(this).addClass('dark-input');
             }
         });
     });
