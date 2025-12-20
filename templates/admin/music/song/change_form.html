@@ -15,6 +15,8 @@
         --text-light: #b0b0b0;
         --success: #00c853;
         --error: #ff5252;
+        --button-bg: #000000;
+        --button-text: #ffffff;
     }
 
     /* Mobile-first responsive design */
@@ -22,8 +24,8 @@
         background: var(--dark-bg) !important;
         color: var(--text) !important;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+        padding: 0;
     }
 
     #content, #content-main {
@@ -32,21 +34,20 @@
         margin: 0 !important;
     }
 
-    /* Mobile-optimized container */
+    /* Mobile container */
     .mobile-container {
         max-width: 100%;
         padding: 16px;
         margin: 0 auto;
     }
 
-    /* Header for mobile */
+    /* Mobile header */
     .mobile-header {
         background: linear-gradient(135deg, var(--accent), #6a11cb);
         color: white;
-        padding: 20px 16px;
-        margin: -16px -16px 20px -16px;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        padding: 24px 16px;
+        margin: -16px -16px 24px -16px;
+        text-align: center;
     }
 
     .mobile-header h1 {
@@ -61,14 +62,13 @@
         margin: 0;
     }
 
-    /* Mobile form sections */
+    /* Form sections */
     .mobile-section {
         background: var(--card-bg);
         border-radius: 16px;
         padding: 20px;
         margin-bottom: 20px;
         border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
     .mobile-section h2 {
@@ -82,16 +82,11 @@
         gap: 10px;
     }
 
-    .mobile-section h2 i {
-        color: var(--accent);
-    }
-
-    /* Mobile-friendly inputs */
+    /* Mobile inputs */
     input[type="text"],
     input[type="number"],
     input[type="email"],
     input[type="url"],
-    input[type="password"],
     select,
     textarea {
         width: 100%;
@@ -100,29 +95,15 @@
         border: 1px solid var(--input-border);
         border-radius: 12px;
         color: var(--text);
-        font-size: 16px; /* Prevents iOS zoom */
-        -webkit-appearance: none;
-        appearance: none;
+        font-size: 16px;
         margin-bottom: 16px;
         box-sizing: border-box;
+        -webkit-appearance: none;
+        appearance: none;
     }
 
-    /* Mobile tap targets */
-    input, select, textarea, button {
-        min-height: 52px; /* Minimum touch target size */
-    }
-
-    /* Focus state for mobile */
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: var(--accent);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
-    }
-
-    /* Mobile upload areas */
-    .mobile-upload {
+    /* Mobile upload area */
+    .upload-area {
         background: rgba(138, 43, 226, 0.1);
         border: 2px dashed var(--accent);
         border-radius: 16px;
@@ -130,36 +111,34 @@
         text-align: center;
         margin: 20px 0;
         cursor: pointer;
-        transition: all 0.3s;
     }
 
-    .mobile-upload:active {
+    .upload-area:active {
         background: rgba(138, 43, 226, 0.2);
-        transform: scale(0.98);
     }
 
-    .mobile-upload i {
+    .upload-icon {
         font-size: 42px;
         color: var(--accent);
         margin-bottom: 16px;
     }
 
-    .mobile-upload h3 {
+    .upload-title {
         font-size: 1.1rem;
         margin: 0 0 8px 0;
         color: var(--text);
     }
 
-    .mobile-upload p {
+    .upload-desc {
         font-size: 0.9rem;
         color: var(--text-light);
         margin: 0 0 16px 0;
         line-height: 1.4;
     }
 
-    .mobile-upload-btn {
-        background: var(--accent);
-        color: white;
+    .upload-button {
+        background: var(--button-bg);
+        color: var(--button-text);
         border: none;
         padding: 14px 28px;
         border-radius: 12px;
@@ -169,17 +148,11 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.3s;
         min-height: 48px;
     }
 
-    .mobile-upload-btn:active {
-        background: var(--accent-hover);
-        transform: translateY(2px);
-    }
-
-    /* Mobile file preview */
-    .mobile-preview {
+    /* File preview */
+    .file-preview {
         background: var(--input-bg);
         border-radius: 16px;
         padding: 20px;
@@ -187,7 +160,7 @@
         border: 1px solid rgba(255,255,255,0.1);
     }
 
-    .mobile-preview h4 {
+    .preview-header {
         font-size: 1rem;
         margin: 0 0 16px 0;
         color: var(--text);
@@ -196,17 +169,17 @@
         gap: 8px;
     }
 
-    .mobile-preview h4 i {
+    .preview-header i {
         color: var(--success);
     }
 
-    .mobile-file-info {
+    .file-details {
         display: grid;
         gap: 12px;
         margin-bottom: 16px;
     }
 
-    .file-detail {
+    .file-row {
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
@@ -224,8 +197,8 @@
         font-size: 0.9rem;
     }
 
-    /* Cover image preview mobile */
-    .cover-mobile-preview {
+    /* Cover image */
+    .cover-preview-img {
         width: 100%;
         max-width: 200px;
         height: 200px;
@@ -236,7 +209,7 @@
         border: 2px solid var(--input-border);
     }
 
-    /* Audio player mobile */
+    /* Audio player */
     audio {
         width: 100%;
         border-radius: 12px;
@@ -247,8 +220,8 @@
         background: var(--input-bg);
     }
 
-    /* Featured artists mobile */
-    .mobile-featured {
+    /* FEATURED ARTISTS - Mobile optimized */
+    .featured-section {
         background: var(--card-bg);
         border-radius: 16px;
         padding: 20px;
@@ -256,59 +229,48 @@
         border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* FIX: Mobile-friendly selector */
+    /* Fix selector for mobile */
     .selector {
         display: flex;
         flex-direction: column;
         gap: 20px;
+        background: transparent !important;
+        border: none !important;
     }
 
     .selector-available,
     .selector-chosen {
         width: 100% !important;
         margin: 0 !important;
-    }
-
-    .selector-chooser {
-        order: 3;
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        padding: 20px 0 !important;
-    }
-
-    .selector-add,
-    .selector-remove {
-        background: var(--accent) !important;
-        color: white !important;
-        border: none !important;
+        background: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
         border-radius: 12px !important;
-        padding: 16px 24px !important;
+        overflow: hidden;
+    }
+
+    .selector-available h2,
+    .selector-chosen h2 {
+        background: #2a2a2a !important;
+        color: var(--text) !important;
+        padding: 16px !important;
+        margin: 0 !important;
+        border: none !important;
         font-size: 0.9rem !important;
         font-weight: 600 !important;
-        min-width: 140px;
-        min-height: 48px;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px;
-    }
-
-    .selector-add:active,
-    .selector-remove:active {
-        background: var(--accent-hover) !important;
-        transform: translateY(2px);
     }
 
     .selector select {
         background: var(--input-bg) !important;
         color: var(--text) !important;
-        border: 1px solid var(--input-border) !important;
-        border-radius: 12px !important;
+        border: none !important;
+        border-radius: 0 !important;
         min-height: 150px;
+        padding: 12px !important;
+        width: 100% !important;
         font-size: 14px;
     }
 
+    /* FIX: Selected artists dark background with white text */
     .selector-chosen select {
         background: #1a1a1a !important;
     }
@@ -317,6 +279,7 @@
         background: #1a1a1a !important;
         color: var(--text) !important;
         padding: 12px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
 
     .selector-chosen select option:checked {
@@ -324,7 +287,58 @@
         color: white !important;
     }
 
-    /* Mobile checkbox */
+    /* Mobile button area */
+    .selector-chooser {
+        order: 3;
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        padding: 20px 0 !important;
+        background: transparent !important;
+    }
+
+    /* FIX: Black Add button with white text */
+    .add-artist-btn {
+        background: var(--button-bg) !important;
+        color: var(--button-text) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 16px 24px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        min-width: 140px;
+        min-height: 48px;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .remove-artist-btn {
+        background: #333 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 16px 24px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        min-width: 140px;
+        min-height: 48px;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px;
+    }
+
+    .add-artist-btn:active,
+    .remove-artist-btn:active {
+        transform: translateY(2px);
+    }
+
+    /* Checkbox for mobile */
     input[type="checkbox"] {
         width: 24px;
         height: 24px;
@@ -333,25 +347,17 @@
         flex-shrink: 0;
     }
 
-    .checkbox-mobile {
+    .checkbox-item {
         display: flex;
         align-items: center;
         padding: 16px;
         background: var(--input-bg);
         border-radius: 12px;
         margin-bottom: 12px;
-        cursor: pointer;
     }
 
-    .checkbox-mobile label {
-        margin: 0;
-        cursor: pointer;
-        color: var(--text);
-        font-size: 0.95rem;
-    }
-
-    /* Mobile submit button */
-    .mobile-submit {
+    /* Submit button */
+    .submit-area {
         background: var(--card-bg);
         padding: 24px 16px;
         margin-top: 30px;
@@ -360,7 +366,7 @@
         border-top: 2px solid var(--accent);
     }
 
-    .mobile-submit input[type="submit"] {
+    .submit-btn {
         background: linear-gradient(135deg, var(--accent), #6a11cb);
         color: white;
         border: none;
@@ -371,17 +377,15 @@
         cursor: pointer;
         width: 100%;
         max-width: 300px;
-        transition: all 0.3s;
         min-height: 56px;
     }
 
-    .mobile-submit input[type="submit"]:active {
+    .submit-btn:active {
         transform: translateY(2px);
-        box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
     }
 
-    /* Mobile help text */
-    .mobile-help {
+    /* Help text */
+    .help-text {
         color: var(--text-light);
         font-size: 0.85rem;
         padding: 12px;
@@ -396,7 +400,7 @@
         display: none;
     }
 
-    /* Mobile responsive adjustments */
+    /* Responsive for tablets */
     @media (min-width: 768px) {
         .mobile-container {
             max-width: 720px;
@@ -405,15 +409,12 @@
         
         .mobile-header {
             margin: -24px -24px 24px -24px;
-            padding: 24px;
-        }
-        
-        .mobile-header h1 {
-            font-size: 1.8rem;
+            padding: 28px;
         }
         
         .selector {
             flex-direction: row;
+            align-items: flex-start;
         }
         
         .selector-available,
@@ -425,11 +426,17 @@
             order: 0;
             flex-direction: column;
             width: 10%;
-            padding: 0 20px !important;
+            padding: 40px 20px !important;
+        }
+        
+        .add-artist-btn,
+        .remove-artist-btn {
+            min-width: 100px;
+            padding: 12px 20px !important;
         }
     }
 
-    /* Prevent text zoom on iOS */
+    /* Prevent iOS zoom */
     @media screen and (max-width: 768px) {
         input, select, textarea {
             font-size: 16px !important;
@@ -445,7 +452,7 @@
             <i class="fas fa-music"></i>
             {% if add %}Upload Music{% else %}Edit Song{% endif %}
         </h1>
-        <p>{% if add %}Share your music with the world{% else %}Update your track details{% endif %}</p>
+        <p>{% if add %}Share your music on MusicCenterUG{% else %}Update your track{% endif %}</p>
     </div>
 
     {{ block.super }}
@@ -460,7 +467,7 @@
       {% if "Audio" in fieldset.name or "audio" in fieldset.name|lower %}
         <i class="fas fa-music"></i> Audio File
       {% elif "Cover" in fieldset.name or "Image" in fieldset.name|lower %}
-        <i class="fas fa-image"></i> Cover Art
+        <i class="fas fa-image"></i> Cover Image
       {% elif "artist" in fieldset.name|lower or "featured" in fieldset.name|lower %}
         <i class="fas fa-users"></i> Featured Artists
       {% elif "Details" in fieldset.name or "Information" in fieldset.name %}
@@ -473,79 +480,88 @@
     {% for line in fieldset %}
       {% for field in line %}
         {% if field.is_checkbox %}
-          <div class="checkbox-mobile">
+          <div class="checkbox-item">
             {{ field.field }}
             {{ field.label_tag }}
           </div>
         {% else %}
           {% if field.field.name == 'audio_file' or field.field.name == 'file' %}
-            <!-- Mobile Audio Upload -->
-            <div class="mobile-upload" onclick="document.getElementById('{{ field.field.auto_id }}').click()">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <h3>Upload Audio</h3>
-              <p>Tap to select your audio file or drag & drop</p>
-              <p class="mobile-help">MP3, WAV, FLAC up to 50MB</p>
-              <button type="button" class="mobile-upload-btn">
-                <i class="fas fa-file-audio"></i> Choose File
+            <!-- Audio Upload -->
+            <div class="upload-area" id="audioUploadArea">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-title">Upload Audio</div>
+              <div class="upload-desc">Tap to select your music file</div>
+              <button type="button" class="upload-button" id="audioUploadBtn">
+                <i class="fas fa-file-audio"></i> Choose Audio File
               </button>
               {{ field.field }}
             </div>
             
-            <div id="mobile-audio-preview" class="mobile-preview" style="display: none;">
-              <h4><i class="fas fa-check-circle"></i> Selected Audio</h4>
-              <div class="mobile-file-info">
-                <div class="file-detail">
+            <div id="audioPreview" class="file-preview" style="display: none;">
+              <div class="preview-header">
+                <i class="fas fa-check-circle"></i> Selected Audio
+              </div>
+              <div class="file-details">
+                <div class="file-row">
                   <span class="file-label">File:</span>
-                  <span class="file-value" id="mobile-audio-name"></span>
+                  <span class="file-value" id="audioFileName"></span>
                 </div>
-                <div class="file-detail">
+                <div class="file-row">
                   <span class="file-label">Size:</span>
-                  <span class="file-value" id="mobile-audio-size"></span>
+                  <span class="file-value" id="audioFileSize"></span>
                 </div>
-                <div class="file-detail">
-                  <span class="file-label">Format:</span>
-                  <span class="file-value" id="mobile-audio-format"></span>
+                <div class="file-row">
+                  <span class="file-label">Type:</span>
+                  <span class="file-value" id="audioFileType"></span>
                 </div>
               </div>
-              <audio controls id="mobile-audio-player">
-                Your device doesn't support audio preview
+              <audio controls id="audioPlayer">
+                Audio preview will appear here
               </audio>
             </div>
             
           {% elif 'cover' in field.field.name|lower or 'image' in field.field.name|lower %}
-            <!-- Mobile Cover Upload -->
-            <div class="mobile-upload" onclick="document.getElementById('{{ field.field.auto_id }}').click()">
-              <i class="fas fa-image"></i>
-              <h3>Upload Cover Image</h3>
-              <p>Tap to select your cover image</p>
-              <p class="mobile-help">JPG, PNG, WebP up to 5MB</p>
-              <button type="button" class="mobile-upload-btn">
+            <!-- Cover Image Upload -->
+            <div class="upload-area" id="coverUploadArea">
+              <div class="upload-icon">
+                <i class="fas fa-image"></i>
+              </div>
+              <div class="upload-title">Upload Cover</div>
+              <div class="upload-desc">Tap to select your cover image</div>
+              <button type="button" class="upload-button" id="coverUploadBtn">
                 <i class="fas fa-image"></i> Choose Image
               </button>
               {{ field.field }}
             </div>
             
-            <div id="mobile-cover-preview" class="mobile-preview" style="display: none;">
-              <h4><i class="fas fa-check-circle"></i> Selected Image</h4>
-              <div class="mobile-file-info">
-                <div class="file-detail">
+            <div id="coverPreview" class="file-preview" style="display: none;">
+              <div class="preview-header">
+                <i class="fas fa-check-circle"></i> Selected Image
+              </div>
+              <div class="file-details">
+                <div class="file-row">
                   <span class="file-label">File:</span>
-                  <span class="file-value" id="mobile-cover-name"></span>
+                  <span class="file-value" id="coverFileName"></span>
                 </div>
-                <div class="file-detail">
+                <div class="file-row">
                   <span class="file-label">Size:</span>
-                  <span class="file-value" id="mobile-cover-size"></span>
+                  <span class="file-value" id="coverFileSize"></span>
                 </div>
-                <div class="file-detail">
+                <div class="file-row">
                   <span class="file-label">Dimensions:</span>
-                  <span class="file-value" id="mobile-cover-dimensions"></span>
+                  <span class="file-value" id="coverDimensions"></span>
                 </div>
               </div>
-              <img id="mobile-cover-image" class="cover-mobile-preview" alt="Cover Preview">
+              <img id="coverImage" class="cover-preview-img" alt="Cover Preview">
             </div>
             
+          {% elif 'featured_artists' in field.field.name %}
+            <!-- Featured Artists Field (hidden but needed) -->
+            {{ field.field }}
           {% else %}
-            <!-- Regular Mobile Input -->
+            <!-- Regular Input Fields -->
             <div style="margin-bottom: 20px;">
               {{ field.label_tag }}
               {% if field.is_readonly %}
@@ -557,7 +573,7 @@
               {% endif %}
               
               {% if field.field.help_text %}
-                <div class="mobile-help">{{ field.field.help_text }}</div>
+                <div class="help-text">{{ field.field.help_text }}</div>
               {% endif %}
             </div>
           {% endif %}
@@ -567,10 +583,10 @@
   </div>
 {% endfor %}
 
-<!-- Mobile Submit Section -->
-<div class="mobile-submit">
+<!-- Submit Section -->
+<div class="submit-area">
   <input type="submit" value="{% if add %}Upload Song{% else %}Save Changes{% endif %}" 
-         onclick="this.value='Uploading...'; this.disabled=true; this.form.submit();">
+         class="submit-btn" id="submitBtn">
 </div>
 </div>
 {% endblock %}
@@ -580,175 +596,237 @@
 <script>
 (function($) {
     $(document).ready(function() {
-        // ===== MOBILE AUDIO UPLOAD =====
-        $('input[type="file"][accept*="audio"]').on('change', function(e) {
-            if (this.files.length > 0) {
-                var file = this.files[0];
-                var preview = $('#mobile-audio-preview');
-                var player = $('#mobile-audio-player')[0];
-                
-                // Update file info
-                $('#mobile-audio-name').text(file.name);
-                $('#mobile-audio-size').text((file.size / (1024 * 1024)).toFixed(1) + ' MB');
-                $('#mobile-audio-format').text(file.type.split('/')[1]?.toUpperCase() || 'Audio');
-                
-                // Set audio source
-                player.src = URL.createObjectURL(file);
-                
-                // Show preview
-                preview.show();
-                
-                // Scroll to preview for mobile
-                preview[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // ===== FIX AUDIO UPLOAD =====
+        var audioInput = $('input[type="file"][accept*="audio"], #id_audio_file, #id_file').first();
+        var audioUploadBtn = $('#audioUploadBtn');
+        var audioUploadArea = $('#audioUploadArea');
+        
+        // Fix 1: Make sure button triggers file input
+        audioUploadBtn.on('click', function(e) {
+            e.stopPropagation(); // Prevent event bubbling
+            audioInput.click();
+        });
+        
+        // Fix 2: Also allow clicking the whole area
+        audioUploadArea.on('click', function(e) {
+            if (!$(e.target).is('button')) {
+                audioInput.click();
             }
         });
-
-        // ===== MOBILE COVER UPLOAD =====
-        $('input[type="file"][accept*="image"]').on('change', function(e) {
-            if (this.files.length > 0) {
+        
+        // Fix 3: Handle file selection
+        audioInput.on('change', function(e) {
+            if (this.files && this.files[0]) {
                 var file = this.files[0];
-                var preview = $('#mobile-cover-preview');
-                var img = $('#mobile-cover-image')[0];
                 
-                // Update file info
-                $('#mobile-cover-name').text(file.name);
-                $('#mobile-cover-size').text((file.size / (1024 * 1024)).toFixed(2) + ' MB');
+                // Validate it's an audio file
+                if (!file.type.startsWith('audio/')) {
+                    alert('Please select an audio file (MP3, WAV, FLAC, etc.)');
+                    return;
+                }
+                
+                // Update preview
+                $('#audioFileName').text(file.name);
+                $('#audioFileSize').text((file.size / (1024 * 1024)).toFixed(1) + ' MB');
+                $('#audioFileType').text(file.type.split('/')[1]?.toUpperCase() || 'Audio');
+                
+                // Create audio preview
+                var url = URL.createObjectURL(file);
+                var player = $('#audioPlayer')[0];
+                player.src = url;
+                
+                // Show preview
+                $('#audioPreview').show();
+                
+                // Update button text
+                audioUploadBtn.html('<i class="fas fa-check"></i> File Selected');
+                audioUploadBtn.css('background', 'var(--success)');
+            }
+        });
+        
+        // ===== FIX COVER UPLOAD =====
+        var coverInput = $('input[type="file"][accept*="image"], #id_cover, #id_image').first();
+        var coverUploadBtn = $('#coverUploadBtn');
+        var coverUploadArea = $('#coverUploadArea');
+        
+        coverUploadBtn.on('click', function(e) {
+            e.stopPropagation();
+            coverInput.click();
+        });
+        
+        coverUploadArea.on('click', function(e) {
+            if (!$(e.target).is('button')) {
+                coverInput.click();
+            }
+        });
+        
+        coverInput.on('change', function(e) {
+            if (this.files && this.files[0]) {
+                var file = this.files[0];
+                
+                // Validate it's an image
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file (JPG, PNG, etc.)');
+                    return;
+                }
+                
+                // Update preview
+                $('#coverFileName').text(file.name);
+                $('#coverFileSize').text((file.size / (1024 * 1024)).toFixed(2) + ' MB');
                 
                 // Create image preview
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    img.src = e.target.result;
+                    $('#coverImage').attr('src', e.target.result);
                     
                     // Get image dimensions
-                    var image = new Image();
-                    image.onload = function() {
-                        $('#mobile-cover-dimensions').text(this.width + ' × ' + this.height);
+                    var img = new Image();
+                    img.onload = function() {
+                        $('#coverDimensions').text(this.width + ' × ' + this.height);
                     };
-                    image.src = e.target.result;
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
                 
                 // Show preview
-                preview.show();
+                $('#coverPreview').show();
                 
-                // Scroll to preview for mobile
-                preview[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Update button text
+                coverUploadBtn.html('<i class="fas fa-check"></i> Image Selected');
+                coverUploadBtn.css('background', 'var(--success)');
             }
         });
-
-        // ===== MOBILE DRAG & DROP =====
-        $('.mobile-upload').each(function() {
-            var uploadArea = $(this);
-            var fileInput = uploadArea.find('input[type="file"]');
+        
+        // ===== FIX FEATURED ARTISTS =====
+        // Replace default Django buttons with custom ones
+        function fixFeaturedArtistsButtons() {
+            // Find the selector
+            var selector = $('.selector');
+            if (selector.length) {
+                // Find default add/remove buttons
+                var defaultAdd = selector.find('.selector-add');
+                var defaultRemove = selector.find('.selector-remove');
+                
+                // Replace add button
+                if (defaultAdd.length) {
+                    defaultAdd.replaceWith(
+                        '<button type="button" class="add-artist-btn">' +
+                        '<i class="fas fa-plus"></i> Add' +
+                        '</button>'
+                    );
+                }
+                
+                // Replace remove button
+                if (defaultRemove.length) {
+                    defaultRemove.replaceWith(
+                        '<button type="button" class="remove-artist-btn">' +
+                        '<i class="fas fa-minus"></i> Remove' +
+                        '</button>'
+                    );
+                }
+                
+                // Add click handlers to new buttons
+                selector.find('.add-artist-btn').on('click', function() {
+                    // Trigger click on original add button
+                    $('.selector-available select option:selected').appendTo('.selector-chosen select');
+                    updateSelectedArtists();
+                });
+                
+                selector.find('.remove-artist-btn').on('click', function() {
+                    // Trigger click on original remove button
+                    $('.selector-chosen select option:selected').appendTo('.selector-available select');
+                    updateSelectedArtists();
+                });
+                
+                // Ensure selected artists have dark background
+                $('.selector-chosen select').css({
+                    'background': '#1a1a1a',
+                    'color': 'white'
+                });
+                
+                $('.selector-chosen select option').css({
+                    'background': '#1a1a1a',
+                    'color': 'white'
+                });
+            }
+        }
+        
+        function updateSelectedArtists() {
+            // Update the actual hidden select field
+            var selectedValues = [];
+            $('.selector-chosen select option').each(function() {
+                selectedValues.push($(this).val());
+            });
             
-            uploadArea.on('dragover', function(e) {
+            // Update the actual form field
+            $('#id_featured_artists').val(selectedValues);
+        }
+        
+        // Run the fix
+        fixFeaturedArtistsButtons();
+        
+        // Also fix when Django dynamically updates the selector
+        $(document).on('DOMSubtreeModified', '.selector', function() {
+            setTimeout(fixFeaturedArtistsButtons, 100);
+        });
+        
+        // ===== FORM SUBMISSION =====
+        $('#submitBtn').on('click', function() {
+            var audioFile = audioInput.val();
+            var songName = $('input[name="name"], input[name="title"]').val();
+            
+            if (!audioFile) {
+                alert('Please select an audio file to upload');
+                return false;
+            }
+            
+            if (!songName || songName.trim() === '') {
+                alert('Please enter a song name');
+                return false;
+            }
+            
+            // Update button state
+            $(this).val('Uploading...').prop('disabled', true);
+            
+            return true;
+        });
+        
+        // ===== MOBILE DRAG & DROP =====
+        function setupDragDrop(area, input) {
+            area.on('dragover', function(e) {
                 e.preventDefault();
-                uploadArea.css({
+                area.css({
                     'background': 'rgba(138, 43, 226, 0.2)',
                     'border-color': 'var(--accent-hover)'
                 });
             });
             
-            uploadArea.on('dragleave drop', function(e) {
+            area.on('dragleave drop', function(e) {
                 e.preventDefault();
-                uploadArea.css({
+                area.css({
                     'background': '',
                     'border-color': ''
                 });
             });
             
-            uploadArea.on('drop', function(e) {
+            area.on('drop', function(e) {
                 e.preventDefault();
                 var files = e.originalEvent.dataTransfer.files;
                 if (files.length > 0) {
                     // Create new FileList
                     var dataTransfer = new DataTransfer();
                     dataTransfer.items.add(files[0]);
-                    fileInput[0].files = dataTransfer.files;
+                    input[0].files = dataTransfer.files;
                     
                     // Trigger change event
-                    fileInput.trigger('change');
-                    
-                    // Show success feedback
-                    uploadArea.addClass('success');
-                    setTimeout(function() {
-                        uploadArea.removeClass('success');
-                    }, 1000);
+                    input.trigger('change');
                 }
-            });
-            
-            // Add touch feedback
-            uploadArea.on('touchstart', function() {
-                $(this).css('transform', 'scale(0.98)');
-            }).on('touchend', function() {
-                $(this).css('transform', 'scale(1)');
-            });
-        });
-
-        // ===== MOBILE FEATURED ARTISTS FIX =====
-        function mobileFixFeaturedArtists() {
-            // Ensure selected artists have dark background
-            $('.selector-chosen select').css({
-                'background': '#1a1a1a',
-                'color': 'white'
-            });
-            
-            // Make buttons touch-friendly
-            $('.selector-add, .selector-remove').css({
-                'min-height': '48px',
-                'min-width': '140px',
-                'display': 'flex',
-                'align-items': 'center',
-                'justify-content': 'center'
-            });
-            
-            // Improve option visibility
-            $('.selector-chosen option').css({
-                'padding': '12px',
-                'margin': '4px 0'
             });
         }
         
-        // Apply fixes
-        mobileFixFeaturedArtists();
-        $(document).on('change', '.selector select', mobileFixFeaturedArtists);
-        
-        // ===== MOBILE FORM SUBMISSION =====
-        $('#song_form').on('submit', function(e) {
-            // Basic validation
-            var audioFile = $('input[type="file"][accept*="audio"]').val();
-            var songName = $('input[name="name"], input[name="title"]').val();
-            
-            if (!audioFile) {
-                alert('📱 Please select an audio file');
-                e.preventDefault();
-                return false;
-            }
-            
-            if (!songName || songName.trim() === '') {
-                alert('📱 Please enter a song name');
-                e.preventDefault();
-                return false;
-            }
-            
-            // Show loading state
-            var submitBtn = $('.mobile-submit input[type="submit"]');
-            submitBtn.val('📤 Uploading...').prop('disabled', true);
-            
-            return true;
-        });
-
-        // ===== MOBILE KEYBOARD HANDLING =====
-        $(document).on('focus', 'input, textarea', function() {
-            // Scroll input into view when keyboard appears
-            setTimeout(function() {
-                var elem = $(this);
-                var rect = elem[0].getBoundingClientRect();
-                if (rect.bottom > window.innerHeight) {
-                    elem[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }.bind(this), 300);
-        });
+        // Set up drag & drop for both upload areas
+        setupDragDrop(audioUploadArea, audioInput);
+        setupDragDrop(coverUploadArea, coverInput);
     });
 })(django.jQuery);
 </script>
