@@ -7,7 +7,7 @@
     :root {
         --dark-bg: #0a0a0a;
         --card-bg: #151515;
-        --input-bg: #1e1e1e;
+        --input-bg: #1a1a1a;  /* Darker for inputs */
         --input-border: #333;
         --accent: #8a2be2;
         --accent-hover: #9b42f5;
@@ -19,7 +19,7 @@
         --button-text: #ffffff;
     }
 
-    /* Mobile-first responsive design */
+    /* Reset and base styles */
     body {
         background: var(--dark-bg) !important;
         color: var(--text) !important;
@@ -100,7 +100,7 @@
         box-sizing: border-box;
     }
 
-    /* Upload area */
+    /* UPLOAD AREA - SIMPLIFIED */
     .upload-area {
         background: rgba(138, 43, 226, 0.1);
         border: 2px dashed var(--accent);
@@ -108,12 +108,11 @@
         padding: 30px 20px;
         text-align: center;
         margin: 20px 0;
-        cursor: pointer;
+        position: relative;
     }
 
-    .upload-area:active {
-        background: rgba(138, 43, 226, 0.2);
-        transform: scale(0.98);
+    .upload-area:hover {
+        background: rgba(138, 43, 226, 0.15);
     }
 
     .upload-icon {
@@ -126,6 +125,7 @@
         font-size: 1.1rem;
         margin: 0 0 8px 0;
         color: var(--text);
+        font-weight: 600;
     }
 
     .upload-desc {
@@ -151,17 +151,13 @@
         min-width: 200px;
     }
 
-    .upload-button:active {
-        transform: translateY(2px);
-    }
-
     /* File preview */
     .file-preview {
         background: var(--input-bg);
         border-radius: 16px;
         padding: 20px;
         margin-top: 20px;
-        border: 1px solid var(--success);
+        border: 2px solid var(--success);
     }
 
     .preview-header {
@@ -177,33 +173,33 @@
         color: var(--success);
     }
 
-    .file-details {
+    .file-info {
         display: flex;
         flex-direction: column;
         gap: 12px;
         margin-bottom: 20px;
     }
 
-    .file-row {
+    .info-row {
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    .file-label {
+    .info-label {
         color: var(--text-light);
         font-size: 0.9rem;
     }
 
-    .file-value {
+    .info-value {
         color: var(--text);
         font-weight: 600;
         font-size: 0.9rem;
     }
 
     /* Cover image preview */
-    .cover-preview-img {
+    .cover-image {
         width: 100%;
         max-width: 200px;
         height: 200px;
@@ -223,52 +219,48 @@
         padding: 10px;
     }
 
-    audio::-webkit-media-controls-panel {
-        background: var(--input-bg);
+    /* FEATURED ARTISTS - SIMPLE AND DARK */
+    .artists-section {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 20px 0;
     }
 
-    /* FEATURED ARTISTS - FIXED */
-    .custom-featured-artists {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .artists-columns {
+    .artists-container {
         display: flex;
         flex-direction: column;
         gap: 20px;
     }
 
     @media (min-width: 768px) {
-        .artists-columns {
+        .artists-container {
             flex-direction: row;
         }
     }
 
-    .available-artists,
-    .selected-artists {
-        background: var(--input-bg);
-        border: 2px solid var(--input-border);
+    /* BOTH Available and Selected artists have DARK background */
+    .artists-box {
+        background: #000000 !important;  /* BLACK background */
+        border: 2px solid #333;
         border-radius: 12px;
         overflow: hidden;
         flex: 1;
     }
 
+    .selected-artists-box {
+        border-color: var(--accent) !important;
+    }
+
     .artists-header {
-        background: #2a2a2a;
+        background: #1a1a1a;
         color: var(--text);
         padding: 16px;
         margin: 0;
         font-size: 0.9rem;
         font-weight: 600;
         text-align: center;
-    }
-
-    /* FIX: Selected artists DARK background with WHITE text */
-    .selected-artists {
-        background: #1a1a1a !important;
-        border-color: var(--accent) !important;
+        border-bottom: 1px solid #333;
     }
 
     .artists-select {
@@ -276,35 +268,25 @@
         min-height: 200px;
         padding: 12px;
         border: none;
-        background: inherit;
-        color: inherit;
+        background: #000000 !important;  /* BLACK background */
+        color: white !important;  /* WHITE text */
         font-size: 14px;
         cursor: pointer;
     }
 
-    /* FIX: Ensure selected artists have dark background */
-    #selectedArtistsSelect {
-        background: #1a1a1a !important;
-        color: white !important;
-    }
-
-    #selectedArtistsSelect option {
-        background: #1a1a1a !important;
+    /* Ensure ALL options have black background and white text */
+    .artists-select option {
+        background: #000000 !important;
         color: white !important;
         padding: 12px !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        border-bottom: 1px solid #333 !important;
     }
 
-    #selectedArtistsSelect option:checked,
-    #selectedArtistsSelect option:selected {
+    .artists-select option:checked,
+    .artists-select option:selected {
         background: var(--accent) !important;
         color: white !important;
         font-weight: 600;
-    }
-
-    #availableArtistsSelect {
-        background: var(--input-bg) !important;
-        color: var(--text) !important;
     }
 
     /* Add/Remove buttons */
@@ -317,8 +299,7 @@
         border-top: 2px solid var(--accent);
     }
 
-    .add-artist-btn,
-    .remove-artist-btn {
+    .action-btn {
         border: none;
         border-radius: 12px;
         padding: 16px 32px;
@@ -331,22 +312,16 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        transition: all 0.2s;
     }
 
-    .add-artist-btn {
+    .add-btn {
         background: var(--button-bg) !important;
         color: var(--button-text) !important;
     }
 
-    .remove-artist-btn {
+    .remove-btn {
         background: #444 !important;
         color: white !important;
-    }
-
-    .add-artist-btn:active,
-    .remove-artist-btn:active {
-        transform: translateY(2px);
     }
 
     /* Submit button */
@@ -373,17 +348,13 @@
         min-height: 60px;
     }
 
-    .submit-btn:active {
-        transform: translateY(2px);
-        box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+    /* File input styling */
+    .hidden-file-input {
+        display: none !important;
     }
 
-    /* Hide default file inputs */
-    .file-input-wrapper {
-        position: relative;
-    }
-
-    .file-input-wrapper input[type="file"] {
+    .visible-file-input {
+        display: block !important;
         position: absolute;
         width: 100%;
         height: 100%;
@@ -391,29 +362,7 @@
         left: 0;
         opacity: 0;
         cursor: pointer;
-        z-index: 10;
-    }
-
-    /* Make sure file inputs are visible to JS */
-    input[type="file"] {
-        display: block !important;
-        visibility: visible !important;
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0,0,0,0);
-        border: 0;
-    }
-
-    .actual-file-input {
-        position: fixed;
-        top: -1000px;
-        left: -1000px;
-        opacity: 0;
-        pointer-events: none;
+        z-index: 100;
     }
 </style>
 {% endblock %}
@@ -461,41 +410,43 @@
           </div>
         {% else %}
           {% if field.field.name == 'audio_file' or field.field.name == 'file' %}
-            <!-- Audio Upload - FIXED -->
+            <!-- Audio Upload - SIMPLE WORKING VERSION -->
             <div class="upload-area" id="audioUploadArea">
+              <!-- Visible file input that actually works -->
+              <input type="file" 
+                     name="{{ field.field.name }}" 
+                     id="audioFileInput" 
+                     accept="audio/*" 
+                     class="visible-file-input"
+                     onchange="handleAudioFileSelect(event)">
+              
               <div class="upload-icon">
                 <i class="fas fa-cloud-upload-alt"></i>
               </div>
               <div class="upload-title">Upload Audio File</div>
               <div class="upload-desc">MP3, WAV, FLAC • Max 50MB</div>
               
-              <!-- REAL file input that will work -->
-              <input type="file" name="{{ field.field.name }}" 
-                     id="realAudioInput" 
-                     accept="audio/*" 
-                     class="actual-file-input">
-              
-              <button type="button" class="upload-button" id="audioUploadBtn">
+              <div class="upload-button" onclick="document.getElementById('audioFileInput').click()">
                 <i class="fas fa-file-audio"></i> Choose File
-              </button>
+              </div>
             </div>
             
             <div id="audioPreview" class="file-preview" style="display: none;">
               <div class="preview-header">
                 <i class="fas fa-check-circle"></i> Selected Audio
               </div>
-              <div class="file-details">
-                <div class="file-row">
-                  <span class="file-label">File:</span>
-                  <span class="file-value" id="audioFileName"></span>
+              <div class="file-info">
+                <div class="info-row">
+                  <span class="info-label">File:</span>
+                  <span class="info-value" id="audioFileName"></span>
                 </div>
-                <div class="file-row">
-                  <span class="file-label">Size:</span>
-                  <span class="file-value" id="audioFileSize"></span>
+                <div class="info-row">
+                  <span class="info-label">Size:</span>
+                  <span class="info-value" id="audioFileSize"></span>
                 </div>
-                <div class="file-row">
-                  <span class="file-label">Type:</span>
-                  <span class="file-value" id="audioFileType"></span>
+                <div class="info-row">
+                  <span class="info-label">Type:</span>
+                  <span class="info-value" id="audioFileType"></span>
                 </div>
               </div>
               <audio controls id="audioPlayer">
@@ -504,80 +455,82 @@
             </div>
             
           {% elif 'cover' in field.field.name|lower or 'image' in field.field.name|lower %}
-            <!-- Cover Image Upload - FIXED -->
+            <!-- Cover Image Upload - SIMPLE WORKING VERSION -->
             <div class="upload-area" id="coverUploadArea">
+              <!-- Visible file input that actually works -->
+              <input type="file" 
+                     name="{{ field.field.name }}" 
+                     id="coverFileInput" 
+                     accept="image/*" 
+                     class="visible-file-input"
+                     onchange="handleCoverFileSelect(event)">
+              
               <div class="upload-icon">
                 <i class="fas fa-image"></i>
               </div>
               <div class="upload-title">Upload Cover Image</div>
               <div class="upload-desc">JPG, PNG, WebP • Max 5MB</div>
               
-              <!-- REAL file input that will work -->
-              <input type="file" name="{{ field.field.name }}" 
-                     id="realCoverInput" 
-                     accept="image/*" 
-                     class="actual-file-input">
-              
-              <button type="button" class="upload-button" id="coverUploadBtn">
+              <div class="upload-button" onclick="document.getElementById('coverFileInput').click()">
                 <i class="fas fa-image"></i> Choose Image
-              </button>
+              </div>
             </div>
             
             <div id="coverPreview" class="file-preview" style="display: none;">
               <div class="preview-header">
                 <i class="fas fa-check-circle"></i> Selected Image
               </div>
-              <div class="file-details">
-                <div class="file-row">
-                  <span class="file-label">File:</span>
-                  <span class="file-value" id="coverFileName"></span>
+              <div class="file-info">
+                <div class="info-row">
+                  <span class="info-label">File:</span>
+                  <span class="info-value" id="coverFileName"></span>
                 </div>
-                <div class="file-row">
-                  <span class="file-label">Size:</span>
-                  <span class="file-value" id="coverFileSize"></span>
+                <div class="info-row">
+                  <span class="info-label">Size:</span>
+                  <span class="info-value" id="coverFileSize"></span>
                 </div>
-                <div class="file-row">
-                  <span class="file-label">Dimensions:</span>
-                  <span class="file-value" id="coverDimensions"></span>
+                <div class="info-row">
+                  <span class="info-label">Dimensions:</span>
+                  <span class="info-value" id="coverDimensions"></span>
                 </div>
               </div>
-              <img id="coverImage" class="cover-preview-img" alt="Cover Preview">
+              <img id="coverImage" class="cover-image" alt="Cover Preview">
             </div>
             
           {% elif 'featured_artists' in field.field.name %}
-            <!-- Custom Featured Artists Section -->
-            <div class="custom-featured-artists">
-              <div class="artists-columns">
-                <!-- Available Artists -->
-                <div class="available-artists">
+            <!-- Featured Artists - SIMPLE WORKING VERSION -->
+            <div class="artists-section">
+              <div class="artists-container">
+                <!-- Available Artists - BLACK BACKGROUND -->
+                <div class="artists-box">
                   <div class="artists-header">Available Artists</div>
-                  <select multiple class="artists-select" id="availableArtistsSelect" size="6">
+                  <select multiple class="artists-select" id="availableArtists" size="6">
                     {% for choice in field.field.field.choices %}
                       <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                     {% endfor %}
                   </select>
                 </div>
                 
-                <!-- Selected Artists - DARK BACKGROUND -->
-                <div class="selected-artists">
+                <!-- Selected Artists - BLACK BACKGROUND -->
+                <div class="artists-box selected-artists-box">
                   <div class="artists-header">Featured Artists</div>
-                  <select multiple class="artists-select" id="selectedArtistsSelect" size="6">
+                  <select multiple class="artists-select" id="selectedArtists" size="6">
                     <!-- Will be populated from existing selections -->
                   </select>
                 </div>
               </div>
               
-              <!-- Add/Remove buttons BELOW selected artists -->
+              <!-- Add/Remove buttons -->
               <div class="artists-buttons">
-                <button type="button" class="add-artist-btn" id="addArtistBtn">
+                <button type="button" class="action-btn add-btn" onclick="addSelectedArtists()">
                   <i class="fas fa-plus"></i> Add
                 </button>
-                <button type="button" class="remove-artist-btn" id="removeArtistBtn">
+                <button type="button" class="action-btn remove-btn" onclick="removeSelectedArtists()">
                   <i class="fas fa-minus"></i> Remove
                 </button>
               </div>
               
-              <!-- Hidden field for form submission -->
+              <!-- Hidden field that Django will submit -->
               <select name="{{ field.field.name }}" id="id_featured_artists" multiple style="display: none;">
                 {% for choice in field.field.field.choices %}
                   <option value="{{ choice.0 }}">{{ choice.1 }}</option>
@@ -609,7 +562,7 @@
 
 <!-- Submit Section -->
 <div class="submit-area">
-  <button type="submit" class="submit-btn" id="submitBtn">
+  <button type="submit" class="submit-btn" onclick="return validateForm()">
     {% if add %}
       <i class="fas fa-upload"></i> Upload Song
     {% else %}
@@ -623,261 +576,261 @@
 {% block admin_change_form_document_ready %}
 {{ block.super }}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ===== FIXED AUDIO UPLOAD =====
-    const audioUploadBtn = document.getElementById('audioUploadBtn');
-    const audioUploadArea = document.getElementById('audioUploadArea');
-    const realAudioInput = document.getElementById('realAudioInput');
+// ===== GLOBAL VARIABLES =====
+let audioFileSelected = false;
+let coverFileSelected = false;
+
+// ===== AUDIO UPLOAD FUNCTION =====
+function handleAudioFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
     
-    // Create backup input if doesn't exist
-    if (!realAudioInput) {
-        const backupInput = document.createElement('input');
-        backupInput.type = 'file';
-        backupInput.id = 'realAudioInput';
-        backupInput.name = 'audio_file';
-        backupInput.accept = 'audio/*';
-        backupInput.style.display = 'none';
-        document.body.appendChild(backupInput);
+    // Validate file type
+    if (!file.type.startsWith('audio/')) {
+        alert('Please select an audio file (MP3, WAV, FLAC, etc.)');
+        return;
     }
     
-    // Button click triggers file input
-    audioUploadBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        realAudioInput.click();
-    });
+    // Update preview
+    document.getElementById('audioFileName').textContent = file.name;
+    document.getElementById('audioFileSize').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+    document.getElementById('audioFileType').textContent = file.type.split('/')[1]?.toUpperCase() || 'Audio';
     
-    // Area click also triggers
-    audioUploadArea.addEventListener('click', function(e) {
-        if (e.target !== audioUploadBtn && !audioUploadBtn.contains(e.target)) {
-            realAudioInput.click();
-        }
-    });
+    // Create audio preview
+    const url = URL.createObjectURL(file);
+    const player = document.getElementById('audioPlayer');
+    player.src = url;
     
-    // Handle file selection
-    realAudioInput.addEventListener('change', function(e) {
-        if (this.files && this.files[0]) {
-            const file = this.files[0];
-            
-            // Validate audio file
-            if (!file.type.startsWith('audio/')) {
-                alert('Please select an audio file (MP3, WAV, FLAC, etc.)');
-                return;
-            }
-            
-            // Update preview
-            document.getElementById('audioFileName').textContent = file.name;
-            document.getElementById('audioFileSize').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
-            document.getElementById('audioFileType').textContent = file.type.split('/')[1]?.toUpperCase() || 'Audio';
-            
-            // Create audio preview
-            const url = URL.createObjectURL(file);
-            const player = document.getElementById('audioPlayer');
-            player.src = url;
-            
-            // Show preview
-            document.getElementById('audioPreview').style.display = 'block';
-            
-            // Update button
-            audioUploadBtn.innerHTML = '<i class="fas fa-check"></i> File Selected';
-            audioUploadBtn.style.background = 'var(--success)';
-            
-            // Also update Django's original field if it exists
-            const djangoAudioInput = document.querySelector('input[name="audio_file"], input[name="file"]');
-            if (djangoAudioInput) {
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                djangoAudioInput.files = dataTransfer.files;
-            }
-        }
-    });
+    // Show preview
+    document.getElementById('audioPreview').style.display = 'block';
     
-    // ===== FIXED COVER UPLOAD =====
-    const coverUploadBtn = document.getElementById('coverUploadBtn');
-    const coverUploadArea = document.getElementById('coverUploadArea');
-    const realCoverInput = document.getElementById('realCoverInput');
+    // Update button
+    const audioBtn = document.querySelector('#audioUploadArea .upload-button');
+    audioBtn.innerHTML = '<i class="fas fa-check"></i> File Selected';
+    audioBtn.style.background = 'var(--success)';
     
-    // Create backup input if doesn't exist
-    if (!realCoverInput) {
-        const backupInput = document.createElement('input');
-        backupInput.type = 'file';
-        backupInput.id = 'realCoverInput';
-        backupInput.name = 'cover';
-        backupInput.accept = 'image/*';
-        backupInput.style.display = 'none';
-        document.body.appendChild(backupInput);
+    audioFileSelected = true;
+}
+
+// ===== COVER UPLOAD FUNCTION =====
+function handleCoverFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPG, PNG, etc.)');
+        return;
     }
     
-    coverUploadBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        realCoverInput.click();
-    });
+    // Update preview
+    document.getElementById('coverFileName').textContent = file.name;
+    document.getElementById('coverFileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
     
-    coverUploadArea.addEventListener('click', function(e) {
-        if (e.target !== coverUploadBtn && !coverUploadBtn.contains(e.target)) {
-            realCoverInput.click();
+    // Create image preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = document.getElementById('coverImage');
+        img.src = e.target.result;
+        
+        // Get dimensions
+        const image = new Image();
+        image.onload = function() {
+            document.getElementById('coverDimensions').textContent = this.width + ' × ' + this.height;
+        };
+        image.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    
+    // Show preview
+    document.getElementById('coverPreview').style.display = 'block';
+    
+    // Update button
+    const coverBtn = document.querySelector('#coverUploadArea .upload-button');
+    coverBtn.innerHTML = '<i class="fas fa-check"></i> Image Selected';
+    coverBtn.style.background = 'var(--success)';
+    
+    coverFileSelected = true;
+}
+
+// ===== FEATURED ARTISTS FUNCTIONS =====
+function initializeArtists() {
+    const hiddenField = document.getElementById('id_featured_artists');
+    const availableSelect = document.getElementById('availableArtists');
+    const selectedSelect = document.getElementById('selectedArtists');
+    
+    if (!hiddenField || !availableSelect || !selectedSelect) return;
+    
+    // Get current selections
+    const currentValues = hiddenField.value ? hiddenField.value.split(',') : [];
+    
+    // Move selected artists to selected box
+    Array.from(availableSelect.options).forEach(option => {
+        if (currentValues.includes(option.value)) {
+            selectedSelect.appendChild(option);
         }
     });
     
-    realCoverInput.addEventListener('change', function(e) {
-        if (this.files && this.files[0]) {
-            const file = this.files[0];
-            
-            // Validate image file
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file (JPG, PNG, etc.)');
-                return;
-            }
-            
-            // Update preview
-            document.getElementById('coverFileName').textContent = file.name;
-            document.getElementById('coverFileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            
-            // Create image preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('coverImage');
-                img.src = e.target.result;
-                
-                // Get dimensions
-                const image = new Image();
-                image.onload = function() {
-                    document.getElementById('coverDimensions').textContent = this.width + ' × ' + this.height;
-                };
-                image.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-            
-            // Show preview
-            document.getElementById('coverPreview').style.display = 'block';
-            
-            // Update button
-            coverUploadBtn.innerHTML = '<i class="fas fa-check"></i> Image Selected';
-            coverUploadBtn.style.background = 'var(--success)';
-            
-            // Also update Django's original field if it exists
-            const djangoCoverInput = document.querySelector('input[name*="cover"], input[name*="image"]');
-            if (djangoCoverInput) {
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                djangoCoverInput.files = dataTransfer.files;
-            }
-        }
+    // Force black background for all artists selects
+    forceDarkArtistsBackground();
+}
+
+function addSelectedArtists() {
+    const availableSelect = document.getElementById('availableArtists');
+    const selectedSelect = document.getElementById('selectedArtists');
+    
+    if (!availableSelect || !selectedSelect) return;
+    
+    // Move selected options
+    Array.from(availableSelect.selectedOptions).forEach(option => {
+        selectedSelect.appendChild(option);
     });
     
-    // ===== FEATURED ARTISTS =====
-    const availableSelect = document.getElementById('availableArtistsSelect');
-    const selectedSelect = document.getElementById('selectedArtistsSelect');
-    const addBtn = document.getElementById('addArtistBtn');
-    const removeBtn = document.getElementById('removeArtistBtn');
+    updateFeaturedArtistsField();
+    forceDarkArtistsBackground();
+}
+
+function removeSelectedArtists() {
+    const availableSelect = document.getElementById('availableArtists');
+    const selectedSelect = document.getElementById('selectedArtists');
+    
+    if (!availableSelect || !selectedSelect) return;
+    
+    // Move selected options back
+    Array.from(selectedSelect.selectedOptions).forEach(option => {
+        availableSelect.appendChild(option);
+    });
+    
+    updateFeaturedArtistsField();
+    forceDarkArtistsBackground();
+}
+
+function updateFeaturedArtistsField() {
+    const selectedSelect = document.getElementById('selectedArtists');
     const hiddenField = document.getElementById('id_featured_artists');
     
-    // Load existing selections
-    if (hiddenField && hiddenField.value) {
-        const currentValues = Array.isArray(hiddenField.value) ? 
-            hiddenField.value : 
-            hiddenField.value.split(',');
+    if (!selectedSelect || !hiddenField) return;
+    
+    // Get all selected values
+    const selectedValues = Array.from(selectedSelect.options).map(option => option.value);
+    
+    // Update hidden field
+    hiddenField.value = selectedValues.join(',');
+    
+    // Also update the options in hidden field
+    Array.from(hiddenField.options).forEach(option => {
+        option.selected = selectedValues.includes(option.value);
+    });
+}
+
+// Force black background for artists selects
+function forceDarkArtistsBackground() {
+    const selects = document.querySelectorAll('.artists-select');
+    selects.forEach(select => {
+        select.style.background = '#000000';
+        select.style.color = 'white';
         
-        // Move selected artists to right column
-        if (availableSelect && selectedSelect) {
-            Array.from(availableSelect.options).forEach(option => {
-                if (currentValues.includes(option.value)) {
-                    selectedSelect.appendChild(option);
-                }
-            });
-        }
-    }
-    
-    // Add button click
-    if (addBtn && availableSelect && selectedSelect) {
-        addBtn.addEventListener('click', function() {
-            Array.from(availableSelect.selectedOptions).forEach(option => {
-                selectedSelect.appendChild(option);
-            });
-            updateHiddenField();
+        // Force options to have black background
+        Array.from(select.options).forEach(option => {
+            option.style.background = '#000000';
+            option.style.color = 'white';
         });
+    });
+}
+
+// ===== FORM VALIDATION =====
+function validateForm() {
+    const audioInput = document.getElementById('audioFileInput');
+    const songName = document.querySelector('input[name="name"], input[name="title"]')?.value;
+    const submitBtn = document.querySelector('.submit-btn');
+    
+    // Check audio file
+    if (!audioInput || !audioInput.files || audioInput.files.length === 0) {
+        alert('Please select an audio file to upload');
+        return false;
     }
     
-    // Remove button click
-    if (removeBtn && availableSelect && selectedSelect) {
-        removeBtn.addEventListener('click', function() {
-            Array.from(selectedSelect.selectedOptions).forEach(option => {
-                availableSelect.appendChild(option);
-            });
-            updateHiddenField();
-        });
+    // Check song name
+    if (!songName || songName.trim() === '') {
+        alert('Please enter a song name');
+        return false;
     }
     
-    // Double click to add/remove
-    if (availableSelect) {
-        availableSelect.addEventListener('dblclick', function(e) {
-            if (e.target.tagName === 'OPTION') {
-                selectedSelect.appendChild(e.target);
-                updateHiddenField();
-            }
-        });
-    }
+    // Update featured artists field before submit
+    updateFeaturedArtistsField();
     
-    if (selectedSelect) {
-        selectedSelect.addEventListener('dblclick', function(e) {
-            if (e.target.tagName === 'OPTION') {
-                availableSelect.appendChild(e.target);
-                updateHiddenField();
-            }
-        });
-    }
-    
-    // Update hidden field for form submission
-    function updateHiddenField() {
-        if (!selectedSelect || !hiddenField) return;
-        
-        const selectedValues = Array.from(selectedSelect.options).map(option => option.value);
-        hiddenField.value = selectedValues.join(',');
-    }
-    
-    // Force selected artists to have dark background
-    function fixSelectedArtistsBackground() {
-        if (selectedSelect) {
-            selectedSelect.style.background = '#1a1a1a';
-            selectedSelect.style.color = 'white';
-            
-            // Also fix options
-            Array.from(selectedSelect.options).forEach(option => {
-                option.style.background = '#1a1a1a';
-                option.style.color = 'white';
-            });
-        }
-    }
-    
-    // Run background fix
-    fixSelectedArtistsBackground();
-    setInterval(fixSelectedArtistsBackground, 1000);
-    
-    // ===== FORM SUBMISSION =====
-    const submitBtn = document.getElementById('submitBtn');
+    // Show loading state
     if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
-            const audioFile = realAudioInput.files.length > 0;
-            const songName = document.querySelector('input[name="name"], input[name="title"]')?.value;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        submitBtn.disabled = true;
+    }
+    
+    return true;
+}
+
+// ===== DRAG & DROP =====
+function setupDragDrop() {
+    const audioArea = document.getElementById('audioUploadArea');
+    const coverArea = document.getElementById('coverUploadArea');
+    const audioInput = document.getElementById('audioFileInput');
+    const coverInput = document.getElementById('coverFileInput');
+    
+    if (audioArea && audioInput) {
+        audioArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            audioArea.style.background = 'rgba(138, 43, 226, 0.2)';
+        });
+        
+        audioArea.addEventListener('dragleave', () => {
+            audioArea.style.background = '';
+        });
+        
+        audioArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            audioArea.style.background = '';
             
-            if (!audioFile) {
-                alert('Please select an audio file');
-                e.preventDefault();
-                return false;
+            if (e.dataTransfer.files.length > 0) {
+                audioInput.files = e.dataTransfer.files;
+                handleAudioFileSelect({target: audioInput});
             }
-            
-            if (!songName || songName.trim() === '') {
-                alert('Please enter a song name');
-                e.preventDefault();
-                return false;
-            }
-            
-            // Show loading state
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-            this.disabled = true;
-            
-            return true;
         });
     }
+    
+    if (coverArea && coverInput) {
+        coverArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            coverArea.style.background = 'rgba(138, 43, 226, 0.2)';
+        });
+        
+        coverArea.addEventListener('dragleave', () => {
+            coverArea.style.background = '';
+        });
+        
+        coverArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            coverArea.style.background = '';
+            
+            if (e.dataTransfer.files.length > 0) {
+                coverInput.files = e.dataTransfer.files;
+                handleCoverFileSelect({target: coverInput});
+            }
+        });
+    }
+}
+
+// ===== INITIALIZE EVERYTHING =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize artists
+    initializeArtists();
+    
+    // Setup drag & drop
+    setupDragDrop();
+    
+    // Force dark background every second (just in case)
+    setInterval(forceDarkArtistsBackground, 1000);
+    
+    // Also force on any click
+    document.addEventListener('click', forceDarkArtistsBackground);
 });
 </script>
 {% endblock %}
