@@ -5,111 +5,170 @@
 {{ block.super }}
 <style>
     :root {
-        --dark-bg: #121212;
-        --darker-bg: #0a0a0a;
-        --card-bg: #1e1e1e;
-        --card-border: #333;
-        --accent-color: #bb86fc;
-        --accent-hover: #9d65d9;
-        --primary-color: #03dac6;
+        --dark-bg: #0f0f0f;
+        --darker-bg: #050505;
+        --card-bg: #1a1a1a;
+        --card-border: #2a2a2a;
+        --accent-color: #8a2be2;
+        --accent-hover: #9b42f5;
+        --primary-color: #00d4ff;
         --text-primary: #ffffff;
-        --text-secondary: #b0b0b0;
-        --border-color: #444;
-        --success-color: #00c853;
-        --error-color: #cf6679;
-        --hover-bg: #2a2a2a;
+        --text-secondary: #cccccc;
+        --border-color: #333;
+        --success-color: #00ff88;
+        --error-color: #ff4757;
+        --hover-bg: #252525;
+        --upload-bg: rgba(138, 43, 226, 0.1);
+        --upload-border: rgba(138, 43, 226, 0.3);
     }
 
-    /* Dark theme for the entire form area */
+    /* Global dark theme */
     body {
-        background: var(--dark-bg);
-        color: var(--text-primary);
+        background: var(--dark-bg) !important;
+        color: var(--text-primary) !important;
     }
 
     #content {
-        background: var(--dark-bg);
+        background: var(--dark-bg) !important;
     }
 
     #content-main {
-        background: var(--dark-bg);
+        background: var(--dark-bg) !important;
     }
 
-    /* Form container */
+    /* Form container - Dark with gradient */
     .form-container {
-        background: var(--darker-bg);
-        padding: 25px;
-        margin: -20px -20px 25px -20px;
-        border-bottom: 3px solid var(--accent-color);
+        background: linear-gradient(135deg, var(--darker-bg) 0%, #1a0033 100%);
+        padding: 30px;
+        margin: -20px -20px 30px -20px;
+        border-bottom: 4px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
     }
 
     .form-header {
         padding: 10px 0;
+        position: relative;
+        z-index: 1;
     }
 
     .form-header h1 {
-        color: var(--accent-color);
+        color: var(--text-primary);
         margin: 0;
-        font-size: 1.8rem;
+        font-size: 2rem;
         display: flex;
         align-items: center;
-        gap: 12px;
-        text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+        gap: 15px;
+        font-weight: 700;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-header h1 i {
+        color: var(--accent-color);
+        background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .form-header p {
         color: var(--text-secondary);
-        margin: 8px 0 0 0;
-        font-size: 0.95rem;
+        margin: 10px 0 0 0;
+        font-size: 1rem;
+        max-width: 800px;
     }
 
-    /* Form sections - dark cards */
+    .brand-highlight {
+        color: var(--primary-color);
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+
+    /* Dark form sections */
     .form-section {
         background: var(--card-bg);
-        border-radius: 10px;
-        padding: 25px;
+        border-radius: 12px;
+        padding: 30px;
         margin-bottom: 25px;
         border: 1px solid var(--card-border);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
     }
 
-    .form-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-        border-color: var(--accent-color);
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        opacity: 0.7;
     }
 
     .form-section h2 {
         color: var(--primary-color);
         margin-top: 0;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--accent-color);
-        font-size: 1.2rem;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+        font-size: 1.3rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
-    /* Form rows */
+    .form-section h2 i {
+        color: var(--accent-color);
+        font-size: 1.2rem;
+    }
+
+    /* Dark form rows */
     .form-row {
         margin-bottom: 20px;
-        padding: 18px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        border-left: 3px solid var(--primary-color);
-        transition: background 0.2s;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        border-left: 4px solid var(--accent-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
     }
 
     .form-row:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateX(5px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .form-row label {
         font-weight: 600;
         color: var(--text-primary);
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         display: block;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-row label:after {
+        content: " *";
+        color: var(--error-color);
+        font-weight: bold;
+        margin-left: 3px;
     }
 
     /* Dark input fields */
@@ -119,53 +178,186 @@
     select,
     textarea {
         width: 100%;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-size: 14px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
         color: var(--text-primary);
         transition: all 0.3s;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus,
     textarea:focus {
+        background: rgba(255, 255, 255, 0.12);
         border-color: var(--accent-color);
         outline: none;
-        box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
-        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
     }
 
-    /* Placeholder text */
     ::placeholder {
         color: var(--text-secondary);
-        opacity: 0.7;
+        opacity: 0.6;
     }
 
-    /* Dark file upload */
-    .file-upload {
-        border: 2px dashed var(--accent-color);
-        border-radius: 8px;
-        padding: 35px;
+    /* DARK FILE UPLOAD SECTION - SPECIFIC STYLING */
+    .file-upload-container {
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(0, 212, 255, 0.05));
+        border: 3px dashed var(--upload-border);
+        border-radius: 15px;
+        padding: 50px 30px;
         text-align: center;
-        background: rgba(187, 134, 252, 0.05);
+        margin: 15px 0;
         cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .file-upload-container:hover {
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(0, 212, 255, 0.08));
+        border-color: var(--accent-color);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 40px rgba(138, 43, 226, 0.2);
+    }
+
+    .file-upload-container.drag-over {
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 212, 255, 0.1));
+        border-color: var(--primary-color);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    }
+
+    .file-upload-icon {
+        font-size: 64px;
+        color: var(--accent-color);
+        margin-bottom: 20px;
+        filter: drop-shadow(0 4px 12px rgba(138, 43, 226, 0.4));
         transition: all 0.3s;
     }
 
-    .file-upload:hover {
-        background: rgba(187, 134, 252, 0.1);
-        border-color: var(--accent-hover);
-        transform: translateY(-2px);
+    .file-upload-container:hover .file-upload-icon {
+        transform: scale(1.1) rotate(5deg);
+        color: var(--primary-color);
     }
 
-    .file-upload i {
+    .file-upload-title {
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .file-upload-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .file-upload-button {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--accent-color), #6a0dad);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+    }
+
+    .file-upload-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+        background: linear-gradient(135deg, var(--accent-hover), #7b1fd9);
+    }
+
+    .file-upload-info {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    /* Audio preview section - Dark theme */
+    .audio-preview-container {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+        border: 2px solid rgba(138, 43, 226, 0.3);
+        position: relative;
+    }
+
+    .audio-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .audio-preview-title {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .audio-info {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .audio-info-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .audio-info-item i {
         color: var(--accent-color);
-        font-size: 32px;
-        margin-bottom: 15px;
-        display: block;
+    }
+
+    /* Custom audio player - Dark theme */
+    audio {
+        width: 100%;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+    }
+
+    audio::-webkit-media-controls-panel {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+    }
+
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display {
+        color: var(--text-primary) !important;
     }
 
     /* Checkboxes */
@@ -173,21 +365,38 @@
         display: flex;
         gap: 25px;
         flex-wrap: wrap;
-        margin-top: 15px;
+        margin-top: 20px;
     }
 
     .checkbox-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 15px;
+        gap: 12px;
+        padding: 12px 20px;
         background: rgba(255, 255, 255, 0.05);
-        border-radius: 6px;
-        transition: background 0.2s;
+        border-radius: 10px;
+        transition: all 0.3s;
+        cursor: pointer;
     }
 
     .checkbox-item:hover {
         background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked {
+        background: var(--accent-color);
+        border-color: var(--accent-color);
     }
 
     .checkbox-item label {
@@ -195,85 +404,113 @@
         cursor: pointer;
         margin: 0;
         font-weight: 500;
-    }
-
-    input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--accent-color);
-        cursor: pointer;
+        text-transform: none;
+        letter-spacing: normal;
     }
 
     /* Dark submit button */
     .submit-row {
-        background: var(--card-bg);
-        padding: 25px;
-        border-radius: 10px;
-        margin-top: 30px;
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(15, 15, 15, 0.9));
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 40px;
         display: flex;
-        justify-content: flex-end;
-        border-top: 3px solid var(--accent-color);
+        justify-content: space-between;
+        align-items: center;
+        border: 2px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .submit-row::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
     }
 
     .submit-row input[type="submit"] {
-        background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-        color: #000;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        color: white;
         border: none;
-        padding: 12px 40px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 1rem;
+        padding: 15px 50px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
         cursor: pointer;
         transition: all 0.3s;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 6px 25px rgba(138, 43, 226, 0.4);
     }
 
     .submit-row input[type="submit"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(187, 134, 252, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(138, 43, 226, 0.6);
+        background: linear-gradient(135deg, var(--accent-hover), #00e5ff);
     }
 
-    /* Help text */
+    .submit-row input[type="submit"]:active {
+        transform: translateY(-1px);
+    }
+
+    /* Dark help text */
     .help {
         color: var(--text-secondary);
-        font-size: 0.85rem;
-        margin-top: 8px;
-        padding: 10px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        padding: 15px;
         background: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-        border-left: 3px solid var(--primary-color);
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+        line-height: 1.6;
     }
 
-    /* Error styling */
+    /* Dark error styling */
     .errorlist {
         color: var(--error-color);
-        margin: 8px 0 0 0;
+        margin: 10px 0 0 0;
         padding: 0;
         list-style: none;
     }
 
     .errorlist li {
-        padding: 8px 12px;
-        background: rgba(207, 102, 121, 0.1);
-        border-radius: 4px;
-        margin-bottom: 5px;
-        border-left: 3px solid var(--error-color);
+        padding: 12px 15px;
+        background: rgba(255, 71, 87, 0.1);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-left: 4px solid var(--error-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    /* Featured artists selector - dark theme */
+    .errorlist li:before {
+        content: '⚠️';
+        font-size: 1rem;
+    }
+
+    /* Featured artists selector - Dark theme */
     .selector {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--card-border) !important;
-        border-radius: 8px !important;
-        overflow: hidden;
+        background: var(--darker-bg) !important;
+        border: 2px solid var(--border-color) !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
     }
 
     .selector h2 {
-        background: var(--darker-bg) !important;
-        color: var(--text-primary) !important;
-        padding: 12px 15px !important;
+        background: linear-gradient(135deg, var(--accent-color), #6a0dad) !important;
+        color: white !important;
+        padding: 15px 20px !important;
         margin: 0 !important;
-        border-bottom: 2px solid var(--accent-color) !important;
+        border: none !important;
+        font-weight: 600 !important;
     }
 
     .selector select {
@@ -285,68 +522,30 @@
     .selector option {
         background: var(--card-bg) !important;
         color: var(--text-primary) !important;
-        padding: 10px !important;
+        padding: 12px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
     .selector option:hover {
         background: var(--hover-bg) !important;
     }
 
-    /* Select styling */
-    select {
-        background-color: var(--card-bg);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-
-    select option {
-        background: var(--card-bg);
-        color: var(--text-primary);
-        padding: 10px;
-    }
-
-    /* Textarea specific */
-    textarea {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        font-family: monospace;
-    }
-
-    /* Readonly fields */
-    .readonly {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 10px;
-        border-radius: 4px;
-        color: var(--text-secondary);
-        border: 1px solid var(--border-color);
-    }
-
-    /* Duration fields */
-    .duration-fields {
-        display: flex;
-        gap: 15px;
-        margin-top: 10px;
-    }
-
-    .duration-field {
-        flex: 1;
-    }
-
-    /* MusicCenterUG branding */
-    .brand-highlight {
-        color: var(--accent-color);
-        font-weight: bold;
-    }
-
     /* Responsive design */
     @media (max-width: 768px) {
         .form-container {
-            padding: 20px 15px;
+            padding: 20px;
         }
         
         .form-section {
             padding: 20px;
+        }
+        
+        .file-upload-container {
+            padding: 30px 20px;
+        }
+        
+        .file-upload-icon {
+            font-size: 48px;
         }
         
         .checkbox-row {
@@ -355,14 +554,15 @@
         
         .submit-row {
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            padding: 20px;
         }
         
         .submit-row input[type="submit"] {
             width: 100%;
         }
         
-        .duration-fields {
+        .audio-info {
             flex-direction: column;
             gap: 10px;
         }
@@ -370,21 +570,29 @@
 
     /* Scrollbar styling */
     ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
     }
 
     ::-webkit-scrollbar-track {
         background: var(--darker-bg);
+        border-radius: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 5px;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        border-radius: 10px;
+        border: 3px solid var(--darker-bg);
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-color);
+        background: linear-gradient(135deg, var(--accent-hover), #00e5ff);
+    }
+
+    /* Selection color */
+    ::selection {
+        background-color: rgba(138, 43, 226, 0.5);
+        color: white;
     }
 </style>
 {% endblock %}
@@ -393,14 +601,14 @@
 <div class="form-container">
     <div class="form-header">
         <h1>
-            <i class="fas fa-music"></i>
-            {% if add %}Upload New Song{% else %}Edit Song{% endif %}
+            <i class="fas fa-cloud-upload-alt"></i>
+            {% if add %}Upload Music Track{% else %}Edit Track Details{% endif %}
         </h1>
         <p>
             {% if add %}
-                Add a new track to <span class="brand-highlight">MusicCenterUG</span>
+                Upload your music to <span class="brand-highlight">MusicCenterUG</span>. Supports MP3, WAV, FLAC formats.
             {% else %}
-                Edit song details on <span class="brand-highlight">MusicCenterUG</span>
+                Edit your track information on <span class="brand-highlight">MusicCenterUG</span>.
             {% endif %}
         </p>
     </div>
@@ -414,19 +622,21 @@
   <div class="form-section">
     <h2>
       {% if fieldset.name == "Song Details" or fieldset.name == "Basic Information" %}
-        <i class="fas fa-info-circle"></i>
+        <i class="fas fa-music"></i>
       {% elif fieldset.name == "Duration" %}
-        <i class="fas fa-clock"></i>
-      {% elif fieldset.name == "Audio Upload" or fieldset.name == "Media Files" %}
+        <i class="fas fa-hourglass-half"></i>
+      {% elif fieldset.name == "Audio Upload" or fieldset.name == "Media Files" or fieldset.name == "File Upload" %}
+        <i class="fas fa-file-audio"></i>
+      {% elif fieldset.name == "Audio File" %}
         <i class="fas fa-file-upload"></i>
       {% elif fieldset.name == "Content Settings" %}
-        <i class="fas fa-cog"></i>
+        <i class="fas fa-sliders-h"></i>
       {% elif fieldset.name == "Additional Information" %}
-        <i class="fas fa-plus-circle"></i>
+        <i class="fas fa-info-circle"></i>
       {% elif fieldset.name == "Featured Artists" %}
-        <i class="fas fa-users"></i>
-      {% elif fieldset.name == "Statistics" %}
-        <i class="fas fa-chart-bar"></i>
+        <i class="fas fa-user-friends"></i>
+      {% elif fieldset.name == "Genre & Mood" %}
+        <i class="fas fa-theater-masks"></i>
       {% else %}
         <i class="fas fa-folder"></i>
       {% endif %}
@@ -451,7 +661,29 @@
               {% if field.is_readonly %}
                   <div class="readonly">{{ field.contents }}</div>
               {% else %}
-                  {{ field.field }}
+                  {% if field.field.name == 'audio_file' or field.field.name == 'file' %}
+                    <!-- Custom dark file upload for audio files -->
+                    <div class="file-upload-container" onclick="this.querySelector('input[type=file]').click();">
+                      <div class="file-upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                      </div>
+                      <div class="file-upload-title">Upload Audio File</div>
+                      <div class="file-upload-subtitle">
+                        Drag & drop your audio file here or click to browse. 
+                        Supported formats: MP3, WAV, FLAC, AAC, OGG
+                      </div>
+                      <button type="button" class="file-upload-button">
+                        <i class="fas fa-search"></i> Browse Files
+                      </button>
+                      {{ field.field }}
+                      <div class="file-upload-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Maximum file size: 50MB. For best quality, upload lossless formats.
+                      </div>
+                    </div>
+                  {% else %}
+                    {{ field.field }}
+                  {% endif %}
               {% endif %}
             {% endif %}
             {% if field.field.help_text %}
@@ -473,61 +705,144 @@
 <script>
 (function($) {
     $(document).ready(function() {
-        // File upload click handler
-        $('.file-upload').on('click', function() {
-            $(this).find('input[type="file"]').click();
+        // Enhanced dark file upload with drag & drop
+        $('.file-upload-container').each(function() {
+            var container = $(this);
+            var fileInput = container.find('input[type="file"]');
+            
+            // Hide the default file input
+            fileInput.css({
+                'position': 'absolute',
+                'width': '1px',
+                'height': '1px',
+                'padding': '0',
+                'margin': '-1px',
+                'overflow': 'hidden',
+                'clip': 'rect(0,0,0,0)',
+                'border': '0'
+            });
+            
+            // Drag and drop functionality
+            container.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                container.addClass('drag-over');
+            });
+            
+            container.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                container.removeClass('drag-over');
+            });
+            
+            container.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                container.removeClass('drag-over');
+                
+                var files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput[0].files = files;
+                    fileInput.trigger('change');
+                    showFileInfo(files[0]);
+                }
+            });
         });
-
-        // Audio preview
+        
+        // Show file information when file is selected
         $('input[type="file"][accept*="audio"]').on('change', function(e) {
             if (e.target.files.length > 0) {
                 var file = e.target.files[0];
-                var url = URL.createObjectURL(file);
-                
-                // Remove existing preview
-                $(this).closest('.form-row').find('.audio-preview').remove();
-                
-                // Add new preview
-                var preview = $(
-                    '<div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid var(--border-color);">' +
-                    '<strong style="color: var(--primary-color); margin-bottom: 8px; display: block;">Audio Preview:</strong>' +
-                    '<audio controls style="width: 100%;">' +
-                    '<source src="' + url + '" type="' + file.type + '">' +
-                    'Audio preview not supported' +
-                    '</audio>' +
-                    '</div>'
-                );
-                
-                $(this).closest('.form-row').append(preview);
+                showFileInfo(file);
+                playAudioPreview(file);
             }
         });
-
-        // Form submission loading state
-        $('#song_form').on('submit', function() {
+        
+        function showFileInfo(file) {
+            var container = $('.file-upload-container');
+            var fileSize = (file.size / (1024 * 1024)).toFixed(2);
+            var fileType = file.type.split('/')[1]?.toUpperCase() || 'AUDIO';
+            
+            // Update upload container with file info
+            container.find('.file-upload-title').html(
+                '<i class="fas fa-check-circle" style="color: var(--success-color); margin-right: 10px;"></i>' +
+                'File Selected: ' + file.name
+            );
+            
+            container.find('.file-upload-subtitle').html(
+                '<span style="color: var(--primary-color);">' + fileType + '</span> • ' +
+                '<span style="color: var(--text-secondary);">' + fileSize + ' MB</span> • ' +
+                '<span style="color: var(--accent-color);">Ready to Upload</span>'
+            );
+            
+            container.find('.file-upload-icon').html('<i class="fas fa-file-audio"></i>');
+        }
+        
+        function playAudioPreview(file) {
+            var url = URL.createObjectURL(file);
+            
+            // Remove existing preview
+            $('.audio-preview-container').remove();
+            
+            // Create new audio preview
+            var audioPreview = $(
+                '<div class="audio-preview-container">' +
+                '<div class="audio-preview-header">' +
+                '<div class="audio-preview-title">' +
+                '<i class="fas fa-headphones"></i> Audio Preview' +
+                '</div>' +
+                '<div class="audio-info">' +
+                '<div class="audio-info-item"><i class="fas fa-file-alt"></i> ' + file.type.split('/')[1]?.toUpperCase() + '</div>' +
+                '<div class="audio-info-item"><i class="fas fa-weight-hanging"></i> ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB</div>' +
+                '</div>' +
+                '</div>' +
+                '<audio controls style="width: 100%;">' +
+                '<source src="' + url + '" type="' + file.type + '">' +
+                'Your browser does not support audio preview.' +
+                '</audio>' +
+                '</div>'
+            );
+            
+            $('.file-upload-container').after(audioPreview);
+        }
+        
+        // Form submission with loading animation
+        $('#song_form').on('submit', function(e) {
             var submitBtn = $('.submit-row input[type="submit"]');
-            submitBtn.val('Uploading...')
-                   .prop('disabled', true)
-                   .css('opacity', '0.8');
+            var originalText = submitBtn.val();
             
-            // Add loading animation
-            submitBtn.css({
-                'background': 'linear-gradient(135deg, var(--primary-color), var(--accent-color))',
-                'position': 'relative',
-                'overflow': 'hidden'
-            });
+            submitBtn.val('')
+                .prop('disabled', true)
+                .css({
+                    'background': 'linear-gradient(135deg, var(--accent-color), var(--primary-color))',
+                    'position': 'relative',
+                    'overflow': 'hidden'
+                })
+                .html(
+                    '<span style="position: relative; z-index: 2;">Uploading...</span>' +
+                    '<div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: loading 1.5s infinite;"></div>'
+                );
             
-            submitBtn.after('<div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: loading 1.5s infinite;"></div>');
+            // Add CSS for loading animation
+            if (!$('#loading-animation').length) {
+                $('<style id="loading-animation">')
+                    .text('@keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }')
+                    .appendTo('head');
+            }
         });
-
-        // Add CSS for loading animation
-        $('<style>').text('@keyframes loading { 0% { left: -100%; } 100% { left: 100%; } }').appendTo('head');
-
+        
         // Duration validation
-        $('[name$="seconds"]').on('input', function() {
-            var seconds = parseInt($(this).val()) || 0;
-            if (seconds >= 60) {
-                alert('Seconds cannot be 60 or more. Use minutes field instead.');
-                $(this).val('59');
+        $('[name*="duration"], [name*="seconds"], [name*="minutes"]').on('input', function() {
+            var value = $(this).val();
+            if (value < 0) $(this).val(0);
+        });
+        
+        // Show file size warning
+        $('input[type="file"]').on('change', function() {
+            var file = this.files[0];
+            if (file && file.size > 50 * 1024 * 1024) { // 50MB
+                alert('⚠️ File size exceeds 50MB limit. Please choose a smaller file.');
+                $(this).val('');
             }
         });
     });
