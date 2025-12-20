@@ -17,12 +17,9 @@
         --error: #ff5252;
         --button-bg: #000000;
         --button-text: #ffffff;
-        --artists-bg: #000000;
-        --artists-text: #ffffff;
-        --selected-bg: #111111;
     }
 
-    /* Reset and base styles */
+    /* Mobile-first design */
     body {
         background: var(--dark-bg) !important;
         color: var(--text) !important;
@@ -85,171 +82,225 @@
         gap: 10px;
     }
 
-    /* ARTISTS SECTION - DARK DESIGN */
-    .artists-section {
+    /* DROPDOWN ARTISTS DESIGN FOR MOBILE */
+    .artists-dropdown-section {
         background: var(--card-bg);
         border-radius: 16px;
         padding: 20px;
         margin: 20px 0;
     }
 
-    .artists-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    @media (min-width: 768px) {
-        .artists-container {
-            flex-direction: row;
-        }
-    }
-
-    /* ARTISTS BOXES - DARK WITH WHITE TEXT */
-    .artists-box {
-        background: var(--artists-bg) !important;
-        border: 2px solid #333;
+    /* Selected Artists Display - Mobile friendly */
+    .selected-artists-display {
+        background: #000000;
+        border: 2px solid var(--accent);
         border-radius: 12px;
-        overflow: hidden;
-        flex: 1;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .artists-header {
-        background: #1a1a1a;
-        color: var(--artists-text);
         padding: 16px;
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-        text-align: center;
-        border-bottom: 1px solid #333;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+        min-height: 60px;
     }
 
-    .artists-select {
-        width: 100%;
-        min-height: 200px;
-        max-height: 250px;
-        padding: 12px;
+    .selected-artists-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .selected-artists-header h3 {
+        font-size: 1rem;
+        margin: 0;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .artist-count {
+        background: var(--accent);
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .selected-artists-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-height: 40px;
+    }
+
+    .selected-artist-tag {
+        background: rgba(138, 43, 226, 0.2);
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(138, 43, 226, 0.3);
+    }
+
+    .remove-artist-btn {
+        background: none;
         border: none;
-        background: var(--artists-bg) !important;
-        color: var(--artists-text) !important;
-        font-size: 14px;
+        color: var(--error);
         cursor: pointer;
-        font-family: inherit;
-        outline: none;
+        padding: 0;
+        font-size: 0.9rem;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .remove-artist-btn:hover {
+        background: rgba(255, 82, 82, 0.1);
+    }
+
+    /* Dropdown for Available Artists */
+    .artists-dropdown-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .artists-dropdown-toggle {
+        width: 100%;
+        padding: 16px;
+        background: var(--input-bg);
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 1rem;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .artists-dropdown-toggle.open {
+        border-color: var(--accent);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .dropdown-arrow {
+        transition: transform 0.3s;
+    }
+
+    .dropdown-arrow.open {
+        transform: rotate(180deg);
+    }
+
+    .artists-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--input-bg);
+        border: 2px solid var(--accent);
+        border-top: none;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+    .artists-dropdown-menu.open {
+        display: block;
+    }
+
+    .artists-search {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--input-border);
+    }
+
+    .artists-search input {
+        width: 100%;
+        padding: 10px 12px;
+        background: #000000;
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .artists-list {
+        max-height: 150px;
         overflow-y: auto;
     }
 
-    /* Custom scrollbar for artists select */
-    .artists-select::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .artists-select::-webkit-scrollbar-track {
-        background: #1a1a1a;
-        border-radius: 3px;
-    }
-
-    .artists-select::-webkit-scrollbar-thumb {
-        background: var(--accent);
-        border-radius: 3px;
-    }
-
-    /* ARTISTS OPTIONS - DARK WITH WHITE TEXT */
-    .artists-select option {
-        background: var(--artists-bg) !important;
-        color: var(--artists-text) !important;
-        padding: 12px 16px !important;
-        margin: 4px 0;
-        border-radius: 8px;
+    .artist-option {
+        padding: 12px 16px;
+        color: var(--text);
         cursor: pointer;
-        transition: all 0.2s;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.2s;
+    }
+
+    .artist-option:hover {
+        background: rgba(138, 43, 226, 0.1);
+    }
+
+    .artist-option.selected {
+        background: rgba(138, 43, 226, 0.2);
+        color: var(--accent);
         font-weight: 500;
     }
 
-    .artists-select option:hover {
-        background: #1a1a1a !important;
+    .artist-checkbox {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+        flex-shrink: 0;
     }
 
-    .artists-select option:checked,
-    .artists-select option:selected {
-        background: var(--accent) !important;
-        color: white !important;
-        font-weight: 600;
-        position: relative;
-    }
-
-    .artists-select option:checked::before {
-        content: "✓";
-        position: absolute;
-        right: 12px;
-        font-weight: bold;
-    }
-
-    /* Selected artists box has different border */
-    .selected-artists-box {
-        border-color: var(--accent) !important;
-        border-width: 2px;
-    }
-
-    .selected-artists-box .artists-header {
-        background: linear-gradient(135deg, #1a1a1a, #2a1a3a);
-        color: var(--accent);
-        font-weight: 700;
-    }
-
-    /* Add/Remove buttons */
-    .artists-buttons {
+    /* Action buttons */
+    .artists-action-buttons {
         display: flex;
-        justify-content: center;
-        gap: 20px;
+        gap: 12px;
         margin-top: 20px;
-        padding-top: 20px;
-        border-top: 2px solid var(--accent);
     }
 
-    .action-btn {
+    .add-artists-btn,
+    .clear-artists-btn {
+        flex: 1;
+        padding: 16px;
         border: none;
         border-radius: 12px;
-        padding: 16px 32px;
         font-size: 1rem;
-        font-weight: 700;
-        min-width: 140px;
-        min-height: 56px;
+        font-weight: 600;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        transition: all 0.2s;
+        min-height: 52px;
     }
 
-    .add-btn {
-        background: var(--button-bg) !important;
-        color: var(--button-text) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    .add-artists-btn {
+        background: var(--button-bg);
+        color: var(--button-text);
     }
 
-    .add-btn:active {
-        transform: translateY(2px);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    }
-
-    .remove-btn {
-        background: #2a2a2a !important;
-        color: white !important;
+    .clear-artists-btn {
+        background: #2a2a2a;
+        color: var(--text);
         border: 1px solid #444;
     }
 
-    .remove-btn:active {
-        transform: translateY(2px);
-        background: #333 !important;
-    }
-
-    /* UPLOAD AREA */
+    /* UPLOAD AREAS */
     .upload-area {
         background: rgba(138, 43, 226, 0.1);
         border: 2px dashed var(--accent);
@@ -389,14 +440,8 @@
         box-shadow: 0 4px 20px rgba(138, 43, 226, 0.3);
     }
 
-    .submit-btn:active {
-        transform: translateY(2px);
-        box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
-    }
-
     /* File inputs */
     .visible-file-input {
-        display: block !important;
         position: absolute;
         width: 100%;
         height: 100%;
@@ -407,16 +452,30 @@
         z-index: 100;
     }
 
-    /* Artist counter */
-    .artist-count {
-        display: inline-block;
-        background: var(--accent);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        margin-left: 8px;
-        font-weight: 600;
+    /* Empty state */
+    .empty-state {
+        color: var(--text-light);
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+        .artists-action-buttons {
+            flex-direction: column;
+        }
+        
+        .selected-artists-list {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .selected-artist-tag {
+            width: 100%;
+            justify-content: space-between;
+        }
     }
 </style>
 {% endblock %}
@@ -550,41 +609,53 @@
             </div>
             
           {% elif 'featured_artists' in field.field.name %}
-            <!-- Featured Artists Section - DARK DESIGN -->
-            <div class="artists-section">
-              <div class="artists-container">
-                <!-- Available Artists Box - DARK -->
-                <div class="artists-box">
-                  <div class="artists-header">
-                    Available Artists
-                    <span id="availableCount" class="artist-count">0</span>
-                  </div>
-                  <select multiple class="artists-select" id="availableArtists" size="6">
-                    {% for choice in field.field.field.choices %}
-                      <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                    {% endfor %}
-                  </select>
+            <!-- Featured Artists - MOBILE DROPDOWN VERSION -->
+            <div class="artists-dropdown-section">
+              <!-- Selected Artists Display -->
+              <div class="selected-artists-display">
+                <div class="selected-artists-header">
+                  <h3>
+                    <i class="fas fa-star"></i> Featured Artists
+                    <span id="selectedArtistsCount" class="artist-count">0</span>
+                  </h3>
                 </div>
                 
-                <!-- Featured Artists Box - DARK with Accent Border -->
-                <div class="artists-box selected-artists-box">
-                  <div class="artists-header">
-                    Featured Artists
-                    <span id="selectedCount" class="artist-count">0</span>
-                  </div>
-                  <select multiple class="artists-select" id="selectedArtists" size="6">
-                    <!-- Will be populated from existing selections -->
-                  </select>
+                <div class="selected-artists-list" id="selectedArtistsList">
+                  <!-- Will be populated with selected artists -->
+                  <div class="empty-state">No artists selected yet</div>
                 </div>
               </div>
               
-              <!-- Add/Remove Buttons -->
-              <div class="artists-buttons">
-                <button type="button" class="action-btn add-btn" onclick="addSelectedArtists()">
-                  <i class="fas fa-plus"></i> Add
+              <!-- Dropdown for Available Artists -->
+              <div class="artists-dropdown-container">
+                <button type="button" class="artists-dropdown-toggle" id="artistsDropdownToggle" onclick="toggleArtistsDropdown()">
+                  <span>Select Artists to Add</span>
+                  <span class="dropdown-arrow">▼</span>
                 </button>
-                <button type="button" class="action-btn remove-btn" onclick="removeSelectedArtists()">
-                  <i class="fas fa-minus"></i> Remove
+                
+                <div class="artists-dropdown-menu" id="artistsDropdownMenu">
+                  <div class="artists-search">
+                    <input type="text" placeholder="Search artists..." id="artistsSearch" oninput="filterArtists()">
+                  </div>
+                  
+                  <div class="artists-list" id="artistsList">
+                    {% for choice in field.field.field.choices %}
+                      <div class="artist-option" data-value="{{ choice.0 }}" onclick="toggleArtistSelection(event, '{{ choice.0 }}')">
+                        <input type="checkbox" class="artist-checkbox" id="artist_{{ choice.0 }}">
+                        <label for="artist_{{ choice.0 }}" style="cursor: pointer; flex: 1;">{{ choice.1 }}</label>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="artists-action-buttons">
+                <button type="button" class="add-artists-btn" onclick="addSelectedArtists()">
+                  <i class="fas fa-plus"></i> Add Selected
+                </button>
+                <button type="button" class="clear-artists-btn" onclick="clearAllArtists()">
+                  <i class="fas fa-times"></i> Clear All
                 </button>
               </div>
               
@@ -634,120 +705,197 @@
 {% block admin_change_form_document_ready %}
 {{ block.super }}
 <script>
-// ===== ARTISTS FUNCTIONS =====
+// ===== ARTISTS DROPDOWN STATE =====
+let artistsDropdownOpen = false;
+let selectedArtists = new Set();
+
+// ===== INITIALIZE ARTISTS =====
 function initializeArtists() {
     const hiddenField = document.getElementById('id_featured_artists');
-    const availableSelect = document.getElementById('availableArtists');
-    const selectedSelect = document.getElementById('selectedArtists');
+    if (!hiddenField || !hiddenField.value) return;
     
-    if (!hiddenField || !availableSelect || !selectedSelect) return;
-    
-    // Get current selections
+    // Get current selections from hidden field
     const currentValues = hiddenField.value ? hiddenField.value.split(',') : [];
     
-    // Move selected artists to selected box
-    Array.from(availableSelect.options).forEach(option => {
-        if (currentValues.includes(option.value)) {
-            selectedSelect.appendChild(option);
+    // Mark artists as selected in the dropdown
+    currentValues.forEach(value => {
+        const artistCheckbox = document.getElementById(`artist_${value}`);
+        if (artistCheckbox) {
+            artistCheckbox.checked = true;
+            selectedArtists.add(value);
         }
     });
     
-    // Update counters
-    updateArtistCounts();
-    
-    // Force dark styling
-    applyDarkStyling();
+    // Update selected artists display
+    updateSelectedArtistsDisplay();
 }
 
+// ===== DROPDOWN FUNCTIONS =====
+function toggleArtistsDropdown() {
+    const dropdownToggle = document.getElementById('artistsDropdownToggle');
+    const dropdownMenu = document.getElementById('artistsDropdownMenu');
+    const arrow = dropdownToggle.querySelector('.dropdown-arrow');
+    
+    artistsDropdownOpen = !artistsDropdownOpen;
+    
+    if (artistsDropdownOpen) {
+        dropdownToggle.classList.add('open');
+        dropdownMenu.classList.add('open');
+        arrow.classList.add('open');
+    } else {
+        dropdownToggle.classList.remove('open');
+        dropdownMenu.classList.remove('open');
+        arrow.classList.remove('open');
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('artistsDropdownContainer');
+    const toggle = document.getElementById('artistsDropdownToggle');
+    const menu = document.getElementById('artistsDropdownMenu');
+    
+    if (artistsDropdownOpen && 
+        !toggle.contains(event.target) && 
+        !menu.contains(event.target)) {
+        toggleArtistsDropdown();
+    }
+});
+
+// ===== ARTIST SELECTION =====
+function toggleArtistSelection(event, artistId) {
+    event.stopPropagation();
+    
+    const checkbox = document.getElementById(`artist_${artistId}`);
+    const option = event.currentTarget;
+    
+    // Toggle checkbox
+    checkbox.checked = !checkbox.checked;
+    
+    // Update selection
+    if (checkbox.checked) {
+        selectedArtists.add(artistId);
+        option.classList.add('selected');
+    } else {
+        selectedArtists.delete(artistId);
+        option.classList.remove('selected');
+    }
+}
+
+function filterArtists() {
+    const searchInput = document.getElementById('artistsSearch');
+    const searchTerm = searchInput.value.toLowerCase();
+    const artistOptions = document.querySelectorAll('.artist-option');
+    
+    artistOptions.forEach(option => {
+        const artistName = option.querySelector('label').textContent.toLowerCase();
+        option.style.display = artistName.includes(searchTerm) ? 'flex' : 'none';
+    });
+}
+
+// ===== ADD/REMOVE ARTISTS =====
 function addSelectedArtists() {
-    const availableSelect = document.getElementById('availableArtists');
-    const selectedSelect = document.getElementById('selectedArtists');
+    // Get all checked artists
+    const checkedCheckboxes = document.querySelectorAll('.artist-checkbox:checked');
     
-    if (!availableSelect || !selectedSelect) return;
-    
-    // Move selected options
-    Array.from(availableSelect.selectedOptions).forEach(option => {
-        selectedSelect.appendChild(option);
+    checkedCheckboxes.forEach(checkbox => {
+        const artistId = checkbox.id.replace('artist_', '');
+        selectedArtists.add(artistId);
     });
     
-    updateFeaturedArtistsField();
-    updateArtistCounts();
-    applyDarkStyling();
-}
-
-function removeSelectedArtists() {
-    const availableSelect = document.getElementById('availableArtists');
-    const selectedSelect = document.getElementById('selectedArtists');
+    // Update display and close dropdown
+    updateSelectedArtistsDisplay();
+    updateHiddenField();
     
-    if (!availableSelect || !selectedSelect) return;
-    
-    // Move selected options back
-    Array.from(selectedSelect.selectedOptions).forEach(option => {
-        availableSelect.appendChild(option);
-    });
-    
-    updateFeaturedArtistsField();
-    updateArtistCounts();
-    applyDarkStyling();
-}
-
-function updateFeaturedArtistsField() {
-    const selectedSelect = document.getElementById('selectedArtists');
-    const hiddenField = document.getElementById('id_featured_artists');
-    
-    if (!selectedSelect || !hiddenField) return;
-    
-    // Get all selected values
-    const selectedValues = Array.from(selectedSelect.options).map(option => option.value);
-    
-    // Update hidden field
-    hiddenField.value = selectedValues.join(',');
-    
-    // Also update the options in hidden field
-    Array.from(hiddenField.options).forEach(option => {
-        option.selected = selectedValues.includes(option.value);
-    });
-}
-
-function updateArtistCounts() {
-    const availableSelect = document.getElementById('availableArtists');
-    const selectedSelect = document.getElementById('selectedArtists');
-    
-    if (availableSelect) {
-        document.getElementById('availableCount').textContent = availableSelect.options.length;
+    // Close dropdown
+    if (artistsDropdownOpen) {
+        toggleArtistsDropdown();
     }
     
-    if (selectedSelect) {
-        document.getElementById('selectedCount').textContent = selectedSelect.options.length;
+    // Clear checkboxes
+    checkedCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.artist-option').classList.remove('selected');
+    });
+}
+
+function clearAllArtists() {
+    // Clear all selections
+    selectedArtists.clear();
+    
+    // Update display
+    updateSelectedArtistsDisplay();
+    updateHiddenField();
+    
+    // Uncheck all checkboxes
+    document.querySelectorAll('.artist-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.artist-option').classList.remove('selected');
+    });
+}
+
+function removeArtist(artistId) {
+    // Remove from selected artists
+    selectedArtists.delete(artistId);
+    
+    // Update display
+    updateSelectedArtistsDisplay();
+    updateHiddenField();
+    
+    // Uncheck checkbox
+    const checkbox = document.getElementById(`artist_${artistId}`);
+    if (checkbox) {
+        checkbox.checked = false;
+        checkbox.closest('.artist-option').classList.remove('selected');
     }
 }
 
-// Force dark styling on artists selects
-function applyDarkStyling() {
-    const selects = document.querySelectorAll('.artists-select');
+// ===== UPDATE DISPLAY =====
+function updateSelectedArtistsDisplay() {
+    const selectedList = document.getElementById('selectedArtistsList');
+    const countElement = document.getElementById('selectedArtistsCount');
     
-    selects.forEach(select => {
-        // Set select background and text
-        select.style.backgroundColor = '#000000';
-        select.style.color = 'white';
-        select.style.border = 'none';
-        
-        // Set options styling
-        Array.from(select.options).forEach(option => {
-            option.style.backgroundColor = '#000000';
-            option.style.color = 'white';
-            option.style.padding = '12px 16px';
-            option.style.margin = '4px 0';
-            option.style.borderRadius = '8px';
-            option.style.fontWeight = '500';
+    // Update count
+    countElement.textContent = selectedArtists.size;
+    
+    // Clear current display
+    selectedList.innerHTML = '';
+    
+    if (selectedArtists.size === 0) {
+        selectedList.innerHTML = '<div class="empty-state">No artists selected yet</div>';
+        return;
+    }
+    
+    // Add each selected artist as a tag
+    selectedArtists.forEach(artistId => {
+        const artistOption = document.querySelector(`.artist-option[data-value="${artistId}"]`);
+        if (artistOption) {
+            const artistName = artistOption.querySelector('label').textContent;
             
-            // Highlight selected options
-            if (option.selected) {
-                option.style.backgroundColor = '#8a2be2';
-                option.style.color = 'white';
-                option.style.fontWeight = '600';
-            }
-        });
+            const tag = document.createElement('div');
+            tag.className = 'selected-artist-tag';
+            tag.innerHTML = `
+                <span>${artistName}</span>
+                <button type="button" class="remove-artist-btn" onclick="removeArtist('${artistId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            selectedList.appendChild(tag);
+        }
+    });
+}
+
+function updateHiddenField() {
+    const hiddenField = document.getElementById('id_featured_artists');
+    if (!hiddenField) return;
+    
+    // Update value
+    hiddenField.value = Array.from(selectedArtists).join(',');
+    
+    // Update selected options in hidden select
+    Array.from(hiddenField.options).forEach(option => {
+        option.selected = selectedArtists.has(option.value);
     });
 }
 
@@ -756,26 +904,19 @@ function handleAudioFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Validate file type
     if (!file.type.startsWith('audio/')) {
         alert('Please select an audio file (MP3, WAV, FLAC, etc.)');
         return;
     }
     
-    // Update preview
     document.getElementById('audioFileName').textContent = file.name;
     document.getElementById('audioFileSize').textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
     document.getElementById('audioFileType').textContent = file.type.split('/')[1]?.toUpperCase() || 'Audio';
     
-    // Create audio preview
     const url = URL.createObjectURL(file);
-    const player = document.getElementById('audioPlayer');
-    player.src = url;
-    
-    // Show preview
+    document.getElementById('audioPlayer').src = url;
     document.getElementById('audioPreview').style.display = 'block';
     
-    // Update button
     const audioBtn = document.querySelector('#audioUploadArea .upload-button');
     audioBtn.innerHTML = '<i class="fas fa-check"></i> File Selected';
     audioBtn.style.background = 'var(--success)';
@@ -785,23 +926,19 @@ function handleCoverFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Validate file type
     if (!file.type.startsWith('image/')) {
         alert('Please select an image file (JPG, PNG, etc.)');
         return;
     }
     
-    // Update preview
     document.getElementById('coverFileName').textContent = file.name;
     document.getElementById('coverFileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
     
-    // Create image preview
     const reader = new FileReader();
     reader.onload = function(e) {
         const img = document.getElementById('coverImage');
         img.src = e.target.result;
         
-        // Get dimensions
         const image = new Image();
         image.onload = function() {
             document.getElementById('coverDimensions').textContent = this.width + ' × ' + this.height;
@@ -810,10 +947,8 @@ function handleCoverFileSelect(event) {
     };
     reader.readAsDataURL(file);
     
-    // Show preview
     document.getElementById('coverPreview').style.display = 'block';
     
-    // Update button
     const coverBtn = document.querySelector('#coverUploadArea .upload-button');
     coverBtn.innerHTML = '<i class="fas fa-check"></i> Image Selected';
     coverBtn.style.background = 'var(--success)';
@@ -825,22 +960,19 @@ function validateForm() {
     const songName = document.querySelector('input[name="name"], input[name="title"]')?.value;
     const submitBtn = document.querySelector('.submit-btn');
     
-    // Check audio file
     if (!audioInput || !audioInput.files || audioInput.files.length === 0) {
         alert('Please select an audio file to upload');
         return false;
     }
     
-    // Check song name
     if (!songName || songName.trim() === '') {
         alert('Please enter a song name');
         return false;
     }
     
-    // Update featured artists field before submit
-    updateFeaturedArtistsField();
+    // Update hidden field before submit
+    updateHiddenField();
     
-    // Show loading state
     if (submitBtn) {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
         submitBtn.disabled = true;
@@ -851,15 +983,8 @@ function validateForm() {
 
 // ===== INITIALIZE =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize artists
+    // Initialize artists from existing data
     initializeArtists();
-    
-    // Apply dark styling continuously
-    setInterval(applyDarkStyling, 500);
-    
-    // Also apply on any interaction
-    document.addEventListener('click', applyDarkStyling);
-    document.addEventListener('change', applyDarkStyling);
 });
 </script>
 {% endblock %}
