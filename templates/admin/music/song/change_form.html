@@ -7,7 +7,7 @@
     :root {
         --dark-bg: #0a0a0a;
         --card-bg: #151515;
-        --input-bg: #000000;
+        --input-bg: #1a1a1a;
         --input-border: #333;
         --accent: #8a2be2;
         --accent-hover: #9b42f5;
@@ -17,8 +17,6 @@
         --error: #ff5252;
         --button-bg: #000000;
         --button-text: #ffffff;
-        --selected-bg: #000000; /* Black background for selected artists */
-        --selected-text: #ffffff; /* White text for selected artists */
     }
 
     /* Mobile-first design */
@@ -84,7 +82,7 @@
         gap: 10px;
     }
 
-    /* ARTISTS SECTION - MOBILE OPTIMIZED */
+    /* ARTISTS SECTION - SAME STYLE FOR BOTH */
     .artists-section {
         background: var(--card-bg);
         border-radius: 16px;
@@ -104,16 +102,21 @@
         }
     }
 
-    /* Available Artists Box */
-    .available-artists-box {
+    /* BOTH Available and Featured artists have SAME style */
+    .artists-box {
         background: var(--input-bg);
-        border: 2px solid #333;
+        border: 2px solid var(--input-border);
         border-radius: 12px;
         overflow: hidden;
         flex: 1;
     }
 
-    .available-header {
+    /* Featured artists box has accent border */
+    .featured-artists-box {
+        border-color: var(--accent) !important;
+    }
+
+    .artists-header {
         background: #2a2a2a;
         color: var(--text);
         padding: 16px;
@@ -121,108 +124,52 @@
         font-size: 0.9rem;
         font-weight: 600;
         text-align: center;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--input-border);
     }
 
-    /* SELECTED ARTISTS BOX - DARK BACKGROUND WITH WHITE TEXT */
-    .selected-artists-box {
-        background: var(--selected-bg) !important; /* BLACK background */
-        border: 2px solid var(--accent) !important;
-        border-radius: 12px;
-        overflow: hidden;
-        flex: 1;
-        box-shadow: 0 4px 20px rgba(138, 43, 226, 0.2);
+    /* Featured artists header has accent color */
+    .featured-artists-header {
+        color: var(--accent) !important;
+        font-weight: 700 !important;
     }
 
-    .selected-header {
-        background: #1a1a1a;
-        color: var(--accent); /* Purple text for header */
-        padding: 16px;
-        margin: 0;
-        font-size: 0.9rem;
-        font-weight: 700;
-        text-align: center;
-        border-bottom: 1px solid var(--accent);
-    }
-
-    /* SELECTED ARTISTS LIST - DARK WITH WHITE TEXT */
-    .selected-artists-list {
-        min-height: 200px;
-        max-height: 250px;
-        padding: 12px;
-        background: var(--selected-bg) !important; /* BLACK background */
-        color: var(--selected-text) !important; /* WHITE text */
-        overflow-y: auto;
-    }
-
-    /* Selected artist item styling */
-    .selected-artist-item {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--selected-text) !important; /* WHITE text */
-        padding: 12px 16px;
-        margin: 6px 0;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.2s;
-    }
-
-    .selected-artist-item:hover {
-        background: rgba(138, 43, 226, 0.1);
-        border-color: rgba(138, 43, 226, 0.3);
-    }
-
-    .remove-artist-btn {
-        background: rgba(255, 82, 82, 0.1);
-        color: var(--error);
-        border: none;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 0.8rem;
-        transition: all 0.2s;
-    }
-
-    .remove-artist-btn:hover {
-        background: var(--error);
-        color: white;
-    }
-
-    /* Available artists select */
     .artists-select {
         width: 100%;
         min-height: 200px;
         padding: 12px;
         border: none;
-        background: var(--input-bg);
-        color: var(--text);
+        background: var(--input-bg) !important;
+        color: var(--text) !important;
         font-size: 14px;
         cursor: pointer;
+        outline: none;
     }
 
+    /* Ensure ALL options have same style */
     .artists-select option {
-        background: var(--input-bg);
-        color: var(--text);
+        background: var(--input-bg) !important;
+        color: var(--text) !important;
         padding: 12px !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        margin: 2px 0;
+        border-radius: 4px;
     }
 
-    .artists-select option:checked {
-        background: rgba(138, 43, 226, 0.3);
-        color: var(--text);
+    .artists-select option:hover {
+        background: rgba(138, 43, 226, 0.1) !important;
+    }
+
+    .artists-select option:checked,
+    .artists-select option:selected {
+        background: var(--accent) !important;
+        color: white !important;
+        font-weight: 600;
     }
 
     /* Add/Remove buttons */
     .artists-buttons {
         display: flex;
         justify-content: center;
-        gap: 15px;
+        gap: 20px;
         margin-top: 20px;
         padding-top: 20px;
         border-top: 2px solid var(--accent);
@@ -263,7 +210,6 @@
 
     .add-btn:active {
         transform: translateY(2px);
-        background: #111 !important;
     }
 
     .remove-btn {
@@ -274,16 +220,6 @@
 
     .remove-btn:active {
         transform: translateY(2px);
-        background: #333 !important;
-    }
-
-    /* Empty state for selected artists */
-    .empty-selected {
-        color: var(--text-light);
-        text-align: center;
-        padding: 40px 20px;
-        font-style: italic;
-        font-size: 0.9rem;
     }
 
     /* UPLOAD AREAS */
@@ -452,6 +388,25 @@
         font-weight: 600;
         margin-left: 8px;
     }
+
+    /* Custom scrollbar */
+    .artists-select::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .artists-select::-webkit-scrollbar-track {
+        background: var(--input-bg);
+        border-radius: 4px;
+    }
+
+    .artists-select::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 4px;
+    }
+
+    .artists-select::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-hover);
+    }
 </style>
 {% endblock %}
 
@@ -584,12 +539,12 @@
             </div>
             
           {% elif 'featured_artists' in field.field.name %}
-            <!-- Featured Artists - DARK SELECTED ARTISTS VERSION -->
+            <!-- Featured Artists - SAME STYLE AS AVAILABLE ARTISTS -->
             <div class="artists-section">
               <div class="artists-container">
                 <!-- Available Artists -->
-                <div class="available-artists-box">
-                  <div class="available-header">
+                <div class="artists-box">
+                  <div class="artists-header">
                     Available Artists
                     <span id="availableCount" class="artist-counter">0</span>
                   </div>
@@ -600,26 +555,25 @@
                   </select>
                 </div>
                 
-                <!-- Selected Artists - DARK BACKGROUND WITH WHITE TEXT -->
-                <div class="selected-artists-box">
-                  <div class="selected-header">
+                <!-- Featured Artists - SAME STYLE, just purple border -->
+                <div class="artists-box featured-artists-box">
+                  <div class="artists-header featured-artists-header">
                     <i class="fas fa-star"></i> Featured Artists
-                    <span id="selectedCount" class="artist-counter">0</span>
+                    <span id="featuredCount" class="artist-counter">0</span>
                   </div>
-                  <div class="selected-artists-list" id="selectedArtistsList">
-                    <!-- Will be populated with selected artists -->
-                    <div class="empty-selected">No artists selected yet</div>
-                  </div>
+                  <select multiple class="artists-select" id="featuredArtists" size="6">
+                    <!-- Will be populated from existing selections -->
+                  </select>
                 </div>
               </div>
               
               <!-- Add/Remove buttons -->
               <div class="artists-buttons">
                 <button type="button" class="action-btn add-btn" onclick="addSelectedArtists()">
-                  <i class="fas fa-plus"></i> Add Selected
+                  <i class="fas fa-arrow-right"></i> Add to Featured
                 </button>
                 <button type="button" class="action-btn remove-btn" onclick="removeSelectedArtists()">
-                  <i class="fas fa-minus"></i> Remove Selected
+                  <i class="fas fa-arrow-left"></i> Remove from Featured
                 </button>
               </div>
               
@@ -673,75 +627,53 @@
 function initializeArtists() {
     const hiddenField = document.getElementById('id_featured_artists');
     const availableSelect = document.getElementById('availableArtists');
+    const featuredSelect = document.getElementById('featuredArtists');
     
-    if (!hiddenField || !availableSelect) return;
+    if (!hiddenField || !availableSelect || !featuredSelect) return;
     
     // Get current selections
     const currentValues = hiddenField.value ? hiddenField.value.split(',') : [];
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
     
-    // Clear and rebuild selected artists list
-    selectedArtistsList.innerHTML = '';
+    // Clear featured select
+    featuredSelect.innerHTML = '';
     
-    if (currentValues.length === 0) {
-        selectedArtistsList.innerHTML = '<div class="empty-selected">No artists selected yet</div>';
-    } else {
-        // Add each selected artist
-        currentValues.forEach(value => {
-            const option = availableSelect.querySelector(`option[value="${value}"]`);
-            if (option) {
-                addArtistToSelectedList(value, option.textContent);
+    if (currentValues.length > 0) {
+        // Move selected artists to featured select
+        const optionsToRemove = [];
+        
+        Array.from(availableSelect.options).forEach(option => {
+            if (currentValues.includes(option.value)) {
+                const newOption = option.cloneNode(true);
+                featuredSelect.appendChild(newOption);
+                optionsToRemove.push(option);
             }
         });
         
-        // Remove selected artists from available list
-        currentValues.forEach(value => {
-            const option = availableSelect.querySelector(`option[value="${value}"]`);
-            if (option) {
-                option.remove();
-            }
-        });
+        // Remove from available
+        optionsToRemove.forEach(option => option.remove());
     }
     
     // Update counters
     updateArtistCounters();
-}
-
-function addArtistToSelectedList(value, text) {
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
     
-    // Remove empty state if present
-    const emptyState = selectedArtistsList.querySelector('.empty-selected');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    // Create artist item
-    const artistItem = document.createElement('div');
-    artistItem.className = 'selected-artist-item';
-    artistItem.dataset.value = value;
-    artistItem.innerHTML = `
-        <span>${text}</span>
-        <button type="button" class="remove-artist-btn" onclick="removeArtist('${value}', '${text.replace(/'/g, "\\'")}')">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    selectedArtistsList.appendChild(artistItem);
+    // Apply consistent styling
+    applyConsistentStyling();
 }
 
 function addSelectedArtists() {
     const availableSelect = document.getElementById('availableArtists');
+    const featuredSelect = document.getElementById('featuredArtists');
     const selectedOptions = availableSelect.selectedOptions;
     
     if (selectedOptions.length === 0) {
-        alert('Please select artists to add');
+        alert('Please select artists from Available Artists');
         return;
     }
     
-    // Add each selected artist
+    // Move selected artists to featured
     Array.from(selectedOptions).forEach(option => {
-        addArtistToSelectedList(option.value, option.textContent);
+        const newOption = option.cloneNode(true);
+        featuredSelect.appendChild(newOption);
         option.remove();
     });
     
@@ -749,103 +681,89 @@ function addSelectedArtists() {
     updateArtistCounters();
     updateHiddenField();
     
-    // Clear selection
-    availableSelect.selectedIndex = -1;
-}
-
-function removeArtist(value, text) {
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
-    const availableSelect = document.getElementById('availableArtists');
-    
-    // Remove from selected list
-    const artistItem = selectedArtistsList.querySelector(`.selected-artist-item[data-value="${value}"]`);
-    if (artistItem) {
-        artistItem.remove();
-    }
-    
-    // Add back to available list
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = text;
-    availableSelect.appendChild(option);
-    
-    // If no artists left, show empty state
-    if (selectedArtistsList.children.length === 0) {
-        selectedArtistsList.innerHTML = '<div class="empty-selected">No artists selected yet</div>';
-    }
-    
-    // Update counters and hidden field
-    updateArtistCounters();
-    updateHiddenField();
+    // Apply consistent styling
+    applyConsistentStyling();
 }
 
 function removeSelectedArtists() {
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
     const availableSelect = document.getElementById('availableArtists');
-    const selectedItems = selectedArtistsList.querySelectorAll('.selected-artist-item');
+    const featuredSelect = document.getElementById('featuredArtists');
+    const selectedOptions = featuredSelect.selectedOptions;
     
-    if (selectedItems.length === 0) {
-        alert('No artists to remove');
+    if (selectedOptions.length === 0) {
+        alert('Please select artists from Featured Artists');
         return;
     }
     
-    // Move all selected artists back to available list
-    selectedItems.forEach(item => {
-        const value = item.dataset.value;
-        const text = item.querySelector('span').textContent;
-        
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = text;
-        availableSelect.appendChild(option);
+    // Move selected artists back to available
+    Array.from(selectedOptions).forEach(option => {
+        const newOption = option.cloneNode(true);
+        availableSelect.appendChild(newOption);
+        option.remove();
     });
-    
-    // Clear selected list
-    selectedArtistsList.innerHTML = '<div class="empty-selected">No artists selected yet</div>';
     
     // Update counters and hidden field
     updateArtistCounters();
     updateHiddenField();
+    
+    // Apply consistent styling
+    applyConsistentStyling();
 }
 
 function updateArtistCounters() {
     const availableSelect = document.getElementById('availableArtists');
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
-    
-    // Count selected artists (excluding empty state)
-    let selectedCount = 0;
-    const selectedItems = selectedArtistsList.querySelectorAll('.selected-artist-item');
-    selectedItems.forEach(item => {
-        if (!item.classList.contains('empty-selected')) {
-            selectedCount++;
-        }
-    });
+    const featuredSelect = document.getElementById('featuredArtists');
     
     // Update counters
     document.getElementById('availableCount').textContent = availableSelect.options.length;
-    document.getElementById('selectedCount').textContent = selectedCount;
+    document.getElementById('featuredCount').textContent = featuredSelect.options.length;
 }
 
 function updateHiddenField() {
+    const featuredSelect = document.getElementById('featuredArtists');
     const hiddenField = document.getElementById('id_featured_artists');
-    const selectedArtistsList = document.getElementById('selectedArtistsList');
     
-    // Get all selected values
-    const selectedValues = [];
-    const selectedItems = selectedArtistsList.querySelectorAll('.selected-artist-item');
-    selectedItems.forEach(item => {
-        if (!item.classList.contains('empty-selected')) {
-            selectedValues.push(item.dataset.value);
-        }
-    });
+    if (!featuredSelect || !hiddenField) return;
+    
+    // Get all featured values
+    const featuredValues = Array.from(featuredSelect.options).map(option => option.value);
     
     // Update hidden field
-    hiddenField.value = selectedValues.join(',');
+    hiddenField.value = featuredValues.join(',');
     
     // Update selected options in hidden select
     Array.from(hiddenField.options).forEach(option => {
-        option.selected = selectedValues.includes(option.value);
+        option.selected = featuredValues.includes(option.value);
     });
+}
+
+// Apply consistent styling to both select boxes
+function applyConsistentStyling() {
+    const availableSelect = document.getElementById('availableArtists');
+    const featuredSelect = document.getElementById('featuredArtists');
+    
+    // Apply same background and text color
+    if (availableSelect) {
+        availableSelect.style.backgroundColor = 'var(--input-bg)';
+        availableSelect.style.color = 'var(--text)';
+        
+        // Style options
+        Array.from(availableSelect.options).forEach(option => {
+            option.style.backgroundColor = 'var(--input-bg)';
+            option.style.color = 'var(--text)';
+        });
+    }
+    
+    if (featuredSelect) {
+        featuredSelect.style.backgroundColor = 'var(--input-bg)';
+        featuredSelect.style.color = 'var(--text)';
+        
+        // Style options
+        Array.from(featuredSelect.options).forEach(option => {
+            option.style.backgroundColor = 'var(--input-bg)';
+            option.style.color = 'var(--text)';
+        });
+    }
 }
 
 // ===== UPLOAD FUNCTIONS =====
@@ -935,12 +853,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize artists from existing data
     initializeArtists();
     
-    // Force dark background for selected artists
-    const selectedList = document.getElementById('selectedArtistsList');
-    if (selectedList) {
-        selectedList.style.backgroundColor = '#000000';
-        selectedList.style.color = 'white';
-    }
+    // Apply consistent styling on load
+    applyConsistentStyling();
+    
+    // Also apply on any change
+    document.addEventListener('change', function() {
+        setTimeout(applyConsistentStyling, 100);
+    });
 });
 </script>
 {% endblock %}
