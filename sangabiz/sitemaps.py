@@ -21,7 +21,7 @@ class ArtistSitemap(Sitemap):
     changefreq = "weekly"
 
     def items(self):
-        return Artist.objects.filter(is_verified=True)
+        return Artist.objects.all()
 
 
 class SongSitemap(Sitemap):
@@ -29,7 +29,7 @@ class SongSitemap(Sitemap):
     changefreq = "weekly"
 
     def items(self):
-        return Song.objects.filter(is_approved=True)
+        return Song.objects.all()
 
 
 class NewsSitemap(Sitemap):
@@ -37,4 +37,4 @@ class NewsSitemap(Sitemap):
     changefreq = "weekly"
 
     def items(self):
-        return News.objects.filter(is_published=True)
+        return News.objects.all()
