@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+from django.urls import reverse
 
 class ArtistManager(models.Manager):
     def verified(self):
@@ -47,6 +48,16 @@ class Artist(models.Model):
         if self.user:
             return self.user.username
         return self.name.lower().replace(' ', '_')
+        
+    def get_absolute_url(self):
+        """
+        Returns the URL to the artist's detail page.
+        Make sure your URL pattern name matches 'artist_detail' and expects artist_id.
+        """
+        return reverse('artist_detail', kwargs={'artist_id': self.id})
+
+
+    
 
 class Follow(models.Model):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
