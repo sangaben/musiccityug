@@ -2,7 +2,7 @@ from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from artists.models import Artist
 from music.models import Song
-from news.models import News
+from news.models import NewsArticle
 
 
 class StaticSitemap(Sitemap):
@@ -10,10 +10,10 @@ class StaticSitemap(Sitemap):
     changefreq = "daily"
 
     def items(self):
-        return ['home']
+        return []
 
     def location(self, item):
-        return reverse(item)
+        return "/"
 
 
 class ArtistSitemap(Sitemap):
@@ -37,4 +37,4 @@ class NewsSitemap(Sitemap):
     changefreq = "weekly"
 
     def items(self):
-        return News.objects.all()
+        return NewsArticle.objects.filter(is_published=True)
