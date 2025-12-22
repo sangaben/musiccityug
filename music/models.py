@@ -5,6 +5,8 @@ from django.core.validators import FileExtensionValidator, MinValueValidator, Ma
 from django.utils import timezone
 from datetime import timedelta
 
+from django.urls import reverse
+
 class Genre(models.Model):
     name = models.CharField(max_length=100, unique=True)
     color = models.CharField(max_length=7, default='#6c5ce7')  # Hex color
@@ -71,6 +73,14 @@ class Song(models.Model):
     lyrics = models.TextField(blank=True, null=True)
     bpm = models.PositiveIntegerField(blank=True, null=True, help_text="Beats per minute")
     release_year = models.PositiveIntegerField(blank=True, null=True)
+
+    
+    def get_absolute_url(self):
+        """
+        Returns the URL to the song's detail page.
+        Make sure your URL pattern name matches 'song_detail' and expects song_id.
+        """
+        return reverse('song_detail', kwargs={'song_id': self.id})
     
     class Meta:
         ordering = ['-upload_date']
