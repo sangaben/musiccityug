@@ -48,10 +48,12 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
+    "django.contrib.sessions", 
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
+    
     "crispy_forms",
     "crispy_bootstrap5",
 
@@ -65,6 +67,7 @@ INSTALLED_APPS = [
     "help",
     "news",
 ]
+SITE_ID = 1
 
 # --------------------------------------------------
 # Middleware
