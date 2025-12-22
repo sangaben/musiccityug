@@ -13,6 +13,8 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}),
+
     path('admin/', admin.site.urls),
 
     # 🔴 ADD THIS LINE (only new one)
