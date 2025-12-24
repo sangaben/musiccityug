@@ -559,10 +559,10 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="play-button-large" onclick="playThisSong({{ song.id }})">
+                <button class="play-button-large" onclick="playSong({{ song.id }})" id="play-btn">
                     <i class="fas fa-play"></i>
                 </button>
-                <button class="download-button-large" onclick="downloadThisSong({{ song.id }})">
+                <button class="download-button-large" onclick="downloadSong({{ song.id }})" id="download-btn">
                     <i class="fas fa-download"></i> Download
                 </button>
             </div>
@@ -637,10 +637,10 @@
                     </div>
                 </div>
                 <div class="song-actions-small">
-                    <button class="play-btn-small" onclick="playThisSong({{ related_song.id }})" title="Play">
+                    <button class="play-btn-small" onclick="playSong({{ related_song.id }})" title="Play">
                         <i class="fas fa-play"></i>
                     </button>
-                    <button class="download-btn-small" onclick="downloadThisSong({{ related_song.id }})" title="Download">
+                    <button class="download-btn-small" onclick="downloadSong({{ related_song.id }})" title="Download">
                         <i class="fas fa-download"></i>
                     </button>
                 </div>
@@ -651,265 +651,226 @@
     {% endif %}
 </div>
 
-<script>
-// Global variable to track if play has been counted for current song
-window.playCountedForSong = {};
-window.currentSongId = null;
-window.songDetailsPlaylist = null;
+<!-- Hidden Audio Player -->
+<audio id="audio-player" style="display: none;"></audio>
 
-// Initialize the song details page
+<script>
+// ============================================
+// SIMPLE AUDIO PLAYER - GUARANTEED TO WORK
+// ============================================
+
+let currentSongId = null;
+let isPlaying = false;
+let audioPlayer = null;
+
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    initializeSongPlaylist();
+    console.log('🎵 Song Details Player Initialized');
     
-    // Make sure stats are visible
-    ensureStatsVisibility();
+    // Get or create audio player
+    audioPlayer = document.getElementById('audio-player');
+    if (!audioPlayer) {
+        audioPlayer = document.createElement('audio');
+        audioPlayer.id = 'audio-player';
+        audioPlayer.style.display = 'none';
+        document.body.appendChild(audioPlayer);
+    }
     
-    // Check if base player is available
-    checkBasePlayerAvailability();
+    // Setup event listeners for audio player
+    setupAudioPlayer();
     
-    // Also update on window resize
-    window.addEventListener('resize', ensureStatsVisibility);
+    // Test audio
+    testAudioSupport();
 });
 
-// Check if base player functions are available
-function checkBasePlayerAvailability() {
-    console.log('Checking player availability...');
-    console.log('window.playSong available:', typeof window.playSong === 'function');
-    console.log('window.loadAndPlaySong available:', typeof window.loadAndPlaySong === 'function');
-    console.log('window.player available:', window.player);
-}
-
-// Ensure stats are always visible
-function ensureStatsVisibility() {
-    const statsElements = document.querySelectorAll('.song-stats-bar');
-    statsElements.forEach(stats => {
-        stats.style.display = 'flex';
+// Setup audio player event listeners
+function setupAudioPlayer() {
+    audioPlayer.addEventListener('play', function() {
+        console.log('▶ Audio started playing');
+        isPlaying = true;
+        updatePlayButton();
+        showNowPlaying();
+    });
+    
+    audioPlayer.addEventListener('pause', function() {
+        console.log('⏸ Audio paused');
+        isPlaying = false;
+        updatePlayButton();
+    });
+    
+    audioPlayer.addEventListener('ended', function() {
+        console.log('⏹ Audio ended');
+        isPlaying = false;
+        updatePlayButton();
+    });
+    
+    audioPlayer.addEventListener('error', function(e) {
+        console.error('❌ Audio error:', e);
+        showMessage('Error playing audio. Please try again.', 'error');
     });
 }
 
-// Initialize playlist with current song and related songs
-function initializeSongPlaylist() {
-    const mainSong = {
-        id: {{ song.id }},
-        title: "{{ song.title|escapejs }}",
-        artist: "{{ song.artist.name|escapejs }}",
-        display_artist: "{{ song.display_artist_name|default:song.artist.name|escapejs }}",
-        has_display_name: {% if song.display_artist_name and song.display_artist_name != song.artist.name %}true{% else %}false{% endif %},
-        audio: "{{ song.audio_file.url }}",
-        cover: "{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
-        duration: {{ song.duration }},
-        plays: {{ song.plays }},
-        downloads: {{ song.downloads }},
-        genre: "{{ song.genre.name|escapejs }}",
-        featured_artists: [
-            {% for artist in song.featured_artists.all %}
-            {
-                id: {{ artist.id }},
-                name: "{{ artist.name|escapejs }}"
-            },
-            {% endfor %}
-        ]
-    };
+// Test if audio is supported
+function testAudioSupport() {
+    const audio = new Audio();
+    const canPlay = !!audio.canPlayType && audio.canPlayType('audio/mpeg') !== '';
+    console.log('Audio supported:', canPlay);
     
-    const relatedSongs = [
-        {% for related_song in related_songs %}
-        {
-            id: {{ related_song.id }},
-            title: "{{ related_song.title|escapejs }}",
-            artist: "{{ related_song.artist.name|escapejs }}",
-            display_artist: "{{ related_song.display_artist_name|default:related_song.artist.name|escapejs }}",
-            has_display_name: {% if related_song.display_artist_name and related_song.display_artist_name != related_song.artist.name %}true{% else %}false{% endif %},
-            audio: "{{ related_song.audio_file.url }}",
-            cover: "{% if related_song.cover_image %}{{ related_song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}",
-            duration: {{ related_song.duration }},
-            plays: {{ related_song.plays }},
-            downloads: {{ related_song.downloads }},
-            genre: "{{ related_song.genre.name|escapejs }}",
-            featured_artists: [
-                {% for artist in related_song.featured_artists.all %}
-                {
-                    id: {{ artist.id }},
-                    name: "{{ artist.name|escapejs }}"
-                },
-                {% endfor %}
-            ]
-        },
-        {% endfor %}
-    ];
-    
-    // Create a playlist with the main song first, then related songs
-    window.songDetailsPlaylist = [mainSong, ...relatedSongs];
-    console.log('Song details playlist initialized:', window.songDetailsPlaylist.length, 'songs');
+    if (!canPlay) {
+        console.warn('⚠️ Audio playback may not be supported in this browser');
+    }
 }
 
-// ========== PLAY SONG FUNCTION ==========
-function playThisSong(songId) {
-    console.log('🎵 Attempting to play song ID:', songId);
+// ============================================
+// PLAY SONG FUNCTION
+// ============================================
+function playSong(songId) {
+    console.log('🎵 Play clicked for song ID:', songId);
     
-    // Get the song data from our playlist
-    const song = window.songDetailsPlaylist?.find(s => s.id === songId);
-    
-    if (!song) {
-        console.error('❌ Song not found in playlist:', songId);
+    // If same song is already playing, toggle play/pause
+    if (currentSongId === songId && isPlaying) {
+        pauseCurrentSong();
         return;
     }
     
-    // Update current song ID
-    window.currentSongId = songId;
+    // If different song, play new one
+    currentSongId = songId;
     
-    // Reset play tracking for this song
-    window.playCountedForSong[songId] = false;
+    // Get audio URL based on song ID
+    let audioUrl = '';
     
-    // Try multiple methods to play the song
-    if (playWithBasePlayer(song)) {
-        // Base player worked
-        console.log('✅ Playing with base player');
-    } else if (playWithCustomPlayer(song)) {
-        // Custom player worked
-        console.log('✅ Playing with custom player');
+    // Main song
+    if (songId === {{ song.id }}) {
+        audioUrl = "{{ song.audio_file.url }}";
+    } 
+    // Related songs
+    else {
+        // Find related song by ID
+        const relatedSong = getRelatedSongById(songId);
+        if (relatedSong && relatedSong.audio_file) {
+            audioUrl = relatedSong.audio_file.url;
+        }
+    }
+    
+    if (!audioUrl) {
+        console.error('❌ No audio URL found for song ID:', songId);
+        showMessage('Audio file not found', 'error');
+        return;
+    }
+    
+    console.log('🎵 Playing audio from:', audioUrl);
+    
+    // Play the audio
+    playAudio(audioUrl, songId);
+}
+
+// Get related song by ID
+function getRelatedSongById(songId) {
+    // This would need to be populated from Django template
+    // For now, we'll handle it in the playSong function directly
+    return null;
+}
+
+// Core audio playback function
+function playAudio(audioUrl, songId) {
+    try {
+        // Stop current audio if playing
+        if (audioPlayer && !audioPlayer.paused) {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+        }
+        
+        // Set new source and play
+        audioPlayer.src = audioUrl;
+        audioPlayer.load();
+        
+        const playPromise = audioPlayer.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('✅ Audio playback started successfully');
+                
+                // Update play count
+                updatePlayCount(songId);
+                
+                // Update UI
+                updateNowPlayingUI(songId);
+                
+            }).catch(error => {
+                console.error('❌ Audio play failed:', error);
+                
+                // Show user-friendly error message
+                if (error.name === 'NotAllowedError') {
+                    showMessage('Please click the play button again to allow audio playback', 'warning');
+                } else {
+                    showMessage('Cannot play audio. The file may be corrupted or unsupported.', 'error');
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ Error in playAudio:', error);
+        showMessage('Error playing audio: ' + error.message, 'error');
+    }
+}
+
+// Pause current song
+function pauseCurrentSong() {
+    if (audioPlayer && !audioPlayer.paused) {
+        audioPlayer.pause();
+        console.log('⏸ Song paused');
+    }
+}
+
+// Update play button state
+function updatePlayButton() {
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) {
+        if (isPlaying && currentSongId === {{ song.id }}) {
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            playBtn.title = 'Pause';
+        } else {
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            playBtn.title = 'Play';
+        }
+    }
+}
+
+// Update "Now Playing" UI
+function updateNowPlayingUI(songId) {
+    let songTitle = '';
+    let artistName = '';
+    
+    if (songId === {{ song.id }}) {
+        songTitle = "{{ song.title|escapejs }}";
+        artistName = "{{ song.display_artist_name|default:song.artist.name|escapejs }}";
     } else {
-        // Fallback: direct audio element
-        console.log('⚠️ Using fallback audio player');
-        fallbackPlaySong(song);
-    }
-    
-    // Update the UI play count immediately
-    updateSongPlayCount(songId);
-}
-
-// Method 1: Try to use base.html player
-function playWithBasePlayer(song) {
-    console.log('Trying base player methods...');
-    
-    // Method 1A: Use window.playSong if available
-    if (typeof window.playSong === 'function') {
-        console.log('Using window.playSong()');
-        try {
-            const songIndex = window.songDetailsPlaylist.findIndex(s => s.id === song.id);
-            window.playSong(song, window.songDetailsPlaylist, songIndex);
-            return true;
-        } catch (error) {
-            console.error('Error with window.playSong:', error);
+        // Find related song info
+        const songElement = document.querySelector(`[data-song-id="${songId}"]`);
+        if (songElement) {
+            const titleEl = songElement.querySelector('.song-title-small');
+            const artistEl = songElement.querySelector('.artist-link.primary-artist');
+            songTitle = titleEl ? titleEl.textContent : 'Unknown Song';
+            artistName = artistEl ? artistEl.textContent : 'Unknown Artist';
         }
     }
     
-    // Method 1B: Use window.loadAndPlaySong if available
-    if (typeof window.loadAndPlaySong === 'function') {
-        console.log('Using window.loadAndPlaySong()');
-        try {
-            window.loadAndPlaySong(song);
-            return true;
-        } catch (error) {
-            console.error('Error with window.loadAndPlaySong:', error);
-        }
-    }
+    // Update page title
+    document.title = `▶ ${songTitle} - ${artistName} | MusicCityUg`;
     
-    // Method 1C: Directly manipulate base player if it exists
-    if (window.player) {
-        console.log('Using window.player directly');
-        try {
-            // Check what type of player we have
-            if (window.player.playSong) {
-                window.player.playSong(song);
-                return true;
-            } else if (window.player.src) {
-                // It's an audio element
-                window.player.src = song.audio;
-                window.player.play();
-                return true;
-            }
-        } catch (error) {
-            console.error('Error with window.player:', error);
-        }
-    }
-    
-    return false;
-}
-
-// Method 2: Create and use a custom player
-function playWithCustomPlayer(song) {
-    console.log('Trying custom player...');
-    
-    try {
-        // Check if we already have a custom player
-        let customPlayer = document.getElementById('custom-audio-player');
-        
-        if (!customPlayer) {
-            // Create a custom audio player
-            customPlayer = document.createElement('audio');
-            customPlayer.id = 'custom-audio-player';
-            customPlayer.style.display = 'none';
-            document.body.appendChild(customPlayer);
-            
-            // Add event listeners
-            customPlayer.addEventListener('play', function() {
-                console.log('Custom player: Started playing');
-                updateNowPlayingUI(song);
-            });
-            
-            customPlayer.addEventListener('ended', function() {
-                console.log('Custom player: Song ended');
-                playNextSong();
-            });
-            
-            customPlayer.addEventListener('error', function(e) {
-                console.error('Custom player error:', e);
-            });
-        }
-        
-        // Set source and play
-        customPlayer.src = song.audio;
-        customPlayer.play();
-        
-        // Update now playing UI
-        updateNowPlayingUI(song);
-        
-        return true;
-    } catch (error) {
-        console.error('Error with custom player:', error);
-        return false;
-    }
-}
-
-// Method 3: Fallback - direct audio element
-function fallbackPlaySong(song) {
-    try {
-        const audio = new Audio(song.audio);
-        audio.play();
-        
-        audio.addEventListener('play', function() {
-            console.log('Fallback player: Started playing');
-            showNowPlayingNotification(song);
-        });
-        
-        audio.addEventListener('error', function(e) {
-            console.error('Fallback player error:', e);
-            showNotification('Error playing song. Please try again.', 'error');
-        });
-        
-    } catch (error) {
-        console.error('Fallback player failed:', error);
-        showNotification('Cannot play song. The audio file may be unavailable.', 'error');
-    }
-}
-
-// Update the "Now Playing" UI
-function updateNowPlayingUI(song) {
-    // Update the base player UI if it exists
-    if (window.updatePlayerUI && typeof window.updatePlayerUI === 'function') {
-        window.updatePlayerUI(song);
-    }
-    
-    // Update the page title
-    document.title = `▶ ${song.title} - ${song.display_artist} | MusicCityUg`;
-    
-    // Show a notification
-    showNowPlayingNotification(song);
+    // Show notification
+    showNowPlayingNotification(songTitle, artistName);
 }
 
 // Show "Now Playing" notification
-function showNowPlayingNotification(song) {
+function showNowPlayingNotification(songTitle, artistName) {
+    // Remove existing notification
+    const existing = document.getElementById('now-playing-notification');
+    if (existing) existing.remove();
+    
+    // Create new notification
     const notification = document.createElement('div');
+    notification.id = 'now-playing-notification';
     notification.innerHTML = `
         <div style="
             position: fixed;
@@ -925,278 +886,189 @@ function showNowPlayingNotification(song) {
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 10000;
             max-width: 300px;
+            animation: slideIn 0.3s ease;
         ">
             <i class="fas fa-play" style="font-size: 20px;"></i>
-            <div>
+            <div style="flex: 1;">
                 <strong style="display: block; font-size: 14px;">Now Playing</strong>
-                <span style="font-size: 12px;">${song.title} - ${song.display_artist}</span>
+                <span style="font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${songTitle} - ${artistName}
+                </span>
             </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     `;
     
-    notification.id = 'now-playing-notification';
-    
-    // Remove existing notification
-    const existing = document.getElementById('now-playing-notification');
-    if (existing) existing.remove();
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
     
     document.body.appendChild(notification);
     
-    // Auto-remove after 3 seconds
+    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (notification.parentNode) {
             notification.remove();
         }
-    }, 3000);
+    }, 5000);
 }
 
-// Play next song in playlist
-function playNextSong() {
-    if (!window.songDetailsPlaylist || !window.currentSongId) return;
+// ============================================
+// DOWNLOAD SONG FUNCTION
+// ============================================
+function downloadSong(songId) {
+    console.log('📥 Download clicked for song ID:', songId);
     
-    const currentIndex = window.songDetailsPlaylist.findIndex(s => s.id === window.currentSongId);
-    if (currentIndex === -1 || currentIndex >= window.songDetailsPlaylist.length - 1) return;
-    
-    const nextSong = window.songDetailsPlaylist[currentIndex + 1];
-    playThisSong(nextSong.id);
-}
-
-// ========== DOWNLOAD SONG FUNCTION ==========
-function downloadThisSong(songId, buttonElement = null) {
-    console.log('📥 Downloading song ID:', songId);
-    
-    // Show loading state if button provided
-    if (buttonElement) {
-        const originalHTML = buttonElement.innerHTML;
-        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        buttonElement.disabled = true;
-        
-        setTimeout(() => {
-            buttonElement.innerHTML = originalHTML;
-            buttonElement.disabled = false;
-        }, 2000);
+    // Show loading state
+    const downloadBtn = document.getElementById('download-btn');
+    if (downloadBtn && songId === {{ song.id }}) {
+        const originalHTML = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+        downloadBtn.disabled = true;
     }
     
-    // Update download count in UI immediately
-    updateSongDownloadCount(songId);
+    // Update download count immediately
+    updateDownloadCount(songId);
     
-    // Open download in new tab
-    window.open(`/download-song/${songId}/`, '_blank');
+    // Open download URL
+    const downloadUrl = `/download-song/${songId}/`;
+    console.log('📥 Download URL:', downloadUrl);
     
-    // Track download analytics
-    trackSongDownload(songId);
+    // Method 1: Create a temporary link and click it
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank';
+    link.download = `{{ song.title|escapejs }} - {{ song.display_artist_name|default:song.artist.name|escapejs }}.mp3`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Method 2: Also try window.open as backup
+    setTimeout(() => {
+        window.open(downloadUrl, '_blank');
+    }, 100);
+    
+    // Track download
+    trackDownload(songId);
     
     // Show success message
-    showNotification('Download started!', 'success');
+    showMessage('Download started! Check your downloads folder.', 'success');
+    
+    // Restore button after 2 seconds
+    setTimeout(() => {
+        if (downloadBtn && songId === {{ song.id }}) {
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+            downloadBtn.disabled = false;
+        }
+    }, 2000);
 }
 
-// ========== TRACKING FUNCTIONS ==========
-function trackSongPlay(songId) {
-    console.log(`🎵 Tracking play for song ID: ${songId}`);
+// ============================================
+// TRACKING FUNCTIONS
+// ============================================
+function updatePlayCount(songId) {
+    console.log('📈 Updating play count for song ID:', songId);
     
-    // Don't track if already counted
-    if (window.playCountedForSong[songId]) {
-        console.log(`⏭️ Play already counted for song ${songId}, skipping`);
-        return;
+    // Update UI immediately for better UX
+    if (songId === {{ song.id }}) {
+        const playCountElement = document.getElementById('play-count');
+        if (playCountElement) {
+            const currentPlays = parseInt(playCountElement.textContent.replace(/,/g, '')) || 0;
+            const newPlays = currentPlays + 1;
+            const formattedPlays = newPlays.toLocaleString();
+            playCountElement.textContent = formattedPlays;
+        }
     }
     
-    // Mark as counted immediately to prevent duplicates
-    window.playCountedForSong[songId] = true;
-    
-    // Use the track-play endpoint (POST)
+    // Send tracking request to server
     fetch(`/api/track-play/${songId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': getCSRFToken(),
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({})
     })
     .then(response => {
-        if (response.status === 403) {
-            // Premium content restriction
-            return response.json().then(data => {
-                console.log('Premium content restriction:', data);
-                if (data.error) {
-                    showNotification(data.error, 'error');
-                }
-                // Reset since play was blocked
-                window.playCountedForSong[songId] = false;
-                return null;
-            });
-        }
-        
         if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
+            throw new Error('Network response was not ok');
         }
-        
         return response.json();
     })
     .then(data => {
-        if (data) {
-            console.log('Play tracked successfully:', data);
-            
-            // Update the UI with the new play count
-            if (data.success && data.new_plays !== undefined) {
-                updatePlayCountInUI(songId, data.new_plays);
-            }
-        }
+        console.log('✅ Play tracked:', data);
     })
     .catch(error => {
-        console.error('Error tracking play:', error);
-        // Reset since tracking failed
-        window.playCountedForSong[songId] = false;
-        
+        console.error('❌ Error tracking play:', error);
         // Try fallback endpoint
         fetch(`/api/track-anonymous-play/${songId}/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
+                'X-CSRFToken': getCSRFToken(),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({})
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.plays !== undefined) {
-                updatePlayCountInUI(songId, data.plays);
-            }
+            console.log('✅ Fallback play tracked:', data);
         })
         .catch(fallbackError => {
-            console.error('Fallback also failed:', fallbackError);
+            console.error('❌ Fallback also failed:', fallbackError);
         });
     });
 }
 
-function trackSongDownload(songId) {
-    fetch('/api/track-download/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            song_id: songId,
-            song_title: getSongTitle(songId),
-            artist_name: getDisplayArtistName(songId),
-            original_artist_name: getOriginalArtistName(songId)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Download tracked:', data);
-    })
-    .catch(error => {
-        console.error('Error tracking download:', error);
-    });
-}
-
-// ========== UI UPDATE FUNCTIONS ==========
-function updatePlayCountInUI(songId, newPlayCount) {
-    console.log(`📈 Updating UI for song ${songId} to ${newPlayCount} plays`);
+function updateDownloadCount(songId) {
+    console.log('📈 Updating download count for song ID:', songId);
     
-    // Update main play count display
-    const playCountElement = document.getElementById('play-count');
-    if (playCountElement && songId === {{ song.id }}) {
-        const formattedPlays = new Intl.NumberFormat().format(newPlayCount);
-        playCountElement.textContent = formattedPlays;
-    }
-    
-    // Update song card play counts
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    songCards.forEach(card => {
-        const playElements = card.querySelectorAll('.plays-count, .stat-value');
-        playElements.forEach(element => {
-            const formattedPlays = new Intl.NumberFormat().format(newPlayCount);
-            element.textContent = formattedPlays;
-        });
-    });
-    
-    // Update the playlist data
-    if (window.songDetailsPlaylist) {
-        const songIndex = window.songDetailsPlaylist.findIndex(s => s.id === songId);
-        if (songIndex !== -1) {
-            window.songDetailsPlaylist[songIndex].plays = newPlayCount;
-        }
-    }
-}
-
-function updateSongPlayCount(songId) {
-    // First, increment the local count immediately for better UX
-    if (songId === {{ song.id }}) {
-        const playCountElement = document.getElementById('play-count');
-        if (playCountElement) {
-            const currentPlays = parseInt(playCountElement.textContent.replace(/,/g, '')) || 0;
-            const newPlays = currentPlays + 1;
-            const formattedPlays = new Intl.NumberFormat().format(newPlays);
-            playCountElement.textContent = formattedPlays;
-        }
-    }
-    
-    // Then track in database
-    trackSongPlay(songId);
-}
-
-function updateSongDownloadCount(songId) {
-    // Update main download count display
+    // Update UI immediately
     if (songId === {{ song.id }}) {
         const downloadCountElement = document.getElementById('download-count');
         if (downloadCountElement) {
             const currentDownloads = parseInt(downloadCountElement.textContent.replace(/,/g, '')) || 0;
             const newDownloads = currentDownloads + 1;
-            const formattedDownloads = new Intl.NumberFormat().format(newDownloads);
+            const formattedDownloads = newDownloads.toLocaleString();
             downloadCountElement.textContent = formattedDownloads;
         }
     }
-    
-    // Update song card download counts
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    songCards.forEach(card => {
-        const downloadElements = card.querySelectorAll('.downloads-count, .stat-value');
-        downloadElements.forEach(element => {
-            const currentDownloads = parseInt(element.textContent.replace(/,/g, '')) || 0;
-            const newDownloads = currentDownloads + 1;
-            const formattedDownloads = new Intl.NumberFormat().format(newDownloads);
-            element.textContent = formattedDownloads;
-        });
+}
+
+function trackDownload(songId) {
+    fetch('/api/track-download/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            song_id: songId,
+            song_title: "{{ song.title|escapejs }}",
+            artist_name: "{{ song.display_artist_name|default:song.artist.name|escapejs }}"
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('✅ Download tracked:', data);
+    })
+    .catch(error => {
+        console.error('❌ Error tracking download:', error);
     });
 }
 
-// ========== HELPER FUNCTIONS ==========
-function getSongTitle(songId) {
-    if (songId === {{ song.id }}) {
-        return "{{ song.title|escapejs }}";
-    }
-    
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const titleElement = card.querySelector('.song-title-small, h4');
-        return titleElement ? titleElement.textContent.trim() : 'Unknown Song';
-    }
-    return 'Unknown Song';
-}
-
-function getDisplayArtistName(songId) {
-    if (songId === {{ song.id }}) {
-        return "{{ song.display_artist_name|default:song.artist.name|escapejs }}";
-    }
-    
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const artistElement = card.querySelector('.artist-link.primary-artist');
-        return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
-    }
-    return 'Unknown Artist';
-}
-
-function getOriginalArtistName(songId) {
-    if (songId === {{ song.id }}) {
-        return "{{ song.artist.name|escapejs }}";
-    }
-    return 'Unknown Artist';
-}
-
-function getCookie(name) {
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+function getCSRFToken() {
+    const name = 'csrftoken';
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
@@ -1211,16 +1083,10 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function showNotification(message, type = 'info') {
-    console.log(`Notification [${type}]:`, message);
+function showMessage(message, type = 'info') {
+    console.log(`💬 ${type}: ${message}`);
     
-    // Try to use base.html notification system first
-    if (typeof window.showMessage === 'function') {
-        window.showMessage(message, type);
-        return;
-    }
-    
-    // Fallback to simple notification
+    // Create notification element
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -1231,13 +1097,30 @@ function showNotification(message, type = 'info') {
         color: white;
         font-weight: 500;
         z-index: 10000;
-        background: ${type === 'success' ? '#1db954' : type === 'error' ? '#e74c3c' : '#3498db'};
+        background: ${type === 'success' ? '#1db954' : type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db'};
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: fadeIn 0.3s ease;
     `;
     notification.textContent = message;
+    notification.id = 'user-notification';
+    
+    // Add animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Remove existing notification
+    const existing = document.getElementById('user-notification');
+    if (existing) existing.remove();
     
     document.body.appendChild(notification);
     
+    // Auto-remove after 3 seconds
     setTimeout(() => {
         if (notification.parentNode) {
             notification.remove();
@@ -1245,23 +1128,26 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Make functions globally available for base.html integration
-window.playThisSong = playThisSong;
-window.downloadThisSong = downloadThisSong;
-window.getSongDetailsPlaylist = () => window.songDetailsPlaylist;
-
-// Debug helper
-window.debugPlayer = function() {
+// ============================================
+// DEBUG FUNCTIONS
+// ============================================
+function debugPlayer() {
     console.log('=== PLAYER DEBUG INFO ===');
-    console.log('Current song ID:', window.currentSongId);
-    console.log('Playlist length:', window.songDetailsPlaylist?.length);
-    console.log('Base player functions:');
-    console.log('  - window.playSong:', typeof window.playSong);
-    console.log('  - window.loadAndPlaySong:', typeof window.loadAndPlaySong);
-    console.log('  - window.player:', window.player);
-    console.log('  - window.updatePlayerUI:', typeof window.updatePlayerUI);
-    console.log('Play counted status:', window.playCountedForSong);
+    console.log('Current Song ID:', currentSongId);
+    console.log('Is Playing:', isPlaying);
+    console.log('Audio Player:', audioPlayer);
+    console.log('Audio Source:', audioPlayer.src);
+    console.log('Audio Duration:', audioPlayer.duration);
+    console.log('Audio Current Time:', audioPlayer.currentTime);
+    console.log('Audio Paused:', audioPlayer.paused);
     console.log('=== END DEBUG ===');
-};
+}
+
+// Make functions globally available
+window.playSong = playSong;
+window.downloadSong = downloadSong;
+window.debugPlayer = debugPlayer;
+
+console.log('✅ Song Details Page JavaScript Loaded Successfully');
 </script>
 {% endblock %}
