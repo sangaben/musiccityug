@@ -655,6 +655,7 @@
 // Global variable to track if play has been counted for current song
 window.playCountedForSong = {};
 window.currentSongId = null;
+window.songDetailsPlaylist = null;
 
 // Initialize the song details page
 document.addEventListener('DOMContentLoaded', function() {
@@ -663,9 +664,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make sure stats are visible
     ensureStatsVisibility();
     
+    // Check if base player is available
+    checkBasePlayerAvailability();
+    
     // Also update on window resize
     window.addEventListener('resize', ensureStatsVisibility);
 });
+
+// Check if base player functions are available
+function checkBasePlayerAvailability() {
+    console.log('Checking player availability...');
+    console.log('window.playSong available:', typeof window.playSong === 'function');
+    console.log('window.loadAndPlaySong available:', typeof window.loadAndPlaySong === 'function');
+    console.log('window.player available:', window.player);
+}
 
 // Ensure stats are always visible
 function ensureStatsVisibility() {
@@ -727,46 +739,232 @@ function initializeSongPlaylist() {
     
     // Create a playlist with the main song first, then related songs
     window.songDetailsPlaylist = [mainSong, ...relatedSongs];
+    console.log('Song details playlist initialized:', window.songDetailsPlaylist.length, 'songs');
 }
 
-// ========== Play song function ==========
+// ========== PLAY SONG FUNCTION ==========
 function playThisSong(songId) {
+    console.log('🎵 Attempting to play song ID:', songId);
+    
     // Get the song data from our playlist
     const song = window.songDetailsPlaylist?.find(s => s.id === songId);
     
-    if (song && typeof window.playSong === 'function') {
-        // Set current song ID
-        window.currentSongId = songId;
-        
-        // Reset play tracking for this song
-        window.playCountedForSong[songId] = false;
-        
-        // Use the base.html player function
-        window.playSong(song, window.songDetailsPlaylist, window.songDetailsPlaylist.findIndex(s => s.id === songId));
-        
-        // Update the UI play count immediately
-        updateSongPlayCount(songId);
-    } else {
-        console.error('Song not found or player not available');
-        // Fallback: direct play
-        fallbackPlaySong(songId);
+    if (!song) {
+        console.error('❌ Song not found in playlist:', songId);
+        return;
     }
-}
-
-// Fallback play function if base player is not available
-function fallbackPlaySong(songId) {
-    const song = window.songDetailsPlaylist?.find(s => s.id === songId);
-    if (!song) return;
     
-    const audio = new Audio(song.audio);
-    audio.play();
+    // Update current song ID
+    window.currentSongId = songId;
     
-    // Update play count
+    // Reset play tracking for this song
+    window.playCountedForSong[songId] = false;
+    
+    // Try multiple methods to play the song
+    if (playWithBasePlayer(song)) {
+        // Base player worked
+        console.log('✅ Playing with base player');
+    } else if (playWithCustomPlayer(song)) {
+        // Custom player worked
+        console.log('✅ Playing with custom player');
+    } else {
+        // Fallback: direct audio element
+        console.log('⚠️ Using fallback audio player');
+        fallbackPlaySong(song);
+    }
+    
+    // Update the UI play count immediately
     updateSongPlayCount(songId);
 }
 
-// ========== Download song function ==========
+// Method 1: Try to use base.html player
+function playWithBasePlayer(song) {
+    console.log('Trying base player methods...');
+    
+    // Method 1A: Use window.playSong if available
+    if (typeof window.playSong === 'function') {
+        console.log('Using window.playSong()');
+        try {
+            const songIndex = window.songDetailsPlaylist.findIndex(s => s.id === song.id);
+            window.playSong(song, window.songDetailsPlaylist, songIndex);
+            return true;
+        } catch (error) {
+            console.error('Error with window.playSong:', error);
+        }
+    }
+    
+    // Method 1B: Use window.loadAndPlaySong if available
+    if (typeof window.loadAndPlaySong === 'function') {
+        console.log('Using window.loadAndPlaySong()');
+        try {
+            window.loadAndPlaySong(song);
+            return true;
+        } catch (error) {
+            console.error('Error with window.loadAndPlaySong:', error);
+        }
+    }
+    
+    // Method 1C: Directly manipulate base player if it exists
+    if (window.player) {
+        console.log('Using window.player directly');
+        try {
+            // Check what type of player we have
+            if (window.player.playSong) {
+                window.player.playSong(song);
+                return true;
+            } else if (window.player.src) {
+                // It's an audio element
+                window.player.src = song.audio;
+                window.player.play();
+                return true;
+            }
+        } catch (error) {
+            console.error('Error with window.player:', error);
+        }
+    }
+    
+    return false;
+}
+
+// Method 2: Create and use a custom player
+function playWithCustomPlayer(song) {
+    console.log('Trying custom player...');
+    
+    try {
+        // Check if we already have a custom player
+        let customPlayer = document.getElementById('custom-audio-player');
+        
+        if (!customPlayer) {
+            // Create a custom audio player
+            customPlayer = document.createElement('audio');
+            customPlayer.id = 'custom-audio-player';
+            customPlayer.style.display = 'none';
+            document.body.appendChild(customPlayer);
+            
+            // Add event listeners
+            customPlayer.addEventListener('play', function() {
+                console.log('Custom player: Started playing');
+                updateNowPlayingUI(song);
+            });
+            
+            customPlayer.addEventListener('ended', function() {
+                console.log('Custom player: Song ended');
+                playNextSong();
+            });
+            
+            customPlayer.addEventListener('error', function(e) {
+                console.error('Custom player error:', e);
+            });
+        }
+        
+        // Set source and play
+        customPlayer.src = song.audio;
+        customPlayer.play();
+        
+        // Update now playing UI
+        updateNowPlayingUI(song);
+        
+        return true;
+    } catch (error) {
+        console.error('Error with custom player:', error);
+        return false;
+    }
+}
+
+// Method 3: Fallback - direct audio element
+function fallbackPlaySong(song) {
+    try {
+        const audio = new Audio(song.audio);
+        audio.play();
+        
+        audio.addEventListener('play', function() {
+            console.log('Fallback player: Started playing');
+            showNowPlayingNotification(song);
+        });
+        
+        audio.addEventListener('error', function(e) {
+            console.error('Fallback player error:', e);
+            showNotification('Error playing song. Please try again.', 'error');
+        });
+        
+    } catch (error) {
+        console.error('Fallback player failed:', error);
+        showNotification('Cannot play song. The audio file may be unavailable.', 'error');
+    }
+}
+
+// Update the "Now Playing" UI
+function updateNowPlayingUI(song) {
+    // Update the base player UI if it exists
+    if (window.updatePlayerUI && typeof window.updatePlayerUI === 'function') {
+        window.updatePlayerUI(song);
+    }
+    
+    // Update the page title
+    document.title = `▶ ${song.title} - ${song.display_artist} | MusicCityUg`;
+    
+    // Show a notification
+    showNowPlayingNotification(song);
+}
+
+// Show "Now Playing" notification
+function showNowPlayingNotification(song) {
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+        <div style="
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1db954;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 300px;
+        ">
+            <i class="fas fa-play" style="font-size: 20px;"></i>
+            <div>
+                <strong style="display: block; font-size: 14px;">Now Playing</strong>
+                <span style="font-size: 12px;">${song.title} - ${song.display_artist}</span>
+            </div>
+        </div>
+    `;
+    
+    notification.id = 'now-playing-notification';
+    
+    // Remove existing notification
+    const existing = document.getElementById('now-playing-notification');
+    if (existing) existing.remove();
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Play next song in playlist
+function playNextSong() {
+    if (!window.songDetailsPlaylist || !window.currentSongId) return;
+    
+    const currentIndex = window.songDetailsPlaylist.findIndex(s => s.id === window.currentSongId);
+    if (currentIndex === -1 || currentIndex >= window.songDetailsPlaylist.length - 1) return;
+    
+    const nextSong = window.songDetailsPlaylist[currentIndex + 1];
+    playThisSong(nextSong.id);
+}
+
+// ========== DOWNLOAD SONG FUNCTION ==========
 function downloadThisSong(songId, buttonElement = null) {
+    console.log('📥 Downloading song ID:', songId);
+    
     // Show loading state if button provided
     if (buttonElement) {
         const originalHTML = buttonElement.innerHTML;
@@ -792,7 +990,7 @@ function downloadThisSong(songId, buttonElement = null) {
     showNotification('Download started!', 'success');
 }
 
-// ========== Track song play in the database ==========
+// ========== TRACKING FUNCTIONS ==========
 function trackSongPlay(songId) {
     console.log(`🎵 Tracking play for song ID: ${songId}`);
     
@@ -870,7 +1068,6 @@ function trackSongPlay(songId) {
     });
 }
 
-// ========== Track song download ==========
 function trackSongDownload(songId) {
     fetch('/api/track-download/', {
         method: 'POST',
@@ -894,7 +1091,7 @@ function trackSongDownload(songId) {
     });
 }
 
-// ========== Update play count in the UI ==========
+// ========== UI UPDATE FUNCTIONS ==========
 function updatePlayCountInUI(songId, newPlayCount) {
     console.log(`📈 Updating UI for song ${songId} to ${newPlayCount} plays`);
     
@@ -924,7 +1121,6 @@ function updatePlayCountInUI(songId, newPlayCount) {
     }
 }
 
-// ========== Update a specific song's play count ==========
 function updateSongPlayCount(songId) {
     // First, increment the local count immediately for better UX
     if (songId === {{ song.id }}) {
@@ -941,7 +1137,6 @@ function updateSongPlayCount(songId) {
     trackSongPlay(songId);
 }
 
-// ========== Update a specific song's download count ==========
 function updateSongDownloadCount(songId) {
     // Update main download count display
     if (songId === {{ song.id }}) {
@@ -967,7 +1162,7 @@ function updateSongDownloadCount(songId) {
     });
 }
 
-// Helper function to get song title
+// ========== HELPER FUNCTIONS ==========
 function getSongTitle(songId) {
     if (songId === {{ song.id }}) {
         return "{{ song.title|escapejs }}";
@@ -981,7 +1176,6 @@ function getSongTitle(songId) {
     return 'Unknown Song';
 }
 
-// Helper function to get display artist name
 function getDisplayArtistName(songId) {
     if (songId === {{ song.id }}) {
         return "{{ song.display_artist_name|default:song.artist.name|escapejs }}";
@@ -995,7 +1189,6 @@ function getDisplayArtistName(songId) {
     return 'Unknown Artist';
 }
 
-// Helper function to get original artist name
 function getOriginalArtistName(songId) {
     if (songId === {{ song.id }}) {
         return "{{ song.artist.name|escapejs }}";
@@ -1003,7 +1196,6 @@ function getOriginalArtistName(songId) {
     return 'Unknown Artist';
 }
 
-// Utility function to get CSRF token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -1019,39 +1211,57 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Show notification
 function showNotification(message, type = 'info') {
+    console.log(`Notification [${type}]:`, message);
+    
     // Try to use base.html notification system first
     if (typeof window.showMessage === 'function') {
         window.showMessage(message, type);
-    } 
-    // Fallback to simple notification
-    else {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            background: ${type === 'success' ? '#1db954' : type === 'error' ? '#e74c3c' : '#3498db'};
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-        notification.textContent = message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        return;
     }
+    
+    // Fallback to simple notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        background: ${type === 'success' ? '#1db954' : type === 'error' ? '#e74c3c' : '#3498db'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
 }
 
 // Make functions globally available for base.html integration
 window.playThisSong = playThisSong;
 window.downloadThisSong = downloadThisSong;
+window.getSongDetailsPlaylist = () => window.songDetailsPlaylist;
+
+// Debug helper
+window.debugPlayer = function() {
+    console.log('=== PLAYER DEBUG INFO ===');
+    console.log('Current song ID:', window.currentSongId);
+    console.log('Playlist length:', window.songDetailsPlaylist?.length);
+    console.log('Base player functions:');
+    console.log('  - window.playSong:', typeof window.playSong);
+    console.log('  - window.loadAndPlaySong:', typeof window.loadAndPlaySong);
+    console.log('  - window.player:', window.player);
+    console.log('  - window.updatePlayerUI:', typeof window.updatePlayerUI);
+    console.log('Play counted status:', window.playCountedForSong);
+    console.log('=== END DEBUG ===');
+};
 </script>
 {% endblock %}
