@@ -4,35 +4,317 @@
 {% block title %}{{ song.title }} - {{ song.artist.name }} | MusicCityUg{% endblock %}
 
 {% block content %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .back-btn {
+        background: transparent;
+        border: none;
+        color: #b3b3b3;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 0;
+        margin-bottom: 30px;
+        transition: color 0.3s;
+    }
+
+    .back-btn:hover {
+        color: white;
+    }
+
+    .song-header {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 40px;
+        align-items: flex-end;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #282828;
+    }
+
+    .song-cover {
+        width: 232px;
+        height: 232px;
+        flex-shrink: 0;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    }
+
+    .song-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .song-cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #535353 0%, #282828 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .song-info {
+        flex: 1;
+        color: white;
+    }
+
+    .song-type {
+        font-size: 14px;
+        color: #b3b3b3;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .song-title {
+        font-size: 48px;
+        font-weight: 900;
+        margin: 0 0 20px 0;
+        line-height: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .song-artist {
+        font-size: 18px;
+        color: #b3b3b3;
+        margin-bottom: 30px;
+    }
+
+    .song-artist a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .song-artist a:hover {
+        text-decoration: underline;
+    }
+
+    .song-meta {
+        font-size: 14px;
+        color: #b3b3b3;
+        margin-bottom: 30px;
+    }
+
+    .song-meta span {
+        margin-right: 15px;
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .play-button {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #1db954;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .play-button:hover {
+        transform: scale(1.05);
+        background: #1ed760;
+    }
+
+    .play-button i {
+        color: black;
+        font-size: 24px;
+        margin-left: 3px;
+    }
+
+    .download-button {
+        background: transparent;
+        border: none;
+        color: #b3b3b3;
+        font-size: 14px;
+        padding: 8px 20px;
+        cursor: pointer;
+        border-radius: 20px;
+        transition: color 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .download-button:hover {
+        color: white;
+    }
+
+    .song-details {
+        background: #181818;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 40px;
+    }
+
+    .details-title {
+        color: white;
+        font-size: 18px;
+        margin: 0 0 20px 0;
+        font-weight: 700;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 10px 20px;
+        color: #b3b3b3;
+        font-size: 14px;
+    }
+
+    .details-grid strong {
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .related-songs {
+        margin-top: 40px;
+    }
+
+    .related-title {
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+    }
+
+    .song-list {
+        background: #181818;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .song-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+
+    .song-item:hover {
+        background: #282828;
+    }
+
+    .song-number {
+        width: 30px;
+        text-align: center;
+        color: #b3b3b3;
+        font-size: 16px;
+    }
+
+    .play-icon {
+        width: 30px;
+        text-align: center;
+        color: #b3b3b3;
+        display: none;
+    }
+
+    .song-item:hover .song-number {
+        display: none;
+    }
+
+    .song-item:hover .play-icon {
+        display: block;
+    }
+
+    .song-info-small {
+        flex: 1;
+        padding: 0 20px;
+    }
+
+    .song-title-small {
+        color: white;
+        font-size: 16px;
+        margin-bottom: 4px;
+        font-weight: 400;
+    }
+
+    .song-artist-small {
+        color: #b3b3b3;
+        font-size: 14px;
+    }
+
+    .song-duration {
+        color: #b3b3b3;
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .song-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .song-cover {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            aspect-ratio: 1;
+        }
+
+        .song-title {
+            font-size: 32px;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+    }
+</style>
+
 <div class="container">
     <!-- Back Button -->
-    <div style="margin-bottom: 20px;">
-        <button onclick="window.history.back()" class="nav-btn">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
-    </div>
+    <button onclick="window.history.back()" class="back-btn">
+        <i class="fas fa-chevron-left"></i> Back
+    </button>
 
     <!-- Song Header -->
-    <div style="display: flex; gap: 30px; margin-bottom: 40px; flex-wrap: wrap;">
+    <div class="song-header">
         <!-- Song Cover -->
-        <div style="flex-shrink: 0;">
+        <div class="song-cover">
             {% if song.cover_image %}
-                <img src="{{ song.cover_image.url }}" alt="{{ song.title }}" 
-                     style="width: 300px; height: 300px; object-fit: cover; border-radius: 10px;">
+                <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
             {% else %}
-                <div style="width: 300px; height: 300px; background: #282828; border-radius: 10px; 
-                           display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-music" style="font-size: 80px; color: #535353;"></i>
+                <div class="song-cover-placeholder">
+                    <i class="fas fa-music" style="font-size: 64px; color: #282828;"></i>
                 </div>
             {% endif %}
         </div>
 
         <!-- Song Info -->
-        <div style="flex: 1; min-width: 300px;">
-            <h1 style="font-size: 36px; margin-bottom: 10px; color: white;">{{ song.title }}</h1>
-            <p style="font-size: 20px; color: #b3b3b3; margin-bottom: 30px;">
-                by {{ song.artist.name }}
-            </p>
+        <div class="song-info">
+            <div class="song-type">Song</div>
+            <h1 class="song-title">{{ song.title }}</h1>
+            <div class="song-artist">
+                by <a href="{% url 'artist_detail' song.artist.id %}">{{ song.artist.name }}</a>
+            </div>
+            
+            <div class="song-meta">
+                <span>{{ song.genre.name }}</span>
+                <span>•</span>
+                <span>{{ song.duration }}</span>
+                <span>•</span>
+                <span>{{ song.created_at|date:"Y" }}</span>
+            </div>
 
             <!-- Messages -->
             {% if messages %}
@@ -46,38 +328,33 @@
             {% endif %}
 
             <!-- Action Buttons -->
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
-                <button class="download-btn" onclick="downloadSong({{ song.id }}, '{{ song.title }}', '{{ song.artist.name }}')">
-                    <i class="fas fa-download"></i> Download
+            <div class="action-buttons">
+                <button class="play-button" onclick="playThisSong({{ song.id }})">
+                    <i class="fas fa-play"></i>
                 </button>
-                
-                <button class="quick-action-btn" onclick="playThisSong({{ song.id }})">
-                    <i class="fas fa-play"></i> Play
-                </button>
-                
-                <button class="quick-action-btn">
-                    <i class="far fa-heart"></i> Like
+                <button class="download-button" onclick="downloadSong({{ song.id }}, '{{ song.title|escapejs }}', '{{ song.artist.name|escapejs }}')">
+                    Download
                 </button>
             </div>
+        </div>
+    </div>
 
-            <!-- Song Details -->
-            <div style="background: #181818; padding: 20px; border-radius: 8px;">
-                <h3 style="margin-bottom: 15px; color: white;">Song Details</h3>
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; color: #b3b3b3;">
-                    <strong>Genre:</strong> <span>{{ song.genre.name }}</span>
-                    <strong>Duration:</strong> <span>{{ song.duration }}</span>
-                    <strong>Uploaded:</strong> <span>{{ song.created_at|date:"M d, Y" }}</span>
-                    <strong>Downloads:</strong> <span>{{ song.download_count }}</span>
-                    <strong>Plays:</strong> <span>{{ song.play_count }}</span>
-                </div>
-            </div>
+    <!-- Song Details -->
+    <div class="song-details">
+        <h3 class="details-title">Song Details</h3>
+        <div class="details-grid">
+            <strong>Genre:</strong> <span>{{ song.genre.name }}</span>
+            <strong>Duration:</strong> <span>{{ song.duration }}</span>
+            <strong>Uploaded:</strong> <span>{{ song.created_at|date:"M d, Y" }}</span>
+            <strong>Downloads:</strong> <span>{{ song.download_count }}</span>
+            <strong>Plays:</strong> <span>{{ song.play_count }}</span>
         </div>
     </div>
 
     <!-- Related Songs -->
     {% if related_songs %}
-    <div>
-        <h2 style="margin-bottom: 20px; color: white;">Related Songs</h2>
+    <div class="related-songs">
+        <h2 class="related-title">More by {{ song.artist.name }}</h2>
         <div class="song-list">
             {% for related_song in related_songs %}
             <div class="song-item" onclick="playThisSong({{ related_song.id }})">
@@ -86,8 +363,8 @@
                     <i class="fas fa-play"></i>
                 </div>
                 <div class="song-info-small">
-                    <div class="song-title">{{ related_song.title }}</div>
-                    <div class="song-artist">{{ related_song.artist.name }}</div>
+                    <div class="song-title-small">{{ related_song.title }}</div>
+                    <div class="song-artist-small">{{ related_song.artist.name }}</div>
                 </div>
                 <div class="song-duration">{{ related_song.duration }}</div>
             </div>
@@ -98,10 +375,26 @@
 </div>
 
 <script>
+function playThisSong(songId) {
+    // Play song implementation
+    console.log('Playing song:', songId);
+    // Add your play logic here
+}
+
 function downloadSong(songId, songTitle, artistName) {
     const downloadUrl = `/download-song/${songId}/`;
     console.log(`Downloading: ${songTitle} by ${artistName}`);
     
+    // Show download started message
+    const message = document.createElement('div');
+    message.className = 'alert alert-success';
+    message.textContent = `Downloading "${songTitle}"...`;
+    document.querySelector('.song-info').appendChild(message);
+    
+    // Remove message after 3 seconds
+    setTimeout(() => message.remove(), 3000);
+    
+    // Start download
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.style.display = 'none';
