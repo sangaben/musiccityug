@@ -233,7 +233,7 @@ LOGGING = {
 # --------------------------------------------------
 # Jazzmin Configuration (App-Specific Search)
 # --------------------------------------------------
-SITE_URL = "https://musiccityug.com"
+SITE_URL = "https://musiccenterug.com"
 
 JAZZMIN_SETTINGS = {
     # ========== BRANDING & THEME ==========
