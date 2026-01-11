@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ artist.name }} - MusicCenterUg{% endblock %}
+{% block title %}{{ artist.name }} - MusicCityUg{% endblock %}
 
 {% block content %}
 <div class="artist-details-container">
@@ -142,7 +142,7 @@
                                     <span class="song-album">{{ song.album.name }}</span>
                                 {% else %}
                                     <span class="album-separator">•</span>
-                
+                                    <span class="song-album">Single</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -183,7 +183,11 @@
                             <i class="fas fa-share-alt"></i>
                         </button>
                         
-                       
+                        {% if user.is_authenticated %}
+                        <button class="like-btn {% if song.is_liked %}liked{% endif %}" onclick="likeSong({{ song.id }}, this)">
+                            <i class="{% if song.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
                 {% empty %}
@@ -1667,6 +1671,20 @@ function initializeShareFunctionality() {
 
 function initializeDownloadFunctionality() {
     console.log('📥 Download functionality initialized');
+    
+    // Add event listeners for download buttons
+    document.querySelectorAll('.download-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const songItem = this.closest('.song-item');
+            const songId = songItem.dataset.songId;
+            const songUrl = songItem.dataset.audioUrl;
+            const songTitle = songItem.querySelector('.song-title').textContent;
+            const artistName = currentArtistName;
+            
+            downloadSong(songId, songUrl, songTitle, artistName, this);
+        });
+    });
 }
 
 // ===== SHARE FUNCTIONALITY =====
@@ -1678,7 +1696,7 @@ function toggleShareDropdown() {
 function shareArtist(platform) {
     const artistName = '{{ artist.name|escapejs }}';
     const url = encodeURIComponent(currentPageUrl);
-    const text = encodeURIComponent(`Check out ${artistName} on MusicCenterUg!`);
+    const text = encodeURIComponent(`Check out ${artistName} on MusicCityUg!`);
     
     shareOnPlatform(platform, url, text);
     toggleShareDropdown();
@@ -1689,7 +1707,7 @@ function shareArtistSongs() {
     const modal = document.getElementById('shareModal');
     const shareInput = document.getElementById('share-link-input');
     
-    const shareText = `Check out ${currentArtistName}'s songs on MusicCenterUg! ${currentPageUrl}`;
+    const shareText = `Check out ${currentArtistName}'s songs on MusicCityUg! ${currentPageUrl}`;
     shareInput.value = shareText;
     
     modal.classList.add('show');
@@ -1707,7 +1725,7 @@ function shareSingleSong(songId, songTitle, artistName) {
     const shareInput = document.getElementById('share-link-input');
     
     const songUrl = `${currentPageUrl}#song-${songId}`;
-    const shareText = `Listen to "${songTitle}" by ${fullArtistName} on MusicCenterUg! ${songUrl}`;
+    const shareText = `Listen to "${songTitle}" by ${fullArtistName} on MusicCityUg! ${songUrl}`;
     shareInput.value = shareText;
     
     modal.classList.add('show');
@@ -1723,7 +1741,7 @@ function shareOnPlatform(platform) {
             shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
             break;
         case 'twitter':
-            const text = encodeURIComponent(`Check out ${currentArtistName} on MusicCenterUg!`);
+            const text = encodeURIComponent(`Check out ${currentArtistName} on MusicCityUg!`);
             shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
             break;
         case 'whatsapp':
@@ -1772,13 +1790,6 @@ function copyArtistLink() {
 
 // ===== DOWNLOAD FUNCTIONALITY =====
 function downloadAllSongs() {
-    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
-    
-    if (!isAuthenticated) {
-        showToast('Please login to download songs', 'info');
-        return;
-    }
-    
     if ({{ songs_count }} === 0) {
         showToast('No songs available to download', 'error');
         return;
@@ -1796,7 +1807,11 @@ function confirmDownloadAll() {
     
     showToast(`Starting download of {{ songs_count }} songs...`, 'info');
     
-    trackBulkDownload();
+    // Track bulk download if user is authenticated
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+    if (isAuthenticated) {
+        trackBulkDownload();
+    }
     
     const songElements = document.querySelectorAll('.song-item');
     let downloadedCount = 0;
@@ -1806,8 +1821,10 @@ function confirmDownloadAll() {
             const songId = songElement.dataset.songId;
             const songUrl = songElement.dataset.audioUrl;
             const songTitle = songElement.querySelector('.song-title').textContent;
+            const artistName = currentArtistName;
+            const coverImage = songElement.querySelector('.song-image img')?.src || '';
             
-            downloadSong(songId, songUrl, songTitle, currentArtistName, null, true);
+            downloadSong(songId, songUrl, songTitle, artistName, null, true, coverImage);
             
             downloadedCount++;
             
@@ -1825,151 +1842,114 @@ function closeDownloadAllModal() {
     modal.classList.remove('show');
 }
 
-// Enhanced download function with better URL handling
-function downloadSong(songId, songUrl, songTitle, artistName, buttonElement, isBulkDownload = false) {
-    console.log('🔍 DEBUG - Download started:', {
-        songId,
-        songUrl,
-        songTitle,
-        artistName,
-        isBulkDownload,
-        authenticated: {% if user.is_authenticated %}true{% else %}false{% endif %}
-    });
-
-    const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+// Enhanced download function - NO LOGIN REQUIRED
+async function downloadSong(songId, songUrl, songTitle, artistName, buttonElement, isBulkDownload = false, coverImageUrl = '') {
+    console.log('📥 Downloading song:', { songId, songTitle });
     
-    if (!isAuthenticated && !isBulkDownload) {
-        showToast('Please login to download songs', 'info');
-        return;
-    }
-
-    // Enhanced URL validation and fixing
-    let finalSongUrl = songUrl;
-    
-    // Check if URL is relative and needs to be converted to absolute
-    if (songUrl && !songUrl.startsWith('http') && !songUrl.startsWith('//')) {
-        // It's a relative URL, convert to absolute
-        if (songUrl.startsWith('/')) {
-            finalSongUrl = window.location.origin + songUrl;
-        } else {
-            finalSongUrl = window.location.origin + '/' + songUrl;
-        }
-        console.log('🔄 DEBUG - Converted relative URL to absolute:', finalSongUrl);
-    }
-    
-    // Validate the final URL
-    if (!finalSongUrl || !isValidUrl(finalSongUrl)) {
-        console.error('❌ DEBUG - Invalid song URL after processing:', finalSongUrl);
-        
-        // Try to construct URL from known patterns
-        const alternativeUrl = constructSongUrl(songId);
-        if (alternativeUrl) {
-            finalSongUrl = alternativeUrl;
-            console.log('🔄 DEBUG - Using alternative URL:', finalSongUrl);
-        } else {
-            showToast('Song file not available for download', 'error');
-            return;
+    // Get cover image URL if not provided
+    if (!coverImageUrl) {
+        const songElement = document.querySelector(`[data-song-id="${songId}"]`);
+        if (songElement) {
+            const imgElement = songElement.querySelector('.song-image img');
+            if (imgElement && imgElement.src) {
+                coverImageUrl = imgElement.src;
+            }
         }
     }
 
+    // Show loading state
     if (buttonElement) {
         buttonElement.disabled = true;
         buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         buttonElement.classList.add('downloading');
     }
 
-    // First track the download
-    trackSongDownload(songId)
-        .then(data => {
-            console.log('✅ DEBUG - Download tracked successfully:', data);
-            
-            if (data.success) {
-                updateDownloadCountUI(songId, data.download_count);
-            }
-            
-            // Always try to download the file, even if tracking fails
-            triggerFileDownload(songId, finalSongUrl, songTitle, artistName, buttonElement);
-            
-            if (!isBulkDownload) {
-                showToast(`Downloading: ${songTitle}`, 'success');
-            }
-        })
-        .catch(error => {
-            console.error('❌ DEBUG - Download tracking error:', error);
-            // Even if tracking fails, try to download the file
-            triggerFileDownload(songId, finalSongUrl, songTitle, artistName, buttonElement);
-            
-            if (!isBulkDownload) {
-                showToast('Download started', 'info');
-            }
-        })
-        .finally(() => {
-            if (buttonElement) {
-                setTimeout(() => {
-                    buttonElement.disabled = false;
-                    buttonElement.innerHTML = '<i class="fas fa-download"></i>';
-                    buttonElement.classList.remove('downloading');
-                }, 2000);
-            }
-        });
-}
-
-// URL validation helper function
-function isValidUrl(string) {
     try {
-        const url = new URL(string);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch (_) {
-        return false;
+        // 1. Track download in database (if authenticated)
+        const isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+        if (isAuthenticated) {
+            await trackSongDownload(songId);
+        }
+        
+        // 2. Build download URL with metadata parameters
+        const downloadUrl = buildDownloadUrl(songId, {
+            title: songTitle,
+            artist: artistName,
+            cover: coverImageUrl,
+            include_metadata: true
+        });
+        
+        console.log('🔗 Using download URL:', downloadUrl);
+        
+        // 3. Trigger download
+        triggerFileDownload(downloadUrl, songTitle, artistName, buttonElement);
+        
+        if (!isBulkDownload) {
+            showToast(`Downloading: ${songTitle}`, 'success');
+        }
+        
+    } catch (error) {
+        console.error('Download error:', error);
+        showToast('Download failed: ' + error.message, 'error');
+    } finally {
+        if (buttonElement) {
+            setTimeout(() => {
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = '<i class="fas fa-download"></i>';
+                buttonElement.classList.remove('downloading');
+            }, 2000);
+        }
     }
 }
 
-// Construct alternative URL if original is invalid
-function constructSongUrl(songId) {
-    // Try different URL patterns that might work with your Django setup
-    const patterns = [
-        `/media/audio_files/${songId}.mp3`,
-        `/media/songs/${songId}.mp3`,
-        `/api/songs/${songId}/download/`,
-        `/download/song/${songId}/`,
-        `/song/${songId}/download/`
-    ];
+// Build download URL using the CORRECT download-song endpoint
+function buildDownloadUrl(songId, options = {}) {
+    const baseUrl = `/download-song/${songId}/`;
+    const params = new URLSearchParams();
     
-    for (const pattern of patterns) {
-        const url = pattern.startsWith('http') ? pattern : window.location.origin + pattern;
-        console.log('🔍 DEBUG - Testing URL pattern:', url);
-        return url;
+    if (options.include_metadata) {
+        params.append('metadata', 'true');
+    }
+    if (options.title) {
+        params.append('title', options.title);
+    }
+    if (options.artist) {
+        params.append('artist', options.artist);
+    }
+    if (options.cover) {
+        params.append('cover', options.cover);
     }
     
-    return null;
+    const queryString = params.toString();
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
 
 // Enhanced file download trigger
-function triggerFileDownload(songId, songUrl, songTitle, artistName, buttonElement) {
-    console.log('📥 DEBUG - Triggering file download:', songUrl);
+function triggerFileDownload(url, songTitle, artistName, buttonElement) {
+    console.log('📥 Triggering download from URL:', url);
     
-    // Method 1: Create a temporary anchor element (most reliable)
+    // Method 1: Create a temporary anchor element
     const link = document.createElement('a');
-    link.href = songUrl;
+    link.href = url;
     
     // Clean filename for download
-    const cleanFileName = `${songTitle} - ${artistName}.mp3`
-        .replace(/[^a-zA-Z0-9\s\-\.\(\)]/g, '')
+    const cleanFileName = `${cleanText(songTitle)} - ${cleanText(artistName)}.mp3`
         .replace(/\s+/g, ' ')
         .trim();
         
     link.download = cleanFileName;
     link.style.display = 'none';
     link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
     
     // Add to document and trigger click
     document.body.appendChild(link);
     
     try {
         link.click();
-        console.log('✅ DEBUG - Download initiated via anchor click');
+        console.log('✅ Download initiated');
     } catch (error) {
-        console.warn('⚠️ DEBUG - Anchor click failed, trying event dispatch');
+        console.warn('⚠️ Anchor click failed, trying event dispatch');
         const clickEvent = new MouseEvent('click', {
             view: window,
             bubbles: true,
@@ -1987,74 +1967,90 @@ function triggerFileDownload(songId, songUrl, songTitle, artistName, buttonEleme
     
     // Fallback: Open in new tab after a delay
     setTimeout(() => {
-        console.log('🔄 DEBUG - Trying fallback download method');
-        window.open(songUrl, '_blank');
+        console.log('🔄 Trying fallback download method');
+        window.open(url, '_blank', 'noopener,noreferrer');
     }, 1000);
 }
 
+// Helper to clean text for filename
+function cleanText(text) {
+    return text
+        .replace(/[<>:"/\\|?*]/g, '') // Remove invalid filename characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim();
+}
+
 // ===== TRACKING FUNCTIONS =====
-function trackBulkDownload() {
-    console.log('📊 DEBUG - Tracking bulk download');
+async function trackBulkDownload() {
+    console.log('📊 Tracking bulk download');
     
-    return fetch('/api/track-bulk-download/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({
-            artist_id: currentArtistId,
-            song_count: {{ songs_count }},
-            timestamp: new Date().toISOString()
-        })
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/api/track-bulk-download/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                artist_id: currentArtistId,
+                song_count: {{ songs_count }},
+                timestamp: new Date().toISOString()
+            })
+        });
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-    })
-    .catch(error => {
-        console.error('❌ DEBUG - Bulk download tracking error:', error);
+        
+        return await response.json();
+    } catch (error) {
+        console.error('❌ Bulk download tracking error:', error);
         return { success: true, error: 'Tracking failed but download continued' };
-    });
+    }
 }
 
-function trackSongDownload(songId) {
-    console.log('📊 DEBUG - Tracking song download:', songId);
+async function trackSongDownload(songId) {
+    console.log('📊 Tracking song download:', songId);
     
     const csrfToken = getCookie('csrftoken');
     if (!csrfToken) {
-        console.warn('⚠️ DEBUG - CSRF token not found');
+        console.warn('⚠️ CSRF token not found');
         return Promise.resolve({ success: false, error: 'CSRF token missing' });
     }
     
-    return fetch('/api/track-download/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({
-            song_id: songId,
-            timestamp: new Date().toISOString(),
-            source: 'artist_page'
-        })
-    })
-    .then(response => {
+    try {
+        const response = await fetch('/api/track-download/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                song_id: songId,
+                timestamp: new Date().toISOString(),
+                source: 'artist_page'
+            })
+        });
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-    })
-    .catch(error => {
-        console.error('❌ DEBUG - Song download tracking error:', error);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            updateDownloadCountUI(songId, data.download_count);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('❌ Song download tracking error:', error);
         return { 
             success: false, 
             download_count: 0,
             error: 'Tracking failed but download continued' 
         };
-    });
+    }
 }
 
 // ===== SONG PLAYBACK FUNCTIONS =====
@@ -2077,12 +2073,12 @@ function playAllSongs() {
         return {
             id: songId,
             title: songTitle,
-            artist: getArtistName(songId), // Use helper function to get artist names including featured artists
+            artist: getArtistName(songId),
             audio: audioUrl,
             cover: coverImage,
             artistId: {{ artist.id }}
         };
-    }).filter(song => song.audio); // Only include songs with audio URLs
+    }).filter(song => song.audio);
 
     console.log('🎵 Found', songs.length, 'songs');
 
@@ -2098,7 +2094,6 @@ function playAllSongs() {
         showToast(`Playing all songs by {{ artist.name|escapejs }}`, 'success');
     } else {
         console.error('Global playSong function not available, using fallback player');
-        // Use the first song as fallback
         playSongDirectly(songs[0].id, songs[0].audio, songs[0].title, songs);
     }
 }
@@ -2113,7 +2108,6 @@ function playSongFromCard(songId) {
         return;
     }
 
-    // Get the song title properly
     const songTitleElement = songElement.querySelector('.song-title');
     if (!songTitleElement) {
         console.error('Song title element not found');
@@ -2121,7 +2115,6 @@ function playSongFromCard(songId) {
         return;
     }
 
-    // Get cover image
     let coverImage = '{% static "images/default-cover.jpg" %}';
     const songImageElement = songElement.querySelector('.song-image img');
     if (songImageElement && songImageElement.src) {
@@ -2131,7 +2124,7 @@ function playSongFromCard(songId) {
     const songData = {
         id: parseInt(songId),
         title: songTitleElement.textContent,
-        artist: getArtistName(songId), // Use helper function to get artist names including featured artists
+        artist: getArtistName(songId),
         audio: songElement.dataset.audioUrl,
         cover: coverImage,
         artistId: {{ artist.id }}
@@ -2139,21 +2132,18 @@ function playSongFromCard(songId) {
 
     console.log('🎵 Song data:', songData);
 
-    // Check if audio URL exists
     if (!songData.audio) {
         console.error('No audio URL found for song:', songId);
         showToast('Audio file not available', 'error');
         return;
     }
 
-    // Get all songs for playlist
     const allSongElements = document.querySelectorAll('.song-item');
     const playlist = Array.from(allSongElements).map(element => {
         const elementSongId = parseInt(element.dataset.songId);
         const elementTitle = element.querySelector('.song-title')?.textContent || 'Unknown Song';
         const elementAudio = element.dataset.audioUrl;
         
-        // Get cover for each song
         let elementCover = '{% static "images/default-cover.jpg" %}';
         const elementImg = element.querySelector('.song-image img');
         if (elementImg && elementImg.src) {
@@ -2163,12 +2153,12 @@ function playSongFromCard(songId) {
         return {
             id: elementSongId,
             title: elementTitle,
-            artist: getArtistName(elementSongId), // Use helper function to get artist names including featured artists
+            artist: getArtistName(elementSongId),
             audio: elementAudio,
             cover: elementCover,
             artistId: {{ artist.id }}
         };
-    }).filter(song => song.audio); // Only include songs with audio URLs
+    }).filter(song => song.audio);
 
     console.log('🎵 Playlist created with', playlist.length, 'songs');
 
@@ -2185,12 +2175,10 @@ function playSongFromCard(songId) {
         return;
     }
 
-    // Check if global player function exists
     if (typeof window.playSong === 'function') {
         console.log('🎵 Calling playSong with data:', songData);
         window.playSong(songData, playlist, songIndex);
         
-        // Track play count
         trackSongPlay(songId)
             .then(data => {
                 if (data.success) {
@@ -2201,7 +2189,6 @@ function playSongFromCard(songId) {
                 console.error('Play count tracking error:', error);
             });
             
-        // Visual feedback
         highlightPlayingSong(songId);
     } else {
         console.error('Global playSong function not available, using fallback player');
@@ -2215,14 +2202,11 @@ function getArtistName(songId) {
     if (card) {
         const artistContainer = card.querySelector('.song-artist-info');
         if (artistContainer) {
-            // Get all artist names including featured artists
             const artists = [];
             
-            // Get primary artist
             const primaryArtist = artistContainer.querySelector('.primary-artist');
             if (primaryArtist) artists.push(primaryArtist.textContent.trim());
             
-            // Get featured artists
             const featuredArtists = artistContainer.querySelectorAll('.featured-artist');
             featuredArtists.forEach(artist => {
                 artists.push(artist.textContent.trim());
@@ -2237,7 +2221,6 @@ function getArtistName(songId) {
             }
         }
         
-        // Fallback to main artist if no artist info found
         return '{{ artist.name|escapejs }}';
     }
     return '{{ artist.name|escapejs }}';
@@ -2245,25 +2228,21 @@ function getArtistName(songId) {
 
 // Fallback audio player function
 function playSongDirectly(songId, audioUrl, songTitle, playlist = null, songIndex = 0) {
-    // Stop any currently playing audio
     if (currentAudioPlayer && isPlaying) {
         currentAudioPlayer.pause();
         currentAudioPlayer = null;
         isPlaying = false;
     }
     
-    // Remove playing class from all songs
     document.querySelectorAll('.song-item').forEach(item => {
         item.classList.remove('playing');
     });
     
-    // Add playing class to current song
     const currentSongElement = document.querySelector(`[data-song-id="${songId}"]`);
     if (currentSongElement) {
         currentSongElement.classList.add('playing');
     }
     
-    // Create and play audio
     currentAudioPlayer = new Audio(audioUrl);
     currentPlayingSongId = songId;
     
@@ -2273,7 +2252,6 @@ function playSongDirectly(songId, audioUrl, songTitle, playlist = null, songInde
             isPlaying = true;
             showToast(`Now playing: ${songTitle}`, 'success');
             
-            // Track play
             trackSongPlay(songId)
                 .then(data => {
                     if (data.success) {
@@ -2281,13 +2259,11 @@ function playSongDirectly(songId, audioUrl, songTitle, playlist = null, songInde
                     }
                 });
             
-            // Setup event listeners for audio
             currentAudioPlayer.onended = function() {
                 isPlaying = false;
                 currentPlayingSongId = null;
                 highlightPlayingSong(null);
                 
-                // If we have a playlist, play next song
                 if (playlist && playlist.length > 0) {
                     const nextIndex = (songIndex + 1) % playlist.length;
                     if (nextIndex !== songIndex) {
@@ -2316,6 +2292,33 @@ function playSongDirectly(songId, audioUrl, songTitle, playlist = null, songInde
         });
 }
 
+async function trackSongPlay(songId) {
+    try {
+        const response = await fetch('/api/track-play/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                song_id: songId,
+                timestamp: new Date().toISOString(),
+                duration_played: 0,
+                source: 'artist_page'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Track play error:', error);
+        return { success: false, play_count: 0 };
+    }
+}
+
 function stopCurrentPlayback() {
     if (currentAudioPlayer) {
         currentAudioPlayer.pause();
@@ -2326,35 +2329,11 @@ function stopCurrentPlayback() {
     highlightPlayingSong(null);
 }
 
-function trackSongPlay(songId) {
-    return fetch('/api/track-play/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({
-            song_id: songId,
-            timestamp: new Date().toISOString(),
-            duration_played: 0,
-            source: 'artist_page'
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    });
-}
-
 function highlightPlayingSong(songId) {
-    // Remove playing class from all songs
     document.querySelectorAll('.song-item').forEach(item => {
         item.classList.remove('playing');
     });
     
-    // Add playing class to current song if provided
     if (songId) {
         const currentSongElement = document.querySelector(`[data-song-id="${songId}"]`);
         if (currentSongElement) {
@@ -2374,7 +2353,6 @@ function updatePlayCountUI(songId, newPlayCount) {
     playElements.forEach(element => {
         element.textContent = newPlayCount;
         
-        // Animation
         element.style.transform = 'scale(1.2)';
         element.style.color = 'var(--primary)';
         setTimeout(() => {
@@ -2389,7 +2367,6 @@ function updateDownloadCountUI(songId, newDownloadCount) {
     downloadElements.forEach(element => {
         element.textContent = newDownloadCount;
         
-        // Animation
         element.style.transform = 'scale(1.2)';
         element.style.color = 'var(--primary)';
         setTimeout(() => {
@@ -2439,7 +2416,6 @@ function likeSong(songId, button) {
 
 // ===== UTILITY FUNCTIONS =====
 function showToast(message, type = 'info') {
-    // Create toast element
     let toast = document.getElementById('toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -2448,13 +2424,11 @@ function showToast(message, type = 'info') {
         document.body.appendChild(toast);
     }
     
-    // Set toast content and style
     toast.innerHTML = `
         <i class="fas fa-${getToastIcon(type)}"></i>
         <span>${message}</span>
     `;
     
-    // Set background color based on type
     const colors = {
         success: 'var(--primary)',
         error: '#e74c3c',
@@ -2466,7 +2440,6 @@ function showToast(message, type = 'info') {
     
     toast.classList.add('show');
     
-    // Auto hide after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
@@ -2486,7 +2459,6 @@ function showNotification(message, type = 'info') {
     if (typeof window.showNotification === 'function') {
         window.showNotification(message, type);
     } else {
-        // Fallback to toast
         showToast(message, type);
     }
 }
@@ -2519,7 +2491,6 @@ window.downloadAllSongs = downloadAllSongs;
 window.stopCurrentPlayback = stopCurrentPlayback;
 
 console.log('✅ Artist page JavaScript loaded successfully!');
-console.log('🔧 Download functionality ready with comprehensive error handling');
-console.log('🎵 Audio player ready with single playback control');
+console.log('📥 Download now works WITHOUT login!');
 </script>
 {% endblock %}
