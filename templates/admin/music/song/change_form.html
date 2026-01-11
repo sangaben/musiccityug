@@ -237,8 +237,7 @@
 
     /* Input styling */
     input[type="text"], 
-    input[type="number"], 
-    input[type="file"],
+    input[type="number"],
     select,
     textarea {
         width: 100%;
@@ -262,52 +261,230 @@
         outline: none;
     }
 
-    /* File upload styling */
-    .file-upload-area {
-        border: 3px dashed var(--spotify-green);
-        border-radius: 16px;
-        padding: 40px;
-        text-align: center;
-        background: rgba(29, 185, 84, 0.1);
-        margin-top: 15px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
+    /* File Input Styling - GREEN DESIGN ONLY */
+    .file-input-container {
         position: relative;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* Hide the original file input completely */
+    .file-input-container input[type="file"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
         overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
 
-    .file-upload-area:hover {
-        background: rgba(29, 185, 84, 0.15);
+    /* Green custom file input */
+    .custom-file-input {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        border: 3px dashed var(--spotify-green);
+        border-radius: 12px;
+        background: rgba(29, 185, 84, 0.05);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        position: relative;
+        min-height: 150px;
+    }
+
+    .custom-file-input:hover {
+        background: rgba(29, 185, 84, 0.1);
         border-color: var(--spotify-green-hover);
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(29, 185, 84, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.2);
     }
 
-    .file-upload-area i {
-        font-size: 56px;
+    .custom-file-input i {
+        font-size: 48px;
         color: var(--spotify-green);
-        margin-bottom: 20px;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        margin-bottom: 15px;
         transition: all 0.3s ease;
     }
 
-    .file-upload-area:hover i {
+    .custom-file-input:hover i {
         transform: scale(1.1);
         color: var(--spotify-green-hover);
     }
 
-    .file-upload-area p {
+    .custom-file-input .input-text {
         color: var(--spotify-text-primary);
-        margin: 10px 0;
-        font-size: 1.1rem;
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .custom-file-input .input-subtext {
+        color: var(--spotify-text-secondary);
+        font-size: 14px;
+        max-width: 400px;
+        line-height: 1.4;
+    }
+
+    /* Selected file display */
+    .selected-file-display {
+        margin-top: 15px;
+        padding: 15px;
+        background: rgba(29, 185, 84, 0.1);
+        border-radius: 10px;
+        border: 1px solid rgba(29, 185, 84, 0.2);
+        animation: fadeIn 0.3s ease;
+        display: none;
+    }
+
+    .selected-file-display.show {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-info-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .file-info-header i {
+        color: var(--spotify-green);
+        font-size: 18px;
+    }
+
+    .file-info-header h4 {
+        margin: 0;
+        color: var(--spotify-text-primary);
+        font-size: 14px;
         font-weight: 600;
     }
 
-    .file-upload-area small {
-        color: var(--spotify-text-secondary);
+    .file-details {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+
+    .file-details i {
+        color: var(--spotify-green);
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .file-name {
+        color: var(--spotify-text-primary);
+        font-weight: 500;
+        font-size: 14px;
+        word-break: break-all;
+        flex: 1;
+    }
+
+    .file-size {
+        display: inline-block;
+        padding: 4px 10px;
+        background: var(--spotify-green);
+        color: var(--spotify-black);
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-left: 10px;
+        flex-shrink: 0;
+    }
+
+    /* File validation */
+    .file-validation {
+        margin-top: 10px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        display: none;
+    }
+
+    .file-validation.show {
+        display: flex;
+    }
+
+    .file-validation.valid {
+        background: rgba(29, 185, 84, 0.1);
+        color: var(--spotify-green);
+        border: 1px solid rgba(29, 185, 84, 0.2);
+    }
+
+    .file-validation.valid i {
+        color: var(--spotify-green);
+    }
+
+    .file-validation.invalid {
+        background: rgba(255, 71, 71, 0.1);
+        color: #FF4747;
+        border: 1px solid rgba(255, 71, 71, 0.2);
+    }
+
+    .file-validation.invalid i {
+        color: #FF4747;
+    }
+
+    /* File preview */
+    .file-preview {
+        margin-top: 20px;
+        padding: 20px;
+        background: var(--spotify-dark-gray);
+        border-radius: 12px;
+        border: 2px solid var(--spotify-green);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: none;
+    }
+
+    .file-preview.show {
         display: block;
-        margin-top: 15px;
-        font-size: 0.9rem;
+    }
+
+    .preview-header {
+        margin-top: 0;
+        color: var(--spotify-green);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .preview-header i {
+        font-size: 18px;
+    }
+
+    /* Audio preview */
+    .audio-preview audio {
+        width: 100%;
+        border-radius: 8px;
+        background: var(--spotify-light-gray);
+    }
+
+    /* Image preview */
+    .image-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        object-fit: contain;
     }
 
     /* Duration fields */
@@ -651,26 +828,6 @@
         line-height: 1.5;
     }
 
-    /* Audio preview section */
-    .audio-preview {
-        background: var(--spotify-dark-gray);
-        color: var(--spotify-text-primary);
-        padding: 20px;
-        border-radius: 12px;
-        margin-top: 15px;
-        border: 2px solid var(--spotify-green);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .audio-preview h4 {
-        margin-top: 0;
-        color: var(--spotify-green);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-    }
-
     /* Quality badges */
     .quality-badge {
         display: inline-block;
@@ -944,7 +1101,7 @@
             <i class="fas fa-music"></i>
             {% if add %}Upload New Song{% else %}Edit Song{% endif %}
         </h1>
-        <p>{% if add %}Fill in the details below to upload a new track to MusicCenterUG{% else %}Edit the song details and metadata{% endif %}</p>
+        <p>{% if add %}Fill in the details below to upload a new track to MusicCityUG{% else %}Edit the song details and metadata{% endif %}</p>
     </div>
 </div>
 
@@ -1005,7 +1162,25 @@
               {% if field.is_readonly %}
                   <div class="readonly">{{ field.contents }}</div>
               {% else %}
-                  {{ field.field }}
+                  {% if field.field.name == 'audio_file' or field.field.name == 'cover_image' %}
+                      <!-- Custom file input only - GREEN DESIGN -->
+                      <div class="file-input-container" data-field-id="{{ field.field.auto_id }}">
+                          <div class="custom-file-input" data-for="{{ field.field.auto_id }}">
+                              {% if field.field.name == 'audio_file' %}
+                                  <i class="fas fa-music"></i>
+                                  <span class="input-text">Upload Audio File</span>
+                                  <span class="input-subtext">Click to browse or drag & drop MP3, WAV, M4A files (max 50MB)</span>
+                              {% elif field.field.name == 'cover_image' %}
+                                  <i class="fas fa-image"></i>
+                                  <span class="input-text">Upload Cover Image</span>
+                                  <span class="input-subtext">Click to browse or drag & drop JPG, PNG, WEBP files (max 10MB)</span>
+                              {% endif %}
+                          </div>
+                          {{ field.field }}
+                      </div>
+                  {% else %}
+                      {{ field.field }}
+                  {% endif %}
               {% endif %}
             {% endif %}
             {% if field.field.help_text %}
@@ -1027,11 +1202,256 @@
 <script>
 (function($) {
     $(document).ready(function() {
-        // Add Spotify-style interactions
-        $('.file-upload-area').on('click', function() {
-            $(this).find('input[type="file"]').click();
+        // Initialize file inputs
+        function initializeFileInputs() {
+            $('.custom-file-input').each(function() {
+                var $customInput = $(this);
+                var fieldId = $customInput.data('for');
+                var $fileInput = $('#' + fieldId);
+                
+                if (!$fileInput.length) {
+                    console.error('File input not found:', fieldId);
+                    return;
+                }
+                
+                // Set up click handler for custom input
+                $customInput.on('click', function() {
+                    $fileInput.trigger('click');
+                });
+                
+                // Handle file change on the hidden input
+                $fileInput.on('change', function(e) {
+                    handleFileChange($(this), e);
+                });
+                
+                // Check for existing file (edit mode)
+                if ($fileInput.val()) {
+                    showExistingFile($fileInput);
+                }
+            });
+        }
+        
+        // Handle file selection
+        function handleFileChange($fileInput, e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            
+            var $container = $fileInput.closest('.file-input-container');
+            
+            // Show file info
+            showFileInfo($fileInput, file, $container);
+            
+            // Validate file
+            validateFile($fileInput, file, $container);
+            
+            // Preview file
+            previewFile($fileInput, file, $container);
+            
+            // Update progress
+            updateProgress();
+        }
+        
+        // Show file information
+        function showFileInfo($fileInput, file, $container) {
+            var $existingDisplay = $container.find('.selected-file-display');
+            if ($existingDisplay.length) {
+                $existingDisplay.remove();
+            }
+            
+            var fileName = file.name;
+            var fileSize = formatFileSize(file.size);
+            var isAudio = $fileInput.attr('name') === 'audio_file';
+            var isImage = $fileInput.attr('name') === 'cover_image';
+            
+            var icon = isAudio ? 'fa-music' : 'fa-image';
+            var fileType = isAudio ? 'Audio File' : 'Image File';
+            
+            var $display = $(
+                '<div class="selected-file-display show">' +
+                '<div class="file-info-header">' +
+                '<i class="fas ' + icon + '"></i>' +
+                '<h4>' + fileType + ' Selected</h4>' +
+                '</div>' +
+                '<div class="file-details">' +
+                '<i class="fas fa-check-circle"></i>' +
+                '<span class="file-name">' + fileName + '</span>' +
+                '<span class="file-size">' + fileSize + '</span>' +
+                '</div>' +
+                '</div>'
+            );
+            
+            $container.append($display);
+        }
+        
+        // Show existing file (edit mode)
+        function showExistingFile($fileInput) {
+            var filePath = $fileInput.val();
+            if (!filePath) return;
+            
+            var fileName = filePath.split('\\').pop().split('/').pop();
+            var $container = $fileInput.closest('.file-input-container');
+            var isAudio = $fileInput.attr('name') === 'audio_file';
+            var isImage = $fileInput.attr('name') === 'cover_image';
+            
+            var icon = isAudio ? 'fa-music' : 'fa-image';
+            var fileType = isAudio ? 'Audio File' : 'Image File';
+            
+            var $display = $(
+                '<div class="selected-file-display show">' +
+                '<div class="file-info-header">' +
+                '<i class="fas ' + icon + '"></i>' +
+                '<h4>Current ' + fileType + '</h4>' +
+                '</div>' +
+                '<div class="file-details">' +
+                '<i class="fas fa-file"></i>' +
+                '<span class="file-name">' + fileName + '</span>' +
+                '</div>' +
+                '</div>'
+            );
+            
+            $container.append($display);
+        }
+        
+        // Validate file
+        function validateFile($fileInput, file, $container) {
+            var $existingValidation = $container.find('.file-validation');
+            if ($existingValidation.length) {
+                $existingValidation.remove();
+            }
+            
+            var $validation = $('<div class="file-validation"></div>');
+            var isValid = true;
+            var message = '';
+            var icon = '<i class="fas fa-check-circle"></i>';
+            
+            if ($fileInput.attr('name') === 'audio_file') {
+                var audioTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/mp4', 'audio/x-m4a', 'audio/mp3'];
+                if (!audioTypes.includes(file.type)) {
+                    isValid = false;
+                    icon = '<i class="fas fa-exclamation-triangle"></i>';
+                    message = 'Invalid audio format. Please use MP3, WAV, or M4A.';
+                } else if (file.size > 50 * 1024 * 1024) {
+                    isValid = false;
+                    icon = '<i class="fas fa-exclamation-triangle"></i>';
+                    message = 'File too large. Maximum size is 50MB.';
+                } else {
+                    message = 'Valid audio file ready for upload.';
+                }
+            } else if ($fileInput.attr('name') === 'cover_image') {
+                var imageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                if (!imageTypes.includes(file.type)) {
+                    isValid = false;
+                    icon = '<i class="fas fa-exclamation-triangle"></i>';
+                    message = 'Invalid image format. Please use JPG, PNG, or WEBP.';
+                } else if (file.size > 10 * 1024 * 1024) {
+                    isValid = false;
+                    icon = '<i class="fas fa-exclamation-triangle"></i>';
+                    message = 'Image too large. Maximum size is 10MB.';
+                } else {
+                    message = 'Valid image file ready for upload.';
+                }
+            }
+            
+            if (isValid) {
+                $validation.addClass('valid').html(icon + ' ' + message);
+            } else {
+                $validation.addClass('invalid').html(icon + ' ' + message);
+            }
+            
+            $validation.addClass('show');
+            $container.append($validation);
+        }
+        
+        // Preview file
+        function previewFile($fileInput, file, $container) {
+            var $row = $container.closest('.form-row');
+            var $existingPreview = $row.find('.file-preview');
+            if ($existingPreview.length) {
+                $existingPreview.remove();
+            }
+            
+            if ($fileInput.attr('name') === 'audio_file' && file.type.startsWith('audio/')) {
+                var url = URL.createObjectURL(file);
+                var $preview = $(
+                    '<div class="file-preview audio-preview show">' +
+                    '<h4 class="preview-header"><i class="fas fa-play-circle"></i> Audio Preview</h4>' +
+                    '<audio controls>' +
+                    '<source src="' + url + '" type="' + file.type + '">' +
+                    'Your browser does not support audio preview.' +
+                    '</audio>' +
+                    '</div>'
+                );
+                $row.append($preview);
+                
+                $preview.find('audio').on('loadeddata', function() {
+                    URL.revokeObjectURL(url);
+                });
+            } else if ($fileInput.attr('name') === 'cover_image' && file.type.startsWith('image/')) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var $preview = $(
+                        '<div class="file-preview image-preview show">' +
+                        '<h4 class="preview-header"><i class="fas fa-image"></i> Image Preview</h4>' +
+                        '<img src="' + e.target.result + '" alt="Cover preview">' +
+                        '</div>'
+                    );
+                    $row.append($preview);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            var k = 1024;
+            var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Initialize file inputs
+        initializeFileInputs();
+        
+        // Drag and drop functionality
+        $('.custom-file-input').on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css({
+                'background': 'rgba(29, 185, 84, 0.15)',
+                'border-color': 'var(--spotify-green-hover)',
+                'transform': 'translateY(-2px)'
+            });
         });
-
+        
+        $('.custom-file-input').on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css({
+                'background': 'rgba(29, 185, 84, 0.05)',
+                'border-color': 'var(--spotify-green)',
+                'transform': 'translateY(0)'
+            });
+        });
+        
+        $('.custom-file-input').on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).css({
+                'background': 'rgba(29, 185, 84, 0.05)',
+                'border-color': 'var(--spotify-green)',
+                'transform': 'translateY(0)'
+            });
+            
+            var fieldId = $(this).data('for');
+            var files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                var $fileInput = $('#' + fieldId);
+                $fileInput[0].files = files;
+                $fileInput.trigger('change');
+            }
+        });
+        
         // Update progress steps based on field completion
         function updateProgress() {
             var completed = 0;
@@ -1059,32 +1479,7 @@
 
         // Add floating button functionality
         $('.fab').on('click', function() {
-            // Quick actions menu
             alert('Quick Actions:\n\n• Validate Form\n• Preview Song\n• Save Draft\n• Clear Form');
-        });
-
-        // Add audio preview for file inputs
-        $('input[type="file"][accept*="audio"]').on('change', function(e) {
-            if (e.target.files.length > 0) {
-                var file = e.target.files[0];
-                var url = URL.createObjectURL(file);
-                
-                // Remove existing preview
-                $(this).closest('.form-row').find('.audio-preview').remove();
-                
-                // Add new preview
-                var preview = $(
-                    '<div class="audio-preview">' +
-                    '<h4><i class="fas fa-play-circle"></i> Audio Preview</h4>' +
-                    '<audio controls style="width: 100%; margin-top: 10px;">' +
-                    '<source src="' + url + '" type="' + file.type + '">' +
-                    'Your browser does not support audio preview.' +
-                    '</audio>' +
-                    '</div>'
-                );
-                
-                $(this).closest('.form-row').append(preview);
-            }
         });
 
         // Add duration calculation
@@ -1113,7 +1508,6 @@
                 '<span class="loading-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></span> Processing...'
             ).prop('disabled', true);
             
-            // Show loading overlay
             $('body').append(
                 '<div class="loading-overlay">' +
                 '<div class="loading-spinner"></div>' +
@@ -1137,24 +1531,6 @@
         $(document).on('click', '.selector-add, .selector-remove', function() {
             setTimeout(updateFeaturedArtistsCounter, 100);
         });
-
-        // Add hover effects to featured artists options
-        $('.selector select option').hover(
-            function() {
-                $(this).css({
-                    'background': 'var(--spotify-light-gray)',
-                    'color': 'var(--spotify-green)'
-                });
-            },
-            function() {
-                if (!$(this).is(':checked')) {
-                    $(this).css({
-                        'background': 'var(--spotify-dark-gray)',
-                        'color': 'var(--spotify-text-primary)'
-                    });
-                }
-            }
-        );
     });
 })(django.jQuery);
 </script>
