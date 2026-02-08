@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ artist.name }} - MusicCityUg{% endblock %}
+{% block title %}{{ artist.name }} - MusicCenterUg{% endblock %}
 
 {% block content %}
 <div class="artist-details-container">
@@ -1696,7 +1696,7 @@ function toggleShareDropdown() {
 function shareArtist(platform) {
     const artistName = '{{ artist.name|escapejs }}';
     const url = encodeURIComponent(currentPageUrl);
-    const text = encodeURIComponent(`Check out ${artistName} on MusicCityUg!`);
+    const text = encodeURIComponent(`Check out ${artistName} on MusicCenterUg!`);
     
     shareOnPlatform(platform, url, text);
     toggleShareDropdown();
@@ -1707,7 +1707,7 @@ function shareArtistSongs() {
     const modal = document.getElementById('shareModal');
     const shareInput = document.getElementById('share-link-input');
     
-    const shareText = `Check out ${currentArtistName}'s songs on MusicCityUg! ${currentPageUrl}`;
+    const shareText = `Check out ${currentArtistName}'s songs on MusicCenterUg! ${currentPageUrl}`;
     shareInput.value = shareText;
     
     modal.classList.add('show');
@@ -1725,7 +1725,7 @@ function shareSingleSong(songId, songTitle, artistName) {
     const shareInput = document.getElementById('share-link-input');
     
     const songUrl = `${currentPageUrl}#song-${songId}`;
-    const shareText = `Listen to "${songTitle}" by ${fullArtistName} on MusicCityUg! ${songUrl}`;
+    const shareText = `Listen to "${songTitle}" by ${fullArtistName} on MusicCenterUg! ${songUrl}`;
     shareInput.value = shareText;
     
     modal.classList.add('show');
@@ -1741,14 +1741,14 @@ function shareOnPlatform(platform) {
             shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
             break;
         case 'twitter':
-            const text = encodeURIComponent(`Check out ${currentArtistName} on MusicCityUg!`);
+            const text = encodeURIComponent(`Check out ${currentArtistName} on MusicCenterUg!`);
             shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
             break;
         case 'whatsapp':
             shareUrl = `https://wa.me/?text=${encodeURIComponent(shareInput.value)}`;
             break;
         case 'telegram':
-            shareUrl = `https://t.me/share/url?url=${url}&text=${encodeURIComponent(`Check out ${currentArtistName} on MusicCityUg!`)}`;
+            shareUrl = `https://t.me/share/url?url=${url}&text=${encodeURIComponent(`Check out ${currentArtistName} on MusicCenterUg!`)}`;
             break;
     }
     
