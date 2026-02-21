@@ -148,8 +148,8 @@ USE_TZ = True
 # --------------------------------------------------
 # Static & Media Files
 # --------------------------------------------------
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/musiccenter/apps/musiccenterug/static/'   # must match Nginx alias
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
