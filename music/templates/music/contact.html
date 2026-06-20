@@ -1,0 +1,814 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - MusicCenter UG{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="container">
+            <div class="contact-hero-content animate-slide-up">
+                <h1>Get in Touch</h1>
+                <p>Have questions, feedback, or want to collaborate? We'd love to hear from you!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form-wrapper animate-on-scroll">
+                    <h2>Send Us a Message</h2>
+                    <form class="contact-form" id="contactForm" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="contactName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="contactName" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address <span class="required">*</span></label>
+                            <input type="email" id="contactEmail" placeholder="Enter your email address" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactSubject">Subject <span class="required">*</span></label>
+                            <select id="contactSubject" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="support">Technical Support</option>
+                                <option value="artist">Artist Submission</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactMessage">Message <span class="required">*</span></label>
+                            <textarea id="contactMessage" rows="5" placeholder="Write your message here..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="contactSubmitBtn">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="contact-info-wrapper animate-on-scroll delay-1">
+                    <h2>Contact Information</h2>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Address</h4>
+                                <p>Arua, Uganda</p>
+                               
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Phone</h4>
+                                <p><a href="tel:+256759803935">+256 759 803935</a></p>
+                                <p>Mon - Fri, 9AM - 6PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Email</h4>
+                                <p><a href="mailto:musiccenterug@gmail.com">musiccenterug@gmail.com</a></p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Working Hours</h4>
+                                <p>Monday - Friday: 9AM - 6PM</p>
+                                <p>Saturday: 10AM - 4PM</p>
+                                <p>Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="social-section">
+                        <h4>Follow Us</h4>
+                        <div class="social-links">
+                            <a href="#" class="social-link facebook" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link twitter" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link instagram" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link youtube" title="YouTube">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a href="#" class="social-link tiktok" title="TikTok">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">FAQ</span>
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-grid">
+                
+                
+                <div class="faq-item animate-on-scroll delay-1">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How can artists submit their music?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Artists can submit their music by creating emailing or whatsapping the admin on the contact details above.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item animate-on-scroll delay-2">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is MusicCenter UG free to use?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, MusicCenter UG is free for listeners. Artists have premium features available with various subscription plans.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item animate-on-scroll delay-3">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How can I report an issue or copyright infringement?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Please use our contact form to report any issues or copyright concerns. We take these matters seriously.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+/* ===== CONTACT PAGE STYLES ===== */
+.contact-page {
+    background: var(--dark, #121212);
+    min-height: 100vh;
+}
+
+/* ===== CONTACT HERO ===== */
+.contact-hero {
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    padding: 80px 0 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-hero::before {
+    content: '✉';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    font-size: 300px;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+}
+
+.contact-hero-content h1 {
+    font-size: 48px;
+    color: var(--light, #fff);
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.contact-hero-content p {
+    font-size: 18px;
+    color: var(--light, #fff);
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== CONTACT SECTION ===== */
+.contact-section {
+    padding: 80px 0;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+}
+
+/* ===== CONTACT FORM ===== */
+.contact-form-wrapper {
+    background: var(--card-bg, #1e1e1e);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.contact-form-wrapper h2 {
+    color: var(--light, #fff);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--light, #fff);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group .required {
+    color: #ff6b00;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--light, #fff);
+    font-size: 14px;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ff6b00;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+}
+
+.form-group select option {
+    background: var(--dark, #121212);
+    color: var(--light, #fff);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    color: var(--light, #fff);
+    border: none;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.submit-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 20px rgba(255, 107, 0, 0.3);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== CONTACT INFO ===== */
+.contact-info-wrapper h2 {
+    color: var(--light, #fff);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: var(--card-bg, #1e1e1e);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    transition: var(--transition);
+}
+
+.info-card:hover {
+    border-color: #ff6b00;
+    transform: translateX(5px);
+}
+
+.info-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: rgba(255, 107, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #ff6b00;
+}
+
+.info-content h4 {
+    color: var(--light, #fff);
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.info-content p {
+    color: var(--gray, #888);
+    font-size: 14px;
+    margin: 0;
+}
+
+.info-content a {
+    color: #ff6b00;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.info-content a:hover {
+    color: #ff8533;
+    text-decoration: underline;
+}
+
+/* ===== SOCIAL SECTION ===== */
+.social-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.social-section h4 {
+    color: var(--light, #fff);
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.social-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.social-link {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--light, #fff);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 18px;
+}
+
+.social-link.facebook { background: #3b5998; }
+.social-link.twitter { background: #1da1f2; }
+.social-link.instagram { background: linear-gradient(135deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d); }
+.social-link.youtube { background: #ff0000; }
+.social-link.tiktok { background: #010101; border: 1px solid #333; }
+
+.social-link:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== MAP SECTION ===== */
+.map-section {
+    padding: 0 0 80px 0;
+}
+
+.map-wrapper {
+    background: var(--card-bg, #1e1e1e);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.map-placeholder {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(204, 85, 0, 0.05));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray, #888);
+}
+
+.map-placeholder i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: #ff6b00;
+}
+
+.map-placeholder p {
+    font-size: 16px;
+    margin: 0;
+}
+
+.map-coordinates {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-top: 4px;
+}
+
+/* ===== FAQ SECTION ===== */
+.faq-section {
+    padding: 80px 0;
+    background: var(--card-bg, #1e1e1e);
+}
+
+.faq-grid {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    background: var(--dark, #121212);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    overflow: hidden;
+}
+
+.faq-question {
+    width: 100%;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--light, #fff);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.faq-question:hover {
+    color: #ff6b00;
+}
+
+.faq-question i {
+    transition: var(--transition);
+    font-size: 14px;
+    color: var(--gray, #888);
+}
+
+.faq-item.active .faq-question i {
+    transform: rotate(180deg);
+    color: #ff6b00;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 20px;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 200px;
+    padding: 0 20px 16px 20px;
+}
+
+.faq-answer p {
+    color: var(--gray, #888);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-slide-up.delay-1 { animation-delay: 0.2s; }
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .contact-hero-content h1 {
+        font-size: 32px;
+    }
+    
+    .contact-form-wrapper {
+        padding: 24px;
+    }
+    
+    .contact-form-wrapper h2 {
+        font-size: 24px;
+    }
+    
+    .contact-info-wrapper h2 {
+        font-size: 24px;
+    }
+    
+    .map-placeholder {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-hero {
+        padding: 60px 0 40px;
+    }
+    
+    .contact-hero-content h1 {
+        font-size: 24px;
+    }
+    
+    .contact-form-wrapper {
+        padding: 16px;
+    }
+    
+    .info-card {
+        padding: 16px;
+    }
+    
+    .social-links {
+        gap: 8px;
+    }
+    
+    .social-link {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+});
+
+// ===== CONTACT FORM =====
+function submitContactForm(event) {
+    event.preventDefault();
+    const btn = document.getElementById('contactSubmitBtn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    const formData = {
+        name: document.getElementById('contactName').value,
+        email: document.getElementById('contactEmail').value,
+        subject: document.getElementById('contactSubject').value,
+        message: document.getElementById('contactMessage').value
+    };
+    
+    fetch('/api/contact/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
+            document.getElementById('contactForm').reset();
+        } else {
+            showNotification(data.error || 'Failed to send message. Please try again.', 'error');
+        }
+    })
+    .catch(() => {
+        showNotification('Something went wrong. Please try again.', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+// ===== FAQ =====
+function toggleFaq(button) {
+    const item = button.closest('.faq-item');
+    const isActive = item.classList.contains('active');
+    
+    // Close all other FAQ items
+    document.querySelectorAll('.faq-item').forEach(el => {
+        if (el !== item) {
+            el.classList.remove('active');
+        }
+    });
+    
+    if (isActive) {
+        item.classList.remove('active');
+    } else {
+        item.classList.add('active');
+    }
+}
+
+// ===== NOTIFICATION =====
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button onclick="this.closest('.notification').remove()" class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    if (!document.querySelector('#notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--card-bg, #1e1e1e);
+                border: 1px solid rgba(255, 107, 0, 0.2);
+                border-radius: 12px;
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                z-index: 99999;
+                min-width: 300px;
+                max-width: 500px;
+                animation: fadeInUp 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+            
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: var(--light, #fff);
+            }
+            
+            .notification-content i {
+                font-size: 20px;
+            }
+            
+            .notification-success .notification-content i {
+                color: #4caf50;
+            }
+            .notification-error .notification-content i {
+                color: #f44336;
+            }
+            .notification-info .notification-content i {
+                color: #2196f3;
+            }
+            
+            .notification-close {
+                background: transparent;
+                border: none;
+                color: var(--gray, #888);
+                cursor: pointer;
+                font-size: 16px;
+                padding: 4px;
+                transition: var(--transition);
+            }
+            
+            .notification-close:hover {
+                color: var(--light, #fff);
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100px)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// ===== CSRF TOKEN =====
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

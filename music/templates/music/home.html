@@ -55,20 +55,20 @@
 
 <!-- Hero Section with News -->
 <section class="spotify-hero">
-    <div class="hero-background">
-        <div class="hero-gradient"></div>
-    </div>
+    <div class="hero-background"></div>
+    <div class="hero-gradient"></div>
     <div class="container">
         <div class="hero-content">
             <div class="hero-text">
-                <h1 class="hero-title">Uganda's Sound, Your Playlist</h1>
-                <p class="hero-subtitle">Discover the best of Ugandan music. Stream millions of songs, download your favorites, and share authentic sounds from the Pearl of Africa.</p>
+                <h1 class="hero-title animate-slide-up">Uganda's Sound, Your Playlist</h1>
+                <p class="hero-subtitle animate-slide-up delay-1">Discover the best of Ugandan music. Stream millions of songs, download your favorites, and share authentic sounds from the Pearl of Africa.</p>
                 
                 <!-- News Ticker in Hero Section -->
-                <div class="news-ticker">
+                <div class="news-ticker animate-slide-up delay-2">
                     <div class="ticker-header">
                         <i class="fas fa-newspaper"></i>
                         <span>Latest Music News</span>
+                        <span class="live-dot"></span>
                     </div>
                     <div class="ticker-content" id="newsTicker">
                         {% for news in trending_news|slice:":5" %}
@@ -84,74 +84,25 @@
                         {% endfor %}
                     </div>
                 </div>
-                
-                
             </div>
-            <div class="hero-visual">
-                <!-- Featured News in Hero -->
-                <div class="featured-news">
-                    {% for news in trending_news|slice:":2" %}
-                    <div class="featured-news-card">
-                        <div class="featured-news-image">
-                            {% if news.featured_image %}
-                            <img src="{{ news.featured_image.url }}" alt="{{ news.title }}">
-                            {% elif news.cover_image %}
-                            <img src="{{ news.cover_image.url }}" alt="{{ news.title }}">
-                            {% else %}
-                            <div class="news-placeholder">
-                                <i class="fas fa-newspaper"></i>
-                            </div>
-                            {% endif %}
-                        </div>
-                        <div class="featured-news-content">
-                            <div class="article-category">{{ news.get_category_display|default:"Music" }}</div>
-                            <h3 class="featured-news-title">{{ news.title|truncatewords:8 }}</h3>
-                            <p class="featured-news-excerpt">{{ news.excerpt|default:news.content|truncatewords:15 }}</p>
-                            <div class="article-meta">
-                                <span class="author">By {{ news.author.username }}</span>
-                                <span class="date">{{ news.published_date|date:"M d, Y" }}</span>
-                            </div>
-                            <a href="{% url 'news_detail' news.id %}" class="featured-news-link">Read More</a>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="featured-news-card">
-                        <div class="featured-news-image">
-                            <div class="news-placeholder">
-                                <i class="fas fa-music"></i>
-                            </div>
-                        </div>
-                        <div class="featured-news-content">
-                            <div class="article-category">Music</div>
-                            <h3 class="featured-news-title">Welcome to MusicCity UG</h3>
-                            <p class="featured-news-excerpt">Discover the best Ugandan music and stay updated with the latest news.</p>
-                            <div class="article-meta">
-                                <span class="author">By MusicCity Team</span>
-                                <span class="date">{{ current_date|date:"M d, Y" }}</span>
-                            </div>
-                            <a href="{% url 'news' %}" class="featured-news-link">Explore News</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+            
             </div>
         </div>
     </div>
 </section>
 
 <!-- Main Content -->
-<!-- Main Content -->
 <main class="main-content">
-    <!-- New Releases Section - UPDATED VERSION -->
+    <!-- New Releases Section -->
     <section class="content-section">
         <div class="section-header">
-            <h2 class="section-title">New Releases</h2>
+            <h2 class="section-title animate-on-scroll">New Releases</h2>
             <a href="{% url 'discover' %}" class="see-all">Show all</a>
         </div>
         <div class="cards-scroll-container">
             <div class="cards-scroll">
                 {% for song in featured_songs|slice:":15" %}
-                <div class="music-card" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})">
+                <div class="music-card animate-on-scroll" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})">
                     <div class="card-image">
                         {% if song.cover_image %}
                         <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
@@ -171,14 +122,10 @@
                     </div>
                     <div class="card-content">
                         <h3 class="card-title">{{ song.title }}</h3>
-                        <!-- UPDATED: Display artists with display_artist_name -->
                         <div class="card-artists">
-                            <!-- Primary Artist with display name -->
                             <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
                                 {{ song.display_artist }}
                             </a>
-                            
-                            <!-- Featured Artists -->
                             {% with featured_artists=song.featured_artists.all %}
                                 {% if featured_artists %}
                                     <span class="ft-text">ft.</span>
@@ -194,8 +141,6 @@
                                 {% endif %}
                             {% endwith %}
                         </div>
-                        
-                        <!-- Show original artist name if different from display name -->
                         {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
                         <div class="original-artist-note">
                             <small class="original-artist">
@@ -204,8 +149,6 @@
                             </small>
                         </div>
                         {% endif %}
-                        
-                        <!-- Song Statistics -->
                         <div class="song-stats">
                             <div class="stat-item" title="Plays">
                                 <i class="fas fa-play"></i>
@@ -235,14 +178,14 @@
     </section>
     
     <div class="container">
-        <!-- Top 10 Trending Songs - UPDATED VERSION -->
+        <!-- Top 10 Trending Songs -->
         <section class="content-section">
             <div class="section-header">
-                <h2 class="section-title">Top 10 Trending</h2>
+                <h2 class="section-title animate-on-scroll">Top 10 Trending</h2>
                 <a href="{% url 'charts' %}" class="see-all">View More</a>
             </div>
             <div class="charts-grid">
-                <div class="chart-card">
+                <div class="chart-card animate-on-scroll">
                     <div class="chart-header">
                         <h3 class="chart-title">
                             <i class="fas fa-fire"></i>
@@ -266,14 +209,10 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <!-- UPDATED: Display artists with display_artist_name -->
                                 <div class="chart-song-artist">
-                                    <!-- Primary Artist with display name -->
                                     <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
                                         {{ song.display_artist }}
                                     </a>
-                                    
-                                    <!-- Featured Artists -->
                                     {% with featured_artists=song.featured_artists.all %}
                                         {% if featured_artists %}
                                             <span class="ft-text">ft.</span>
@@ -285,8 +224,6 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
-                                
-                                <!-- Show original artist name if different from display name -->
                                 {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
                                 <div class="original-artist-note">
                                     <small class="original-artist">
@@ -295,8 +232,6 @@
                                     </small>
                                 </div>
                                 {% endif %}
-                                
-                                <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
                                         <i class="fas fa-play"></i>
@@ -326,7 +261,7 @@
                     </div>
                 </div>
 
-                <div class="chart-card">
+                <div class="chart-card animate-on-scroll delay-1">
                     <div class="chart-header">
                         <h3 class="chart-title">
                             <i class="fas fa-download"></i>
@@ -350,14 +285,10 @@
                             </div>
                             <div class="chart-song-info">
                                 <h4 class="chart-song-title">{{ song.title }}</h4>
-                                <!-- UPDATED: Display artists with display_artist_name -->
                                 <div class="chart-song-artist">
-                                    <!-- Primary Artist with display name -->
                                     <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
                                         {{ song.display_artist }}
                                     </a>
-                                    
-                                    <!-- Featured Artists -->
                                     {% with featured_artists=song.featured_artists.all %}
                                         {% if featured_artists %}
                                             <span class="ft-text">ft.</span>
@@ -369,8 +300,6 @@
                                         {% endif %}
                                     {% endwith %}
                                 </div>
-                                
-                                <!-- Show original artist name if different from display name -->
                                 {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
                                 <div class="original-artist-note">
                                     <small class="original-artist">
@@ -379,8 +308,6 @@
                                     </small>
                                 </div>
                                 {% endif %}
-                                
-                                <!-- Chart Statistics -->
                                 <div class="chart-stats">
                                     <div class="stat-item" title="Plays">
                                         <i class="fas fa-play"></i>
@@ -412,16 +339,16 @@
             </div>
         </section>
 
-        <!-- Trending News -->
+        <!-- Trending News with Auto-Scroll and Next Button -->
         <section class="content-section">
             <div class="section-header">
-                <h2 class="section-title">Trending Music News</h2>
+                <h2 class="section-title animate-on-scroll">Trending Music News</h2>
                 <a href="{% url 'news' %}" class="see-all">All news</a>
             </div>
-            <div class="news-scroll-container">
+            <div class="news-scroll-container" id="newsScrollContainer">
                 <div class="news-scroll" id="newsScroll">
-                    {% for news in trending_news|slice:":4" %}
-                    <div class="news-card">
+                    {% for news in trending_news|slice:":8" %}
+                    <div class="news-card animate-on-scroll">
                         <div class="news-image">
                             {% if news.featured_image %}
                             <img src="{{ news.featured_image.url }}" alt="{{ news.title }}">
@@ -464,60 +391,130 @@
                 <button class="scroll-btn scroll-right" onclick="scrollNewsSection(1)">
                     <i class="fas fa-chevron-right"></i>
                 </button>
+                <div class="news-pagination" id="newsPagination"></div>
             </div>
         </section>
-<!-- Popular Artists -->
-<section class="content-section">
-    <div class="section-header">
-        <h2 class="section-title">Popular Artists</h2>
-        <a href="{% url 'artists' %}" class="see-all">Show all</a>
-    </div>
-    <div class="artists-scroll-container">
-        <div class="artists-scroll">
-            {% for artist in trending_artists|slice:":12" %}
-            <a href="{% url 'artist_detail' artist.id %}" class="artist-link">
-                <div class="artist-card">
-                    <div class="artist-image">
-                        {% if artist.image %}
-                        <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
-                        {% else %}
-                        <div class="artist-placeholder">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        {% endif %}
-                        {% if artist.is_verified %}
-                        <div class="verified-badge">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="artist-info">
-                        <h3 class="artist-name">{{ artist.name }}</h3>
-                        <p class="artist-type">Artist</p>
-                    </div>
-                </div>
-            </a>
-            {% empty %}
-            <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <p>No artists available</p>
+
+        <!-- Popular Artists -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title animate-on-scroll">Popular Artists</h2>
+                <a href="{% url 'artists' %}" class="see-all">Show all</a>
             </div>
-            {% endfor %}
-        </div>
-        <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</section>
+            <div class="artists-scroll-container">
+                <div class="artists-scroll">
+                    {% for artist in trending_artists|slice:":12" %}
+                    <a href="{% url 'artist_detail' artist.id %}" class="artist-link animate-on-scroll">
+                        <div class="artist-card">
+                            <div class="artist-image">
+                                {% if artist.image %}
+                                <img src="{{ artist.image.url }}" alt="{{ artist.name }}">
+                                {% else %}
+                                <div class="artist-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                                {% if artist.is_verified %}
+                                <div class="verified-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="artist-info">
+                                <h3 class="artist-name">{{ artist.name }}</h3>
+                                <p class="artist-type">Artist</p>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No artists available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
     </div>
 </main>
 {% endblock %}
 
 {% block extra_css %}
 <style>
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(29, 185, 84, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(29, 185, 84, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(29, 185, 84, 0.2); }
+}
+
+.animate-slide-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-slide-up.delay-1 { animation-delay: 0.2s; }
+.animate-slide-up.delay-2 { animation-delay: 0.4s; }
+.animate-slide-up.delay-3 { animation-delay: 0.6s; }
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-on-scroll.delay-1 { transition-delay: 0.2s; }
+.animate-on-scroll.delay-2 { transition-delay: 0.4s; }
+
+/* ===== LIVE DOT ===== */
+.live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #ff4444;
+    border-radius: 50%;
+    margin-left: 6px;
+    animation: pulse 1s infinite;
+}
+
 /* ===== VARIABLES ===== */
 :root {
     --spotify-black: #121212;
@@ -534,23 +531,9 @@
 }
 
 /* ===== BASE STYLES ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: var(--spotify-black);
-    color: var(--spotify-white);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--spotify-black); color: var(--spotify-white); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* ===== HERO SECTION ===== */
 .spotify-hero {
@@ -559,1391 +542,626 @@ body {
     padding: 100px 0 60px;
     overflow: hidden;
 }
-
 .hero-background {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;
     opacity: 0.3;
+    animation: float 20s ease-in-out infinite;
 }
-
 .hero-gradient {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: linear-gradient(135deg, rgba(217, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
 }
-
 .hero-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
     gap: 60px;
 }
-
-.hero-text {
-    flex: 1;
-    max-width: 600px;
-}
-
+.hero-text { flex: 1; max-width: 600px; }
 .hero-title {
-    font-size: 3.5rem;
-    font-weight: 900;
-    margin-bottom: 20px;
-    line-height: 1.1;
-    color: var(--spotify-white);
+    font-size: 3.5rem; font-weight: 900; margin-bottom: 20px;
+    line-height: 1.1; color: var(--spotify-white);
 }
-
 .hero-subtitle {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 30px;
-    line-height: 1.6;
+    font-size: 1.2rem; color: rgba(255,255,255,0.9);
+    margin-bottom: 30px; line-height: 1.6;
 }
 
-/* News Ticker Styles */
 .news-ticker {
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 30px;
-    border-left: 4px solid var(--spotify-green);
+    background: rgba(0,0,0,0.4); border-radius: 8px; padding: 15px;
+    margin-bottom: 30px; border-left: 4px solid var(--spotify-green);
 }
-
 .ticker-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: var(--spotify-green);
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px; font-weight: 600; color: var(--spotify-green);
     font-size: 0.9rem;
 }
-
-.ticker-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
+.ticker-content { display: flex; flex-direction: column; gap: 8px; }
 .ticker-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
 }
+.ticker-item:last-child { border-bottom: none; }
+.news-date { font-size: 0.75rem; color: var(--spotify-light-gray); min-width: 40px; }
+.news-link { color: var(--spotify-white); text-decoration: none; font-size: 0.85rem; transition: var(--transition); }
+.news-link:hover { color: var(--spotify-green); text-decoration: underline; }
 
-.ticker-item:last-child {
-    border-bottom: none;
-}
-
-.news-date {
-    font-size: 0.75rem;
-    color: var(--spotify-light-gray);
-    min-width: 40px;
-}
-
-.news-link {
-    color: var(--spotify-white);
-    text-decoration: none;
-    font-size: 0.85rem;
-    transition: var(--transition);
-}
-
-.news-link:hover {
-    color: var(--spotify-green);
-    text-decoration: underline;
-}
-
-/* Featured News Styles */
 .featured-news {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 400px;
+    display: flex; flex-direction: column; gap: 20px; max-width: 400px;
 }
-
 .featured-news-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1); border-radius: var(--card-radius);
+    overflow: hidden; backdrop-filter: blur(10px);
     transition: var(--transition);
 }
-
 .featured-news-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
-
 .featured-news-image {
-    position: relative;
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
+    position: relative; width: 100%; height: 180px; overflow: hidden;
 }
-
-.featured-news-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.featured-news-card:hover .featured-news-image img {
-    transform: scale(1.05);
-}
-
-.featured-news-content {
-    padding: 15px;
-    position: relative;
-}
-
+.featured-news-image img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
+.featured-news-card:hover .featured-news-image img { transform: scale(1.05); }
+.featured-news-content { padding: 15px; position: relative; }
 .article-category {
-    position: absolute;
-    top: -12px;
-    left: 12px;
-    background: var(--spotify-green);
-    color: var(--spotify-black);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
+    position: absolute; top: -12px; left: 12px;
+    background: var(--spotify-green); color: var(--spotify-black);
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
     z-index: 2;
 }
-
 .featured-news-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--spotify-white);
-    line-height: 1.3;
-    margin-top: 8px;
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;
+    color: var(--spotify-white); line-height: 1.3; margin-top: 8px;
 }
-
 .featured-news-excerpt {
-    font-size: 0.85rem;
-    color: var(--spotify-light-gray);
-    margin-bottom: 12px;
-    line-height: 1.4;
+    font-size: 0.85rem; color: var(--spotify-light-gray);
+    margin-bottom: 12px; line-height: 1.4;
 }
-
-.featured-news-link {
-    color: var(--spotify-green);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
-}
-
-.featured-news-link:hover {
-    color: #1ed760;
-    text-decoration: underline;
-}
-
+.featured-news-link { color: var(--spotify-green); text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: var(--transition); }
+.featured-news-link:hover { color: #1ed760; text-decoration: underline; }
 .article-meta {
-    display: flex;
-    gap: 12px;
-    font-size: 0.75rem;
-    color: var(--spotify-light-gray);
-    margin-bottom: 12px;
+    display: flex; gap: 12px; font-size: 0.75rem;
+    color: var(--spotify-light-gray); margin-bottom: 12px;
 }
+.article-meta .author { color: var(--spotify-green); font-weight: 600; }
 
-.article-meta .author {
-    color: var(--spotify-green);
-    font-weight: 600;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.spotify-btn {
-    padding: 14px 32px;
-    border-radius: 500px;
-    font-weight: 700;
-    font-size: 1rem;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.spotify-primary {
-    background-color: var(--spotify-green);
-    color: var(--spotify-black);
-}
-
-.spotify-primary:hover {
-    background-color: #1ed760;
-    transform: scale(1.05);
-}
-
-.spotify-secondary {
-    background-color: transparent;
-    color: var(--spotify-white);
-    border: 2px solid var(--spotify-white);
-}
-
-.spotify-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: scale(1.05);
-}
-
-/* ===== ARTIST LINKS STYLING ===== */
-
-/* Primary artist with display name - Orange */
+/* ===== ARTIST LINKS ===== */
 .artist-link.primary-artist {
-    color: var(--uganda-yellow);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
+    color: var(--uganda-yellow); text-decoration: none; font-weight: 600;
+    font-size: 0.85rem; transition: var(--transition);
 }
-
-.artist-link.primary-artist:hover {
-    color: #ffdf4d; /* Lighter orange/yellow on hover */
-    text-decoration: underline;
-}
-
-/* Featured artists - Green */
+.artist-link.primary-artist:hover { color: #ffdf4d; text-decoration: underline; }
 .artist-link.featured-artist {
-    color: var(--spotify-green);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: var(--transition);
+    color: var(--spotify-green); text-decoration: none; font-weight: 600;
+    font-size: 0.85rem; transition: var(--transition);
 }
-
-.artist-link.featured-artist:hover {
-    color: #1ed760; /* Lighter green on hover */
-    text-decoration: underline;
-}
-
-/* "ft." text styling */
-.ft-text {
-    color: var(--spotify-light-gray);
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin: 0 4px;
-}
-
-/* Featured indicator (icon + number) */
+.artist-link.featured-artist:hover { color: #1ed760; text-decoration: underline; }
+.ft-text { color: var(--spotify-light-gray); font-size: 0.85rem; font-weight: 500; margin: 0 4px; }
 .featured-indicator {
-    margin-left: 6px;
-    color: var(--spotify-light-gray);
-    font-size: 0.75rem;
-    background: rgba(255, 209, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+    margin-left: 6px; color: var(--spotify-light-gray); font-size: 0.75rem;
+    background: rgba(255,209,0,0.1); padding: 2px 6px; border-radius: 10px;
+    display: inline-flex; align-items: center; gap: 3px;
 }
-
-.featured-indicator i {
-    font-size: 0.7rem;
-}
-
-/* Original artist note */
-.original-artist-note {
-    margin-top: 4px;
-}
-
+.original-artist-note { margin-top: 4px; }
 .original-artist {
-    color: var(--spotify-text-secondary);
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    opacity: 0.7;
-}
-
-.original-artist i {
-    font-size: 0.7rem;
-}
-
-/* Chart song artist links */
-.chart-song-artist .artist-link.primary-artist {
-    font-size: 0.75rem;
-}
-
-.chart-song-artist .artist-link.featured-artist {
-    font-size: 0.75rem;
-}
-
-/* Compact artist display for charts */
-.chart-song-artist .ft-text {
-    font-size: 0.75rem;
-}
-
-.chart-song-artist .original-artist {
-    font-size: 0.7rem;
+    color: var(--spotify-text-secondary); font-size: 0.75rem;
+    display: flex; align-items: center; gap: 4px; opacity: 0.7;
 }
 
 /* ===== MAIN CONTENT ===== */
-.main-content {
-    background: var(--spotify-black);
-    padding: 40px 0;
-}
-
-.content-section {
-    margin-bottom: 50px;
-}
-
+.main-content { background: var(--spotify-black); padding: 40px 0; }
+.content-section { margin-bottom: 50px; }
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 25px;
 }
-
 .section-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--spotify-white);
+    font-size: 1.6rem; font-weight: 700; color: var(--spotify-white);
 }
-
 .see-all {
-    color: var(--spotify-light-gray);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: var(--transition);
+    color: var(--spotify-light-gray); text-decoration: none;
+    font-weight: 600; font-size: 0.9rem; transition: var(--transition);
 }
+.see-all:hover { color: var(--spotify-white); text-decoration: underline; }
 
-.see-all:hover {
-    color: var(--spotify-white);
-    text-decoration: underline;
-}
-
-/* ===== CHARTS GRID ===== */
+/* ===== CHARTS ===== */
 .charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; margin-bottom: 30px;
 }
-
 .chart-card {
-    background: var(--spotify-gray);
-    border-radius: var(--card-radius);
-    padding: 20px;
-    transition: var(--transition);
+    background: var(--spotify-gray); border-radius: var(--card-radius);
+    padding: 20px; transition: var(--transition);
 }
-
-.chart-card:hover {
-    background: #3e3e3e;
-}
-
+.chart-card:hover { background: #3e3e3e; transform: translateY(-2px); }
 .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 15px;
 }
-
 .chart-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--spotify-white);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 1.1rem; font-weight: 700; color: var(--spotify-white);
+    display: flex; align-items: center; gap: 8px;
 }
-
-.chart-songs {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
+.chart-songs { display: flex; flex-direction: column; gap: 10px; }
 .chart-song-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 6px;
-    transition: var(--transition);
-    cursor: pointer;
+    display: flex; align-items: center; padding: 10px;
+    border-radius: 6px; transition: var(--transition); cursor: pointer;
     gap: 12px;
 }
-
-.chart-song-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.chart-song-item.playing {
-    background: rgba(29, 185, 84, 0.1);
-    border-left: 3px solid var(--spotify-green);
-}
-
+.chart-song-item:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
 .chart-rank {
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--spotify-light-gray);
+    width: 22px; height: 22px; border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: var(--spotify-light-gray);
 }
-
 .chart-rank.top-three {
     background: linear-gradient(135deg, var(--uganda-yellow), var(--uganda-red));
     color: var(--spotify-black);
 }
-
 .chart-song-image {
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-    overflow: hidden;
-    flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 4px;
+    overflow: hidden; flex-shrink: 0;
 }
-
-.chart-song-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
+.chart-song-image img { width: 100%; height: 100%; object-fit: cover; }
 .default-cover.small {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--spotify-white);
-    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--spotify-white); font-size: 1rem;
 }
-
-.chart-song-info {
-    flex: 1;
-    min-width: 0;
-}
-
+.chart-song-info { flex: 1; min-width: 0; }
 .chart-song-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--spotify-white);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.85rem; font-weight: 600; color: var(--spotify-white);
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
 .chart-song-artist {
-    font-size: 0.75rem;
-    color: var(--spotify-light-gray);
-    margin: 2px 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.75rem; color: var(--spotify-light-gray);
+    margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
-/* Chart Statistics */
 .chart-stats {
-    display: flex;
-    gap: 10px;
-    margin-top: 4px;
+    display: flex; gap: 10px; margin-top: 4px;
 }
-
 .chart-stats .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 0.7rem;
-    color: var(--spotify-light-gray);
+    display: flex; align-items: center; gap: 3px;
+    font-size: 0.7rem; color: var(--spotify-light-gray);
 }
-
-.chart-stats .stat-item i {
-    font-size: 0.6rem;
-}
-
 .chart-song-actions {
-    display: flex;
-    gap: 5px;
-    opacity: 0;
+    display: flex; gap: 5px; opacity: 0;
     transition: var(--transition);
 }
-
-.chart-song-item:hover .chart-song-actions {
-    opacity: 1;
-}
-
+.chart-song-item:hover .chart-song-actions { opacity: 1; }
 .play-btn-small, .download-btn-small {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: transparent; border: none;
     color: var(--spotify-light-gray);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition); font-size: 0.8rem;
 }
-
 .play-btn-small:hover, .download-btn-small:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--spotify-white);
-    transform: scale(1.1);
+    background: rgba(255,255,255,0.1);
+    color: var(--spotify-white); transform: scale(1.1);
 }
 
 /* ===== SCROLLING SECTIONS ===== */
 .cards-scroll-container,
 .artists-scroll-container,
 .news-scroll-container {
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
 }
-
 .cards-scroll,
 .artists-scroll,
 .news-scroll {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 10px 0 20px;
-    scroll-behavior: smooth;
+    display: flex; gap: 20px; overflow-x: auto; overflow-y: hidden;
+    padding: 10px 0 20px; scroll-behavior: smooth;
     scrollbar-width: none;
 }
-
 .cards-scroll::-webkit-scrollbar,
 .artists-scroll::-webkit-scrollbar,
-.news-scroll::-webkit-scrollbar {
-    display: none;
-}
+.news-scroll::-webkit-scrollbar { display: none; }
 
 .scroll-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    border: none;
-    color: var(--spotify-white);
-    cursor: pointer;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    opacity: 0;
-    font-size: 0.9rem;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(0,0,0,0.7); border: none;
+    color: var(--spotify-white); cursor: pointer; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition); opacity: 0; font-size: 0.9rem;
 }
-
 .scroll-left { left: 10px; }
 .scroll-right { right: 10px; }
-
 .cards-scroll-container:hover .scroll-btn,
 .artists-scroll-container:hover .scroll-btn,
-.news-scroll-container:hover .scroll-btn {
-    opacity: 1;
-}
-
+.news-scroll-container:hover .scroll-btn { opacity: 1; }
 .scroll-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0,0,0,0.9);
     transform: translateY(-50%) scale(1.1);
 }
 
 /* ===== MUSIC CARDS ===== */
 .music-card {
-    background: var(--spotify-gray);
-    border-radius: var(--card-radius);
-    padding: 15px;
-    transition: var(--transition);
-    cursor: pointer;
-    position: relative;
-    flex: 0 0 auto;
-    width: 180px;
+    background: var(--spotify-gray); border-radius: var(--card-radius);
+    padding: 15px; transition: var(--transition); cursor: pointer;
+    position: relative; flex: 0 0 auto; width: 180px;
 }
-
 .music-card:hover {
-    background: #3e3e3e;
-    transform: translateY(-3px);
+    background: #3e3e3e; transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
-
-.music-card.playing {
-    background: rgba(29, 185, 84, 0.1);
-    border: 1px solid var(--spotify-green);
-}
-
 .card-image {
-    position: relative;
-    width: 100%;
-    margin-bottom: 12px;
-    border-radius: 4px;
-    overflow: hidden;
-    aspect-ratio: 1;
+    position: relative; width: 100%; margin-bottom: 12px;
+    border-radius: 4px; overflow: hidden; aspect-ratio: 1;
 }
-
-.card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
+.card-image img { width: 100%; height: 100%; object-fit: cover; }
 .default-cover {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--spotify-white);
-    font-size: 2rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--spotify-white); font-size: 2rem;
 }
-
 .card-actions {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: var(--transition);
-    display: flex;
-    gap: 6px;
+    position: absolute; bottom: 8px; right: 8px;
+    opacity: 0; transform: translateY(8px);
+    transition: var(--transition); display: flex; gap: 6px;
 }
-
-.music-card:hover .card-actions {
-    opacity: 1;
-    transform: translateY(0);
-}
-
+.music-card:hover .card-actions { opacity: 1; transform: translateY(0); }
 .play-btn-card, .download-btn-card {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.9rem;
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition); font-size: 0.9rem;
 }
-
 .play-btn-card {
-    background: var(--spotify-green);
-    color: var(--spotify-black);
+    background: var(--spotify-green); color: var(--spotify-black);
 }
-
-.play-btn-card:hover {
-    background: #1ed760;
-    transform: scale(1.1);
-}
-
+.play-btn-card:hover { background: #1ed760; transform: scale(1.1); }
 .download-btn-card {
-    background: var(--uganda-yellow);
-    color: var(--spotify-black);
+    background: var(--uganda-yellow); color: var(--spotify-black);
 }
-
-.download-btn-card:hover {
-    background: #ffdf4d;
-    transform: scale(1.1);
-}
-
-.card-content {
-    min-height: 70px;
-}
-
+.download-btn-card:hover { background: #ffdf4d; transform: scale(1.1); }
+.card-content { min-height: 70px; }
 .card-title {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--spotify-white);
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 600; margin-bottom: 4px; color: var(--spotify-white);
+    font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
-.card-subtitle {
-    color: var(--spotify-light-gray);
-    font-size: 0.8rem;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Song Statistics */
 .song-stats {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
+    display: flex; gap: 10px; margin-top: 8px;
 }
-
 .song-stats .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 0.75rem;
-    color: var(--spotify-light-gray);
-}
-
-.song-stats .stat-item i {
-    font-size: 0.7rem;
-    color: var(--spotify-light-gray);
-}
-
-.song-stats .stat-item .plays,
-.song-stats .stat-item .downloads {
-    font-size: 0.7rem;
-    font-weight: 500;
+    display: flex; align-items: center; gap: 3px;
+    font-size: 0.75rem; color: var(--spotify-light-gray);
 }
 
 /* ===== ARTIST CARDS ===== */
 .artist-card {
-    background: var(--spotify-gray);
-    border-radius: var(--card-radius);
-    padding: 15px;
-    transition: var(--transition);
-    cursor: pointer;
-    text-align: center;
-    flex: 0 0 auto;
-    width: 140px;
+    background: var(--spotify-gray); border-radius: var(--card-radius);
+    padding: 15px; transition: var(--transition); cursor: pointer;
+    text-align: center; flex: 0 0 auto; width: 140px;
 }
-
 .artist-card:hover {
-    background: #3e3e3e;
-    transform: translateY(-3px);
+    background: #3e3e3e; transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
-
 .artist-image {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 12px;
-    border-radius: 50%;
-    overflow: hidden;
+    position: relative; width: 100px; height: 100px;
+    margin: 0 auto 12px; border-radius: 50%; overflow: hidden;
 }
-
-.artist-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
+.artist-image img { width: 100%; height: 100%; object-fit: cover; }
 .artist-placeholder {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--spotify-white);
-    font-size: 2rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--spotify-white); font-size: 2rem;
 }
-
 .verified-badge {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: var(--spotify-green);
-    color: var(--spotify-black);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; bottom: 5px; right: 5px;
+    background: var(--spotify-green); color: var(--spotify-black);
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     font-size: 0.6rem;
 }
-
-.artist-info {
-    min-height: 50px;
-}
-
 .artist-name {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--spotify-white);
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 600; margin-bottom: 4px; color: var(--spotify-white);
+    font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-
-.artist-type {
-    color: var(--spotify-light-gray);
-    font-size: 0.8rem;
-    margin: 0;
-}
+.artist-type { color: var(--spotify-light-gray); font-size: 0.8rem; margin: 0; }
 
 /* ===== NEWS CARDS ===== */
 .news-card {
-    background: var(--spotify-gray);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    transition: var(--transition);
-    flex: 0 0 auto;
-    width: 280px;
+    background: var(--spotify-gray); border-radius: var(--card-radius);
+    overflow: hidden; transition: var(--transition);
+    flex: 0 0 auto; width: 280px;
 }
-
 .news-card:hover {
-    background: #3e3e3e;
-    transform: translateY(-3px);
+    background: #3e3e3e; transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
-
 .news-image {
-    position: relative;
-    width: 100%;
-    height: 160px;
-    overflow: hidden;
+    position: relative; width: 100%; height: 160px; overflow: hidden;
 }
-
-.news-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.news-card:hover .news-image img {
-    transform: scale(1.05);
-}
-
+.news-image img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); }
+.news-card:hover .news-image img { transform: scale(1.05); }
 .news-placeholder {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--spotify-white);
-    font-size: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--spotify-white); font-size: 2.5rem;
 }
-
 .news-date {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0, 0, 0, 0.7);
-    color: var(--spotify-white);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 500;
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.7); color: var(--spotify-white);
+    padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 500;
 }
-
-.news-content {
-    padding: 15px;
-    position: relative;
-}
-
-.news-meta {
-    margin-bottom: 8px;
-}
-
+.news-content { padding: 15px; position: relative; }
+.news-meta { margin-bottom: 8px; }
 .news-category {
-    background: var(--spotify-green);
-    color: var(--spotify-black);
-    padding: 3px 6px;
-    border-radius: 10px;
-    font-size: 0.7rem;
-    font-weight: 700;
+    background: var(--spotify-green); color: var(--spotify-black);
+    padding: 3px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 700;
 }
-
 .news-title {
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--spotify-white);
-    font-size: 1rem;
-    line-height: 1.3;
+    font-weight: 600; margin-bottom: 8px; color: var(--spotify-white);
+    font-size: 1rem; line-height: 1.3;
 }
-
 .news-excerpt {
-    color: var(--spotify-light-gray);
-    font-size: 0.8rem;
-    line-height: 1.4;
-    margin-bottom: 12px;
+    color: var(--spotify-light-gray); font-size: 0.8rem;
+    line-height: 1.4; margin-bottom: 12px;
 }
-
 .news-read-more {
-    color: var(--spotify-green);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.8rem;
+    color: var(--spotify-green); text-decoration: none;
+    font-weight: 600; font-size: 0.8rem; transition: var(--transition);
+}
+.news-read-more:hover { color: #1ed760; text-decoration: underline; }
+
+/* ===== NEWS PAGINATION ===== */
+.news-pagination {
+    display: flex; justify-content: center; gap: 8px;
+    margin-top: 15px;
+}
+.news-pagination .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--spotify-light-gray); cursor: pointer;
     transition: var(--transition);
 }
-
-.news-read-more:hover {
-    color: #1ed760;
-    text-decoration: underline;
-}
+.news-pagination .dot.active { background: var(--spotify-green); transform: scale(1.2); }
 
 /* ===== MUSIC PLAYER ===== */
 .music-player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--spotify-gray);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1000;
-    padding: 8px 0;
-    transition: var(--transition);
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--spotify-gray); border-top: 1px solid rgba(255,255,255,0.1);
+    z-index: 1000; padding: 8px 0; transition: var(--transition);
 }
-
-.music-player.hidden {
-    transform: translateY(100%);
-    opacity: 0;
-}
-
+.music-player.hidden { transform: translateY(100%); opacity: 0; }
 .player-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 15px;
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1200px; margin: 0 auto; padding: 0 15px;
 }
-
 .player-track-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
+    display: flex; align-items: center; gap: 12px; flex: 1;
 }
-
-.track-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-}
-
-.track-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.track-details h4 {
-    color: var(--spotify-white);
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.track-details p {
-    color: var(--spotify-light-gray);
-    margin: 2px 0 0;
-    font-size: 0.75rem;
-}
-
+.track-image { width: 48px; height: 48px; border-radius: 4px; overflow: hidden; position: relative; }
+.track-image img { width: 100%; height: 100%; object-fit: cover; }
+.track-details h4 { color: var(--spotify-white); margin: 0; font-size: 0.85rem; font-weight: 600; }
+.track-details p { color: var(--spotify-light-gray); margin: 2px 0 0; font-size: 0.75rem; }
 .player-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    justify-content: center;
+    display: flex; align-items: center; gap: 12px;
+    flex: 1; justify-content: center;
 }
-
 .control-btn {
-    background: transparent;
-    border: none;
-    color: var(--spotify-light-gray);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 6px;
-    border-radius: 50%;
-    font-size: 0.9rem;
+    background: transparent; border: none;
+    color: var(--spotify-light-gray); cursor: pointer;
+    transition: var(--transition); padding: 6px;
+    border-radius: 50%; font-size: 0.9rem;
 }
-
-.control-btn:hover {
-    color: var(--spotify-white);
-    transform: scale(1.1);
-}
-
+.control-btn:hover { color: var(--spotify-white); transform: scale(1.1); }
 .play-pause {
-    background: var(--spotify-white);
-    color: var(--spotify-black);
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--spotify-white); color: var(--spotify-black);
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
 }
-
-.play-pause:hover {
-    background: var(--spotify-green);
-    color: var(--spotify-white);
-    transform: scale(1.1);
-}
-
+.play-pause:hover { background: var(--spotify-green); color: var(--spotify-white); transform: scale(1.1); }
 .player-progress {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 2;
-    max-width: 350px;
+    display: flex; align-items: center; gap: 8px;
+    flex: 2; max-width: 350px;
 }
-
-.time-current, .time-total {
-    color: var(--spotify-light-gray);
-    font-size: 0.75rem;
-    min-width: 32px;
-}
-
+.time-current, .time-total { color: var(--spotify-light-gray); font-size: 0.75rem; min-width: 32px; }
 .progress-bar {
-    flex: 1;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
+    flex: 1; height: 3px; background: rgba(255,255,255,0.3);
+    border-radius: 2px; cursor: pointer; position: relative;
 }
-
 .progress {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: var(--spotify-green);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.1s ease;
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--spotify-green); border-radius: 2px;
+    width: 0%; transition: width 0.1s ease;
 }
-
 .player-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    justify-content: flex-end;
+    display: flex; align-items: center; gap: 8px;
+    flex: 1; justify-content: flex-end;
 }
-
 .action-btn {
-    background: transparent;
-    border: none;
-    color: var(--spotify-light-gray);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 6px;
-    border-radius: 50%;
-    font-size: 0.9rem;
+    background: transparent; border: none;
+    color: var(--spotify-light-gray); cursor: pointer;
+    transition: var(--transition); padding: 6px;
+    border-radius: 50%; font-size: 0.9rem;
 }
-
-.action-btn:hover {
-    color: var(--spotify-white);
-    transform: scale(1.1);
-}
-
+.action-btn:hover { color: var(--spotify-white); transform: scale(1.1); }
 #volumeSlider {
-    width: 70px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    outline: none;
-    -webkit-appearance: none;
+    width: 70px; height: 3px; background: rgba(255,255,255,0.3);
+    border-radius: 2px; outline: none; -webkit-appearance: none;
 }
-
 #volumeSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--spotify-white);
-    cursor: pointer;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--spotify-white); cursor: pointer;
 }
 
-/* ===== EMPTY STATES ===== */
-.empty-state, .empty-chart, .empty-news {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--spotify-light-gray);
-}
-
-.empty-state i, .empty-chart i, .empty-news i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    opacity: 0.7;
-}
-
-.empty-state p, .empty-chart p, .empty-news p {
-    margin: 0;
-    font-size: 1rem;
-}
-
-/* ===== LOADING STATES ===== */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    border-top: 2px solid var(--spotify-green);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
-    .hero-title {
-        font-size: 2.8rem;
-    }
-    
-    .hero-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 40px;
-    }
-    
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .music-card {
-        width: 170px;
-    }
-    
-    .artist-card {
-        width: 130px;
-    }
-    
-    .news-card {
-        width: 260px;
-    }
-    
-    .featured-news {
-        max-width: 100%;
-        flex-direction: row;
-        justify-content: center;
-    }
-    
-    .featured-news-card {
-        flex: 1;
-        max-width: 300px;
-    }
+    .hero-title { font-size: 2.8rem; }
+    .hero-content { flex-direction: column; text-align: center; gap: 40px; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .featured-news { max-width: 100%; flex-direction: row; justify-content: center; }
+    .featured-news-card { flex: 1; max-width: 300px; }
 }
-
 @media (max-width: 768px) {
-    .spotify-hero {
-        padding: 80px 0 40px;
-    }
-    
-    .hero-title {
-        font-size: 2.2rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 1rem;
-    }
-    
-    .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .spotify-btn {
-        width: 100%;
-        max-width: 250px;
-    }
-    
-    .section-title {
-        font-size: 1.4rem;
-    }
-    
-    .music-card {
-        width: 160px;
-    }
-    
-    .artist-card {
-        width: 120px;
-    }
-    
-    .news-card {
-        width: 240px;
-    }
-    
-    .player-container {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .player-progress {
-        order: 3;
-        flex: 1 0 100%;
-        max-width: none;
-        margin-top: 5px;
-    }
-    
-    .featured-news {
-        flex-direction: column;
-    }
-    
-    .featured-news-card {
-        max-width: 100%;
-    }
-    
-    /* Adjust stats for mobile */
-    .song-stats {
-        gap: 8px;
-    }
-    
-    .song-stats .stat-item {
-        font-size: 0.7rem;
-    }
-    
-    .song-stats .stat-item i {
-        font-size: 0.65rem;
-    }
-    
-    /* Adjust artist links for mobile */
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.8rem;
-    }
-    
-    .ft-text {
-        font-size: 0.8rem;
-    }
-    
-    .original-artist {
-        font-size: 0.7rem;
-    }
+    .spotify-hero { padding: 80px 0 40px; }
+    .hero-title { font-size: 2.2rem; }
+    .hero-subtitle { font-size: 1rem; }
+    .section-title { font-size: 1.4rem; }
+    .music-card { width: 160px; }
+    .artist-card { width: 120px; }
+    .news-card { width: 240px; }
+    .player-container { flex-wrap: wrap; gap: 10px; }
+    .player-progress { order: 3; flex: 1 0 100%; max-width: none; margin-top: 5px; }
+    .featured-news { flex-direction: column; }
+    .featured-news-card { max-width: 100%; }
 }
-
 @media (max-width: 480px) {
-    .hero-title {
-        font-size: 1.8rem;
-    }
-    
-    .music-card {
-        width: 150px;
-    }
-    
-    .artist-card {
-        width: 110px;
-    }
-    
-    .news-card {
-        width: 220px;
-    }
-    
-    .scroll-btn {
-        display: none;
-    }
-    
-    .chart-song-actions {
-        opacity: 1;
-    }
-    
-    .player-track-info {
-        flex: 0 0 auto;
-    }
-    
-    .player-controls {
-        flex: 1;
-    }
-    
-    .player-actions {
-        display: none;
-    }
-    
-    /* Mobile-specific stats layout */
-    .song-stats-below {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-top: 6px;
-    }
-    
-    .song-stats-below .stat-item {
-        justify-content: center;
-    }
-    
-    /* Adjust artist links for very small screens */
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.75rem;
-    }
-    
-    .ft-text {
-        font-size: 0.75rem;
-    }
-    
-    .featured-indicator {
-        display: none; /* Hide on very small screens */
-    }
-    
-    .original-artist {
-        font-size: 0.65rem;
-    }
+    .hero-title { font-size: 1.8rem; }
+    .music-card { width: 150px; }
+    .artist-card { width: 110px; }
+    .news-card { width: 220px; }
+    .scroll-btn { display: none; }
+    .chart-song-actions { opacity: 1; }
+    .player-actions { display: none; }
 }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Global variable to track if play has been counted for current song
-window.playCountedForSong = {};
-window.currentSongId = null;
-
-// Initialize the home page with your existing base.html player
+// ========== ANIMATIONS ON SCROLL ==========
 document.addEventListener('DOMContentLoaded', function() {
-    initializeHomePlaylist();
-    initializeEventListeners();
-});
-
-// Set up event listeners for play and download buttons
-function initializeEventListeners() {
-    // Listen for play events from base player
-    document.addEventListener('songPlayed', function(e) {
-        if (e.detail && e.detail.songId) {
-            // Set current song ID
-            window.currentSongId = e.detail.songId;
-            
-            // Update the UI play count for this specific song card
-            updateSongPlayCount(e.detail.songId);
-        }
+    // Intersection Observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
     });
     
-    // Listen for download events from base player
-    document.addEventListener('songDownloaded', function(e) {
-        if (e.detail && e.detail.songId) {
-            updateSongDownloadCount(e.detail.songId);
-        }
+    // Initialize home playlist and news ticker
+    initializeHomePlaylist();
+    initializeNewsTicker();
+    initializeNewsPagination();
+    initializeAutoScrollNews();
+});
+
+// ========== NEWS TICKER ROTATION ==========
+function initializeNewsTicker() {
+    const ticker = document.getElementById('newsTicker');
+    if (!ticker) return;
+    
+    const items = ticker.querySelectorAll('.ticker-item');
+    if (items.length <= 1) return;
+    
+    let currentIndex = 0;
+    
+    // Hide all items except first
+    items.forEach((item, index) => {
+        if (index > 0) item.style.display = 'none';
+    });
+    
+    setInterval(() => {
+        items.forEach(item => item.style.display = 'none');
+        currentIndex = (currentIndex + 1) % items.length;
+        items[currentIndex].style.display = 'flex';
+    }, 5000);
+}
+
+// ========== NEWS AUTO-SCROLL & PAGINATION ==========
+function initializeNewsPagination() {
+    const container = document.getElementById('newsScrollContainer');
+    const scroll = document.getElementById('newsScroll');
+    if (!container || !scroll) return;
+    
+    const cards = scroll.querySelectorAll('.news-card');
+    if (cards.length === 0) return;
+    
+    // Create pagination dots
+    const pagination = document.getElementById('newsPagination');
+    if (!pagination) return;
+    
+    pagination.innerHTML = '';
+    const totalDots = Math.min(cards.length, 5);
+    
+    for (let i = 0; i < totalDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dot.addEventListener('click', () => {
+            const cardWidth = cards[0].offsetWidth + 20;
+            scroll.scrollTo({ left: i * cardWidth, behavior: 'smooth' });
+            updatePagination(i);
+        });
+        pagination.appendChild(dot);
+    }
+    
+    // Update pagination on scroll
+    scroll.addEventListener('scroll', () => {
+        const cardWidth = cards[0].offsetWidth + 20;
+        const index = Math.round(scroll.scrollLeft / cardWidth);
+        updatePagination(index);
     });
 }
 
-// Initialize playlist with home page songs for base.html player
+function updatePagination(activeIndex) {
+    const dots = document.querySelectorAll('.news-pagination .dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+    });
+}
+
+// ========== AUTO-SCROLL NEWS ==========
+function initializeAutoScrollNews() {
+    const container = document.getElementById('newsScrollContainer');
+    const scroll = document.getElementById('newsScroll');
+    if (!container || !scroll) return;
+    
+    const cards = scroll.querySelectorAll('.news-card');
+    if (cards.length <= 1) return;
+    
+    let currentIndex = 0;
+    let autoScrollInterval;
+    
+    function startAutoScroll() {
+        autoScrollInterval = setInterval(() => {
+            const cardWidth = cards[0].offsetWidth + 20;
+            const maxScroll = scroll.scrollWidth - scroll.clientWidth;
+            
+            if (scroll.scrollLeft >= maxScroll - 10) {
+                // Scroll back to start smoothly
+                scroll.scrollTo({ left: 0, behavior: 'smooth' });
+                currentIndex = 0;
+                updatePagination(0);
+            } else {
+                currentIndex = Math.min(currentIndex + 1, cards.length - 1);
+                const scrollTo = Math.min(currentIndex * cardWidth, maxScroll);
+                scroll.scrollTo({ left: scrollTo, behavior: 'smooth' });
+                updatePagination(currentIndex);
+            }
+        }, 4000);
+    }
+    
+    function stopAutoScroll() {
+        clearInterval(autoScrollInterval);
+    }
+    
+    // Start auto-scroll
+    startAutoScroll();
+    
+    // Pause on hover
+    container.addEventListener('mouseenter', stopAutoScroll);
+    container.addEventListener('mouseleave', startAutoScroll);
+}
+
+// ========== HOME PLAYLIST ==========
 function initializeHomePlaylist() {
     const homeSongs = [
         {% for song in featured_songs %}
@@ -1962,66 +1180,67 @@ function initializeHomePlaylist() {
             genre: "{{ song.genre.name|escapejs }}",
             featured_artists: [
                 {% for artist in song.featured_artists.all %}
-                {
-                    id: {{ artist.id }},
-                    name: "{{ artist.name|escapejs }}"
-                },
+                { id: {{ artist.id }}, name: "{{ artist.name|escapejs }}" },
                 {% endfor %}
             ]
         },
         {% endfor %}
     ];
     
-    // Store the home playlist globally for the base player to use
     window.homePlaylist = homeSongs;
 }
 
-// Start listening using base.html player
-function startListening() {
-    if (window.homePlaylist && window.homePlaylist.length > 0) {
-        // Use the base.html player function
-        if (typeof window.playSong === 'function') {
-            window.playSong(window.homePlaylist[0], window.homePlaylist, 0);
-        }
-    }
+// ========== SCROLL FUNCTIONS ==========
+function scrollSection(button, direction) {
+    const container = button.parentElement;
+    const scrollContainer = container.querySelector('.cards-scroll, .artists-scroll');
+    if (!scrollContainer) return;
+    const scrollAmount = 300;
+    scrollContainer.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
 }
 
-// Play song from card using base.html player
+function scrollNewsSection(direction) {
+    const container = document.querySelector('.news-scroll-container');
+    const scrollContainer = container.querySelector('.news-scroll');
+    if (!scrollContainer) return;
+    const scrollAmount = 300;
+    scrollContainer.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+// ========== PLAY FUNCTIONS ==========
+window.playCountedForSong = {};
+window.currentSongId = null;
+
 function playSongFromCard(songId) {
-    // Get the song data from our home playlist
     const song = window.homePlaylist?.find(s => s.id === songId);
-    
     if (song && typeof window.playSong === 'function') {
-        // Set current song ID
         window.currentSongId = songId;
-        
-        // Reset play tracking for this song
         window.playCountedForSong[songId] = false;
-        
-        // Use the base.html player function
         window.playSong(song, window.homePlaylist, window.homePlaylist.findIndex(s => s.id === songId));
-        
-        // Update the UI play count immediately
         updateSongPlayCount(songId);
     } else {
         console.error('Song not found or player not available');
     }
 }
 
-// ========== Track song play in the database ==========
+function updateSongPlayCount(songId) {
+    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+    songCards.forEach(card => {
+        const currentPlays = parseInt(card.getAttribute('data-plays') || '0');
+        const newPlays = currentPlays + 1;
+        card.setAttribute('data-plays', newPlays);
+        const playElements = card.querySelectorAll('.plays');
+        playElements.forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newPlays);
+        });
+    });
+    trackSongPlay(songId);
+}
+
 function trackSongPlay(songId) {
-    console.log(`🎵 Tracking play for song ID: ${songId}`);
-    
-    // Don't track if already counted
-    if (window.playCountedForSong[songId]) {
-        console.log(`⏭️ Play already counted for song ${songId}, skipping`);
-        return;
-    }
-    
-    // Mark as counted immediately to prevent duplicates
+    if (window.playCountedForSong[songId]) return;
     window.playCountedForSong[songId] = true;
     
-    // Use the track-play endpoint (POST)
     fetch(`/api/track-play/${songId}/`, {
         method: 'POST',
         headers: {
@@ -2030,42 +1249,15 @@ function trackSongPlay(songId) {
         },
         body: JSON.stringify({})
     })
-    .then(response => {
-        if (response.status === 403) {
-            // Premium content restriction
-            return response.json().then(data => {
-                console.log('Premium content restriction:', data);
-                if (data.error) {
-                    showNotification(data.error, 'error');
-                }
-                // Reset since play was blocked
-                window.playCountedForSong[songId] = false;
-                return null;
-            });
-        }
-        
-        if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        if (data) {
-            console.log('Play tracked successfully:', data);
-            
-            // Update the UI with the new play count
-            if (data.success && data.new_plays !== undefined) {
-                updatePlayCountInUI(songId, data.new_plays);
-            }
+        if (data.success && data.new_plays !== undefined) {
+            updatePlayCountInUI(songId, data.new_plays);
         }
     })
-    .catch(error => {
-        console.error('Error tracking play:', error);
-        // Reset since tracking failed
+    .catch(() => {
         window.playCountedForSong[songId] = false;
-        
-        // Try fallback endpoint
+        // Try fallback
         fetch(`/api/track-anonymous-play/${songId}/`, {
             method: 'POST',
             headers: {
@@ -2080,33 +1272,19 @@ function trackSongPlay(songId) {
                 updatePlayCountInUI(songId, data.plays);
             }
         })
-        .catch(fallbackError => {
-            console.error('Fallback also failed:', fallbackError);
-        });
+        .catch(() => {});
     });
 }
 
-// ========== Update play count in the UI ==========
 function updatePlayCountInUI(songId, newPlayCount) {
-    console.log(`📈 Updating UI for song ${songId} to ${newPlayCount} plays`);
-    
-    // Find all elements with this song ID and update their play count
     const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    
     songCards.forEach(card => {
-        // Update plays data attribute
         card.setAttribute('data-plays', newPlayCount);
-        
-        // Find play count elements inside this card
         const playElements = card.querySelectorAll('.plays');
-        playElements.forEach(element => {
-            // Format number with commas
-            const formattedPlays = new Intl.NumberFormat().format(newPlayCount);
-            element.textContent = formattedPlays;
+        playElements.forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newPlayCount);
         });
     });
-    
-    // Also update the global home playlist data
     if (window.homePlaylist) {
         const songIndex = window.homePlaylist.findIndex(s => s.id === songId);
         if (songIndex !== -1) {
@@ -2115,135 +1293,46 @@ function updatePlayCountInUI(songId, newPlayCount) {
     }
 }
 
-// ========== Update a specific song's play count ==========
-function updateSongPlayCount(songId) {
-    // First, increment the local count immediately for better UX
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    
-    songCards.forEach(card => {
-        const currentPlays = parseInt(card.getAttribute('data-plays') || '0');
-        const newPlays = currentPlays + 1;
-        
-        // Update data attribute
-        card.setAttribute('data-plays', newPlays);
-        
-        // Update UI immediately
-        const playElements = card.querySelectorAll('.plays');
-        playElements.forEach(element => {
-            const formattedPlays = new Intl.NumberFormat().format(newPlays);
-            element.textContent = formattedPlays;
-        });
-    });
-    
-    // Then track in database
-    trackSongPlay(songId);
-}
-
-// ========== Update a specific song's download count ==========
-function updateSongDownloadCount(songId) {
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    
-    songCards.forEach(card => {
-        const currentDownloads = parseInt(card.getAttribute('data-downloads') || '0');
-        const newDownloads = currentDownloads + 1;
-        
-        // Update data attribute
-        card.setAttribute('data-downloads', newDownloads);
-        
-        // Update UI
-        const downloadElements = card.querySelectorAll('.downloads');
-        downloadElements.forEach(element => {
-            const formattedDownloads = new Intl.NumberFormat().format(newDownloads);
-            element.textContent = formattedDownloads;
-        });
-    });
-}
-
-// ========== Download song function ==========
 function downloadSong(songId, buttonElement = null) {
-    // Show loading state if button provided
     if (buttonElement) {
         const originalHTML = buttonElement.innerHTML;
         buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         buttonElement.disabled = true;
     }
     
-    // Update download count in UI immediately
     updateSongDownloadCount(songId);
-    
-    // Open download in new tab (this will trigger the Django view)
     window.open(`/download-song/${songId}/`, '_blank');
     
-    // Track download analytics
     fetch('/api/track-download/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            song_id: songId,
-            song_title: getSongTitle(songId),
-            artist_name: getDisplayArtistName(songId),
-            original_artist_name: getOriginalArtistName(songId)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Download tracked:', data);
-    })
-    .catch(error => {
-        console.error('Error tracking download:', error);
-    });
+        body: JSON.stringify({ song_id: songId })
+    }).catch(() => {});
     
-    // Restore button state if button provided
     if (buttonElement) {
         setTimeout(() => {
             buttonElement.innerHTML = '<i class="fas fa-download"></i>';
             buttonElement.disabled = false;
         }, 1000);
     }
-    
-    // Trigger download event for analytics
-    triggerSongDownloaded(songId);
 }
 
-// Helper function to get song title from data attributes
-function getSongTitle(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const titleElement = card.querySelector('.card-title, .chart-song-title');
-        return titleElement ? titleElement.textContent.trim() : 'Unknown Song';
-    }
-    return 'Unknown Song';
+function updateSongDownloadCount(songId) {
+    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+    songCards.forEach(card => {
+        const currentDownloads = parseInt(card.getAttribute('data-downloads') || '0');
+        const newDownloads = currentDownloads + 1;
+        card.setAttribute('data-downloads', newDownloads);
+        const downloadElements = card.querySelectorAll('.downloads');
+        downloadElements.forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newDownloads);
+        });
+    });
 }
 
-// Helper function to get display artist name from data attributes
-function getDisplayArtistName(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const artistElement = card.querySelector('.artist-link.primary-artist');
-        return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
-    }
-    return 'Unknown Artist';
-}
-
-// Helper function to get original artist name from data attributes
-function getOriginalArtistName(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const originalNote = card.querySelector('.original-artist');
-        if (originalNote) {
-            // Extract original artist name from the note
-            const text = originalNote.textContent.trim();
-            const match = text.match(/Original:\s*(.+)/);
-            return match ? match[1].trim() : 'Unknown Artist';
-        }
-    }
-    return 'Unknown Artist';
-}
-
-// Utility function to get CSRF token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -2259,62 +1348,9 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Show notification
-function showNotification(message, type = 'info') {
-    // Try to use base.html notification system first
-    if (typeof window.showMessage === 'function') {
-        window.showMessage(message, type);
-    } 
-    // Fallback to simple notification
-    else {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            background: ${type === 'success' ? 'var(--primary)' : type === 'error' ? '#dc3545' : '#17a2b8'};
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-        notification.textContent = message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-}
-
-// Scroll functionality for horizontal sections
-function scrollSection(button, direction) {
-    const container = button.parentElement;
-    const scrollContainer = container.querySelector('.cards-scroll, .artists-scroll');
-    const scrollAmount = 300;
-    scrollContainer.scrollLeft += direction * scrollAmount;
-}
-
-function scrollNewsSection(direction) {
-    const container = document.querySelector('.news-scroll-container');
-    const scrollContainer = container.querySelector('.news-scroll');
-    const scrollAmount = 300;
-    scrollContainer.scrollLeft += direction * scrollAmount;
-}
-
-// Trigger custom event for download
-function triggerSongDownloaded(songId) {
-    const event = new CustomEvent('songDownloaded', { detail: { songId } });
-    document.dispatchEvent(event);
-}
-
-// Make functions globally available for base.html integration
+// Make functions globally available
 window.playSongFromCard = playSongFromCard;
 window.downloadSong = downloadSong;
-window.startListening = startListening;
 window.scrollSection = scrollSection;
 window.scrollNewsSection = scrollNewsSection;
 </script>

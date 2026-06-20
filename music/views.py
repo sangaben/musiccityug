@@ -15,6 +15,18 @@ import tempfile
 import shutil
 import re
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.core.mail import send_mail
+from django.conf import settings
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
 from .models import Song, Genre, SongPlay, SongDownload
 from .forms import SongUploadForm
 
@@ -1210,3 +1222,136 @@ def like_song(request, song_id):
 def custom_404(request, exception):
     """Custom 404 error page"""
     return render(request, "music/404.html", status=404)
+
+
+
+
+# ========== STATIC PAGE VIEWS ==========
+
+def about_view(request):
+    """Display the About Us page"""
+    context = {
+        'page_title': 'About Us',
+        'active_page': 'about',
+    }
+    return render(request, 'music/about.html', context)
+
+
+def privacy_view(request):
+    """Display the Privacy Policy page"""
+    context = {
+        'page_title': 'Privacy Policy',
+        'active_page': 'privacy',
+        'last_updated': 'February 2024',
+    }
+    return render(request, 'music/privacy.html', context)
+
+
+def terms_view(request):
+    """Display the Terms of Service page"""
+    context = {
+        'page_title': 'Terms of Service',
+        'active_page': 'terms',
+        'last_updated': 'February 2024',
+    }
+    return render(request, 'music/terms.html', context)
+
+
+def contact_view(request):
+    """Display the Contact page"""
+    context = {
+        'page_title': 'Contact Us',
+        'active_page': 'contact',
+    }
+    return render(request, 'music/contact.html', context)
+
+
+# ========== CONTACT FORM API VIEWS ==========
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def contact_submit(request):
+    """
+    Handle contact form submissions via AJAX
+    Returns JSON response
+    """
+    try:
+        data = json.loads(request.body)
+        
+        name = data.get('name', '').strip()
+        email = data.get('email', '').strip()
+        subject = data.get('subject', '').strip()
+        message = data.get('message', '').strip()
+        
+        # Validation
+        if not all([name, email, subject, message]):
+            return JsonResponse({
+                'success': False,
+                'error': 'All fields are required.'
+            }, status=400)
+        
+        if len(name) < 2:
+            return JsonResponse({
+                'success': False,
+                'error': 'Name must be at least 2 characters.'
+            }, status=400)
+        
+        if len(message) < 10:
+            return JsonResponse({
+                'success': False,
+                'error': 'Message must be at least 10 characters.'
+            }, status=400)
+        
+        # Send email notification
+        try:
+            send_mail(
+                subject=f'Contact Form: {subject} - from {name}',
+                message=f"""
+                Name: {name}
+                Email: {email}
+                Subject: {subject}
+                
+                Message:
+                {message}
+                
+                ---
+                Sent from MusicCenter UG Contact Form
+                """,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.CONTACT_EMAIL],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"Failed to send contact email: {e}")
+            # Still return success if saved to database
+        
+        # Save to database (optional)
+        try:
+            from .models import ContactMessage
+            ContactMessage.objects.create(
+                name=name,
+                email=email,
+                subject=subject,
+                message=message,
+                ip_address=request.META.get('REMOTE_ADDR', ''),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            )
+        except Exception as e:
+            logger.error(f"Failed to save contact message: {e}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Thank you for your message! We\'ll get back to you soon.'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid request format.'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Contact form error: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred. Please try again.'
+        }, status=500)

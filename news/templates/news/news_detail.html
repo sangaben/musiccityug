@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{{ article.title }} - MusicCenter UG News{% endblock %}
 
@@ -9,41 +10,51 @@
         <!-- Article Header -->
         <header class="article-header">
             <div class="container">
-                <nav class="breadcrumb">
-                    <a href="{% url 'news' %}">News</a>
+                <nav class="breadcrumb animate-slide-up">
+                    <a href="{% url 'news' %}"><i class="fas fa-home"></i> News</a>
                     <i class="fas fa-chevron-right"></i>
                     <a href="{% url 'news_category' article.category %}">{{ article.get_category_display }}</a>
                     <i class="fas fa-chevron-right"></i>
                     <span>Current Article</span>
                 </nav>
                 
-                <h1 class="article-title">{{ article.title }}</h1>
-                <div class="article-meta-large">
+                <div class="article-category-large animate-slide-up delay-1">
+                    {{ article.get_category_display }}
+                </div>
+                
+                <h1 class="article-title animate-slide-up delay-2">{{ article.title }}</h1>
+                
+                <div class="article-meta-large animate-slide-up delay-3">
                     <div class="author-info">
                         <div class="author-avatar">
                             {{ article.author.username|first|upper }}
                         </div>
                         <div class="author-details">
                             <span class="author-name">By {{ article.author.username }}</span>
-                            <span class="publish-date">{{ article.published_date|date:"F d, Y" }}</span>
+                            <span class="publish-date"><i class="fas fa-calendar-alt"></i> {{ article.published_date|date:"F d, Y" }}</span>
+                            <span class="update-date" style="display: none;">
+                                <i class="fas fa-edit"></i> Updated: {{ article.updated_at|date:"F d, Y" }}
+                            </span>
                         </div>
                     </div>
                     <div class="article-stats">
-                        <span class="views"><i class="fas fa-eye"></i> {{ article.views }} views</span>
-                        <span class="reading-time"><i class="fas fa-clock"></i> 5 min read</span>
+                        <span class="views"><i class="fas fa-eye"></i> {{ article.views|intcomma }} views</span>
+                        <span class="reading-time"><i class="fas fa-clock"></i> <span id="readingTime">5</span> min read</span>
+                        <span class="comments-count"><i class="fas fa-comment"></i> <span id="commentsCount">0</span> comments</span>
                     </div>
-                </div>
-                
-                <div class="article-category-large">
-                    {{ article.get_category_display }}
                 </div>
             </div>
         </header>
 
         <!-- Featured Image -->
-        <div class="article-featured-image">
+        <div class="article-featured-image animate-on-scroll">
             <div class="container">
-                <img src="{{ article.featured_image.url }}" alt="{{ article.title }}">
+                <div class="featured-image-wrapper">
+                    <img src="{{ article.featured_image.url }}" alt="{{ article.title }}">
+                    <div class="image-caption">
+                        <i class="fas fa-camera"></i> Featured image for {{ article.title }}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -51,40 +62,65 @@
         <div class="article-content">
             <div class="container">
                 <div class="content-wrapper">
-                    <div class="article-body">
+                    <!-- Article Body -->
+                    <div class="article-body animate-on-scroll">
                         {{ article.content|linebreaks }}
                     </div>
                     
                     <!-- Tags -->
                     {% if article.tags %}
-                    <div class="article-tags">
-                        <h4>Tags:</h4>
+                    <div class="article-tags animate-on-scroll delay-1">
+                        <h4><i class="fas fa-tags"></i> Tags:</h4>
                         <div class="tags-list">
                             {% for tag in article.tags.split %}
-                            <span class="tag">{{ tag }}</span>
+                            <a href="{% url 'news' %}?tag={{ tag }}" class="tag">#{{ tag }}</a>
                             {% endfor %}
                         </div>
                     </div>
                     {% endif %}
 
-                    <!-- Social Share -->
-                    <div class="social-share">
-                        <h4>Share this article:</h4>
-                        <div class="share-buttons">
-                            <a href="#" class="share-btn facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="#" class="share-btn twitter">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                            <a href="#" class="share-btn whatsapp">
-                                <i class="fab fa-whatsapp"></i>
-                            </a>
-                            <a href="#" class="share-btn linkedin">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
+                    <!-- Article Actions -->
+                    <div class="article-actions animate-on-scroll delay-2">
+                        <div class="action-group">
+                            <button class="action-btn like-btn" onclick="toggleLike({{ article.id }})" id="likeBtn">
+                                <i class="far fa-heart" id="likeIcon"></i>
+                                <span id="likeCount">{{ article.likes|default:0 }}</span>
+                                <span class="action-label">Likes</span>
+                            </button>
+                            <button class="action-btn bookmark-btn" onclick="toggleBookmark({{ article.id }})" id="bookmarkBtn">
+                                <i class="far fa-bookmark" id="bookmarkIcon"></i>
+                                <span class="action-label">Save</span>
+                            </button>
+                            <button class="action-btn share-btn" onclick="openShareModal()" id="shareBtn">
+                                <i class="fas fa-share-alt"></i>
+                                <span class="action-label">Share</span>
+                            </button>
                         </div>
                     </div>
+
+                    <!-- Social Share -->
+                    <div class="social-share animate-on-scroll delay-3">
+                        <h4><i class="fas fa-share-alt"></i> Share this article:</h4>
+                        <div class="share-buttons">
+                            <button onclick="shareToFacebook()" class="share-btn facebook" title="Share on Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button onclick="shareToTwitter()" class="share-btn twitter" title="Share on Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button onclick="shareToWhatsApp()" class="share-btn whatsapp" title="Share on WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button onclick="shareToLinkedIn()" class="share-btn linkedin" title="Share on LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </button>
+                            <button onclick="copyToClipboard()" class="share-btn copy" title="Copy Link">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    
                 </div>
             </div>
         </div>
@@ -92,21 +128,28 @@
 
     <!-- Related Articles -->
     {% if related_articles %}
-    <section class="related-articles">
+    <section class="related-articles animate-on-scroll">
         <div class="container">
-            <h2 class="section-title">Related Articles</h2>
+            <div class="section-header">
+                <h2 class="section-title">Related Articles</h2>
+                <a href="{% url 'news' %}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
             <div class="related-grid">
                 {% for related in related_articles %}
-                <article class="related-card">
+                <article class="related-card animate-on-scroll" data-delay="{{ forloop.counter|add:1 }}">
                     <div class="related-image">
-                        <img src="{{ related.featured_image.url }}" alt="{{ related.title }}">
+                        <img src="{{ related.featured_image.url }}" alt="{{ related.title }}" loading="lazy">
+                        <div class="related-category">{{ related.get_category_display }}</div>
                     </div>
                     <div class="related-content">
                         <h3><a href="{% url 'news_detail' related.id %}">{{ related.title }}</a></h3>
-                        <div class="article-meta">
-                            <span class="date">{{ related.published_date|date:"M d, Y" }}</span>
-                            <span class="views"><i class="fas fa-eye"></i> {{ related.views }}</span>
+                        <div class="related-meta">
+                            <span class="date"><i class="fas fa-calendar"></i> {{ related.published_date|date:"M d, Y" }}</span>
+                            <span class="views"><i class="fas fa-eye"></i> {{ related.views|intcomma }}</span>
                         </div>
+                        <a href="{% url 'news_detail' related.id %}" class="read-more-link">
+                            Read More <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </article>
                 {% endfor %}
@@ -116,392 +159,99 @@
     {% endif %}
 </div>
 
+<!-- Share Modal -->
+<div class="share-modal" id="shareModal" style="display: none;">
+    <div class="share-modal-content">
+        <button class="share-modal-close" onclick="closeShareModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3><i class="fas fa-share-alt"></i> Share this article</h3>
+        <p class="share-title">{{ article.title }}</p>
+        <div class="share-platforms">
+            <button onclick="shareToFacebook()" class="share-platform facebook">
+                <i class="fab fa-facebook-f"></i> Facebook
+            </button>
+            <button onclick="shareToTwitter()" class="share-platform twitter">
+                <i class="fab fa-twitter"></i> Twitter
+            </button>
+            <button onclick="shareToWhatsApp()" class="share-platform whatsapp">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button onclick="shareToLinkedIn()" class="share-platform linkedin">
+                <i class="fab fa-linkedin-in"></i> LinkedIn
+            </button>
+            <button onclick="copyToClipboard()" class="share-platform copy">
+                <i class="fas fa-copy"></i> Copy Link
+            </button>
+        </div>
+        <div class="share-url">
+            <input type="text" value="{{ request.build_absolute_uri }}" readonly id="shareUrlInput">
+            <button onclick="copyToClipboard()" class="copy-url-btn">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
 <style>
-    /* News Page Styles */
-.news-page {
-    background: var(--dark);
-    min-height: 100vh;
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* News Hero */
-.news-hero {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    padding: 80px 0 60px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-.news-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('../images/pattern.png') repeat;
-    opacity: 0.1;
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-.news-hero-content h1 {
-    font-size: 48px;
-    margin-bottom: 16px;
-    color: var(--light);
-    font-weight: 800;
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
 }
 
-.news-hero-content p {
-    font-size: 18px;
-    color: var(--light);
-    opacity: 0.9;
-    max-width: 600px;
-    margin: 0 auto;
+.animate-slide-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
 }
 
-/* Featured News */
-.featured-news {
-    padding: 60px 0;
-    background: var(--card-bg);
+.animate-slide-up.delay-1 { animation-delay: 0.2s; }
+.animate-slide-up.delay-2 { animation-delay: 0.4s; }
+.animate-slide-up.delay-3 { animation-delay: 0.6s; }
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
 }
 
-.featured-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.featured-article {
-    background: var(--dark);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: var(--transition);
-    border: 1px solid rgba(255, 107, 0, 0.1);
-}
+.animate-on-scroll[data-delay="2"] { transition-delay: 0.1s; }
+.animate-on-scroll[data-delay="3"] { transition-delay: 0.2s; }
+.animate-on-scroll[data-delay="4"] { transition-delay: 0.3s; }
+.animate-on-scroll[data-delay="5"] { transition-delay: 0.4s; }
 
-.featured-article:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.featured-image {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-
-.featured-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.featured-article:hover .featured-image img {
-    transform: scale(1.05);
-}
-
-.article-category {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: var(--primary);
-    color: var(--light);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.featured-content {
-    padding: 20px;
-}
-
-.featured-content h3 {
-    margin-bottom: 12px;
-    font-size: 18px;
-}
-
-.featured-content h3 a {
-    color: var(--light);
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.featured-content h3 a:hover {
-    color: var(--primary);
-}
-
-.featured-content p {
-    color: var(--gray);
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 16px;
-}
-
-.article-meta {
-    display: flex;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--dark-gray);
-}
-
-.article-meta .author {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-/* Main News Layout */
-.main-news {
-    padding: 60px 0;
-}
-
-.news-layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 40px;
-}
-
-/* News Sidebar */
-.news-sidebar {
-    position: sticky;
-    top: 100px;
-    height: fit-content;
-}
-
-.filter-widget {
-    background: var(--card-bg);
-    padding: 24px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(255, 107, 0, 0.1);
-}
-
-.filter-widget h3 {
-    color: var(--light);
-    margin-bottom: 16px;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.category-filters {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.category-filter {
-    padding: 10px 16px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--gray);
-    text-decoration: none;
-    transition: var(--transition);
-    font-size: 14px;
-}
-
-.category-filter:hover,
-.category-filter.active {
-    background: var(--primary);
-    color: var(--light);
-    border-color: var(--primary);
-}
-
-.sort-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.sort-option {
-    padding: 10px 16px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--gray);
-    text-decoration: none;
-    transition: var(--transition);
-    font-size: 14px;
-}
-
-.sort-option:hover,
-.sort-option.active {
-    background: var(--primary);
-    color: var(--light);
-    border-color: var(--primary);
-}
-
-.newsletter-widget {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    padding: 24px;
-    border-radius: 12px;
-    text-align: center;
-}
-
-.newsletter-widget h3 {
-    color: var(--light);
-    margin-bottom: 8px;
-}
-
-.newsletter-widget p {
-    color: var(--light);
-    opacity: 0.9;
-    margin-bottom: 16px;
-    font-size: 14px;
-}
-
-.newsletter-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.newsletter-form input {
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--dark);
-}
-
-.subscribe-btn {
-    background: var(--light);
-    color: var(--dark);
-    border: none;
-    padding: 12px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.subscribe-btn:hover {
-    background: var(--gray);
-}
-
-/* News Content */
-.articles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    margin-bottom: 40px;
-}
-
-.news-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: var(--transition);
-    border: 1px solid rgba(255, 107, 0, 0.1);
-}
-
-.news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.news-card-image {
-    position: relative;
-    height: 180px;
-    overflow: hidden;
-}
-
-.news-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.news-card:hover .news-card-image img {
-    transform: scale(1.05);
-}
-
-.news-card-content {
-    padding: 20px;
-}
-
-.news-card-content h3 {
-    margin-bottom: 12px;
-    font-size: 16px;
-}
-
-.news-card-content h3 a {
-    color: var(--light);
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.news-card-content h3 a:hover {
-    color: var(--primary);
-}
-
-.news-card-content p {
-    color: var(--gray);
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 16px;
-}
-
-/* No Articles */
-.no-articles {
-    text-align: center;
-    padding: 60px 20px;
-    grid-column: 1 / -1;
-}
-
-.no-articles i {
-    font-size: 48px;
-    color: var(--gray);
-    margin-bottom: 16px;
-}
-
-.no-articles h3 {
-    color: var(--light);
-    margin-bottom: 8px;
-}
-
-.no-articles p {
-    color: var(--gray);
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.page-link {
-    padding: 8px 16px;
-    background: var(--card-bg);
-    color: var(--gray);
-    text-decoration: none;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 107, 0, 0.1);
-    transition: var(--transition);
-    font-size: 14px;
-}
-
-.page-link:hover,
-.page-link.active {
-    background: var(--primary);
-    color: var(--light);
-    border-color: var(--primary);
-}
-
-/* News Detail Page */
+/* ===== NEWS DETAIL PAGE ===== */
 .news-detail-page {
-    background: var(--dark);
+    background: var(--dark, #121212);
     min-height: 100vh;
 }
 
+/* ===== ARTICLE HEADER ===== */
 .article-header {
-    background: var(--card-bg);
-    padding: 40px 0;
+    background: var(--card-bg, #1e1e1e);
+    padding: 40px 0 30px;
     border-bottom: 1px solid rgba(255, 107, 0, 0.1);
 }
 
@@ -510,36 +260,53 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 13px;
+    flex-wrap: wrap;
 }
 
 .breadcrumb a {
-    color: var(--gray);
+    color: var(--gray, #888);
     text-decoration: none;
     transition: var(--transition);
 }
 
 .breadcrumb a:hover {
-    color: var(--primary);
+    color: #ff6b00;
 }
 
 .breadcrumb i {
     font-size: 10px;
-    color: var(--gray);
+    color: var(--gray, #888);
+}
+
+.breadcrumb span {
+    color: var(--light, #fff);
+    opacity: 0.7;
+}
+
+.article-category-large {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    color: var(--light, #fff);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
 }
 
 .article-title {
-    font-size: 36px;
-    color: var(--light);
-    margin-bottom: 24px;
-    line-height: 1.3;
+    font-size: 40px;
+    color: var(--light, #fff);
+    margin-bottom: 20px;
+    line-height: 1.2;
+    font-weight: 800;
 }
 
 .article-meta-large {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 16px;
 }
@@ -547,19 +314,20 @@
 .author-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
 .author-avatar {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: var(--primary);
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--light);
-    font-weight: 600;
+    color: var(--light, #fff);
+    font-weight: 700;
+    font-size: 18px;
 }
 
 .author-details {
@@ -568,45 +336,70 @@
 }
 
 .author-name {
-    color: var(--light);
+    color: var(--light, #fff);
     font-weight: 600;
+    font-size: 15px;
 }
 
 .publish-date {
-    color: var(--gray);
-    font-size: 14px;
+    color: var(--gray, #888);
+    font-size: 13px;
+}
+
+.publish-date i {
+    margin-right: 4px;
 }
 
 .article-stats {
     display: flex;
-    gap: 16px;
-    color: var(--gray);
-    font-size: 14px;
+    gap: 20px;
+    color: var(--gray, #888);
+    font-size: 13px;
 }
 
-.article-category-large {
-    display: inline-block;
-    background: var(--primary);
-    color: var(--light);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
+.article-stats i {
+    margin-right: 4px;
+    color: #ff6b00;
 }
 
+/* ===== FEATURED IMAGE ===== */
 .article-featured-image {
     padding: 40px 0;
 }
 
-.article-featured-image img {
+.featured-image-wrapper {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.featured-image-wrapper img {
     width: 100%;
     max-height: 500px;
     object-fit: cover;
-    border-radius: 12px;
+    display: block;
 }
 
+.image-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 30px 20px 16px;
+    color: var(--light, #fff);
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.image-caption i {
+    margin-right: 6px;
+}
+
+/* ===== ARTICLE CONTENT ===== */
 .article-content {
-    padding: 40px 0;
+    padding: 20px 0 40px;
 }
 
 .content-wrapper {
@@ -615,9 +408,9 @@
 }
 
 .article-body {
-    color: var(--light);
-    line-height: 1.8;
-    font-size: 16px;
+    color: var(--light, #e0e0e0);
+    line-height: 1.9;
+    font-size: 17px;
     margin-bottom: 40px;
 }
 
@@ -625,13 +418,36 @@
     margin-bottom: 20px;
 }
 
+.article-body img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.article-body h2, 
+.article-body h3 {
+    color: var(--light, #fff);
+    margin: 30px 0 16px;
+}
+
+/* ===== ARTICLE TAGS ===== */
 .article-tags {
     margin-bottom: 30px;
+    padding: 20px;
+    background: var(--card-bg, #1e1e1e);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
 }
 
 .article-tags h4 {
-    color: var(--light);
+    color: var(--light, #fff);
     margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.article-tags h4 i {
+    color: #ff6b00;
+    margin-right: 6px;
 }
 
 .tags-list {
@@ -642,54 +458,540 @@
 
 .tag {
     background: rgba(255, 107, 0, 0.1);
-    color: var(--primary);
-    padding: 6px 12px;
+    color: #ff6b00;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 12px;
-    border: 1px solid rgba(255, 107, 0, 0.2);
+    text-decoration: none;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 107, 0, 0.1);
 }
 
+.tag:hover {
+    background: #ff6b00;
+    color: var(--light, #fff);
+    transform: scale(1.05);
+}
+
+/* ===== ARTICLE ACTIONS ===== */
+.article-actions {
+    margin: 30px 0 40px;
+    padding: 20px;
+    background: var(--card-bg, #1e1e1e);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.action-group {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--gray, #888);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.action-btn:hover {
+    background: rgba(255, 107, 0, 0.1);
+    color: var(--light, #fff);
+}
+
+.action-btn i {
+    font-size: 18px;
+}
+
+.action-btn .action-label {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.like-btn.liked {
+    color: #ff6b00;
+}
+
+.like-btn.liked i {
+    font-weight: 900;
+}
+
+.bookmark-btn.bookmarked {
+    color: #ff6b00;
+}
+
+.bookmark-btn.bookmarked i {
+    font-weight: 900;
+}
+
+/* ===== SOCIAL SHARE ===== */
 .social-share {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 30px;
+    margin-top: 20px;
 }
 
 .social-share h4 {
-    color: var(--light);
+    color: var(--light, #fff);
     margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.social-share h4 i {
+    color: #ff6b00;
+    margin-right: 8px;
 }
 
 .share-buttons {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .share-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--light);
+    color: var(--light, #fff);
     text-decoration: none;
     transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
 }
 
 .share-btn.facebook { background: #3b5998; }
 .share-btn.twitter { background: #1da1f2; }
 .share-btn.whatsapp { background: #25d366; }
 .share-btn.linkedin { background: #0077b5; }
+.share-btn.copy { background: var(--gray, #444); }
 
 .share-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Related Articles */
+/* ===== COMMENTS SECTION ===== */
+.comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comments-section h3 {
+    color: var(--light, #fff);
+    margin-bottom: 24px;
+    font-size: 20px;
+}
+
+.comments-section h3 i {
+    color: #ff6b00;
+    margin-right: 8px;
+}
+
+.comment-form-wrapper {
+    background: var(--card-bg, #1e1e1e);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.comment-input-group {
+    display: flex;
+    gap: 14px;
+}
+
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--light, #fff);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.comment-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.comment-input-wrapper textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--light, #fff);
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.comment-input-wrapper textarea:focus {
+    outline: none;
+    border-color: #ff6b00;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.comment-input-wrapper textarea::placeholder {
+    color: var(--gray, #888);
+}
+
+.comment-tools {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.emoji-btn {
+    background: transparent;
+    border: none;
+    color: var(--gray, #888);
+    cursor: pointer;
+    font-size: 20px;
+    transition: var(--transition);
+    padding: 4px 8px;
+}
+
+.emoji-btn:hover {
+    color: var(--light, #fff);
+}
+
+.emoji-picker {
+    display: flex;
+    gap: 4px;
+    background: var(--dark, #121212);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emoji-picker span {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 2px 4px;
+    transition: var(--transition);
+}
+
+.emoji-picker span:hover {
+    transform: scale(1.2);
+    background: rgba(255, 107, 0, 0.1);
+    border-radius: 4px;
+}
+
+.submit-comment-btn {
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    color: var(--light, #fff);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 12px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.submit-comment-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 20px rgba(255, 107, 0, 0.3);
+}
+
+.submit-comment-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== COMMENTS LIST ===== */
+.comments-list {
+    margin-top: 20px;
+}
+
+.loading-comments {
+    text-align: center;
+    color: var(--gray, #888);
+    padding: 20px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.comment-avatar-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--light, #fff);
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.comment-content {
+    flex: 1;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.comment-author {
+    color: var(--light, #fff);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.comment-date {
+    color: var(--gray, #888);
+    font-size: 12px;
+}
+
+.comment-text {
+    color: var(--light, #e0e0e0);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.comment-action {
+    background: transparent;
+    border: none;
+    color: var(--gray, #888);
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.comment-action:hover {
+    color: #ff6b00;
+}
+
+.comment-action i {
+    font-size: 12px;
+}
+
+.no-comments {
+    text-align: center;
+    color: var(--gray, #888);
+    padding: 30px 0;
+}
+
+.no-comments i {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+/* ===== SHARE MODAL ===== */
+.share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeInUp 0.3s ease;
+}
+
+.share-modal-content {
+    background: var(--card-bg, #1e1e1e);
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 440px;
+    width: 90%;
+    position: relative;
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.share-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--gray, #888);
+    font-size: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 4px 8px;
+}
+
+.share-modal-close:hover {
+    color: var(--light, #fff);
+    transform: rotate(90deg);
+}
+
+.share-modal-content h3 {
+    color: var(--light, #fff);
+    margin-bottom: 8px;
+    font-size: 20px;
+}
+
+.share-modal-content h3 i {
+    color: #ff6b00;
+    margin-right: 8px;
+}
+
+.share-title {
+    color: var(--gray, #888);
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.share-platforms {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.share-platform {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--light, #fff);
+    width: 100%;
+}
+
+.share-platform:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.share-platform.facebook { background: #3b5998; }
+.share-platform.twitter { background: #1da1f2; }
+.share-platform.whatsapp { background: #25d366; }
+.share-platform.linkedin { background: #0077b5; }
+.share-platform.copy { background: var(--gray, #444); }
+
+.share-platform i {
+    width: 24px;
+    text-align: center;
+}
+
+.share-url {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.share-url input {
+    flex: 1;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--gray, #888);
+    font-size: 12px;
+}
+
+.copy-url-btn {
+    padding: 10px 14px;
+    background: rgba(255, 107, 0, 0.2);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 8px;
+    color: #ff6b00;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.copy-url-btn:hover {
+    background: #ff6b00;
+    color: var(--light, #fff);
+}
+
+/* ===== RELATED ARTICLES ===== */
 .related-articles {
     padding: 60px 0;
-    background: var(--card-bg);
+    background: var(--card-bg, #1e1e1e);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 28px;
+    color: var(--light, #fff);
+    font-weight: 700;
+}
+
+.view-all-link {
+    color: #ff6b00;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.view-all-link:hover {
+    color: #ff8533;
+    transform: translateX(5px);
 }
 
 .related-grid {
@@ -699,7 +1001,7 @@
 }
 
 .related-card {
-    background: var(--dark);
+    background: var(--dark, #121212);
     border-radius: 12px;
     overflow: hidden;
     transition: var(--transition);
@@ -709,9 +1011,11 @@
 .related-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: #ff6b00;
 }
 
 .related-image {
+    position: relative;
     height: 150px;
     overflow: hidden;
 }
@@ -727,51 +1031,65 @@
     transform: scale(1.05);
 }
 
+.related-category {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(255, 107, 0, 0.9);
+    color: var(--light, #fff);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
 .related-content {
     padding: 16px;
 }
 
 .related-content h3 {
     margin-bottom: 8px;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1.3;
 }
 
 .related-content h3 a {
-    color: var(--light);
+    color: var(--light, #fff);
     text-decoration: none;
     transition: var(--transition);
 }
 
 .related-content h3 a:hover {
-    color: var(--primary);
+    color: #ff6b00;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .news-layout {
-        grid-template-columns: 250px 1fr;
-        gap: 30px;
-    }
+.related-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--gray, #888);
+    margin-bottom: 10px;
 }
 
+.related-meta i {
+    margin-right: 4px;
+}
+
+.read-more-link {
+    color: #ff6b00;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.read-more-link:hover {
+    color: #ff8533;
+    transform: translateX(5px);
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .news-layout {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-    
-    .news-sidebar {
-        position: static;
-    }
-    
-    .featured-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .articles-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .article-title {
         font-size: 28px;
     }
@@ -779,36 +1097,494 @@
     .article-meta-large {
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px;
     }
     
-    .news-hero-content h1 {
-        font-size: 36px;
+    .article-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .content-wrapper {
+        padding: 0 16px;
+    }
+    
+    .action-group {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .related-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .comment-input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .comment-avatar {
+        display: none;
+    }
+    
+    .share-modal-content {
+        padding: 24px;
     }
 }
 
 @media (max-width: 480px) {
-    .featured-grid,
-    .articles-grid,
+    .article-title {
+        font-size: 22px;
+    }
+    
     .related-grid {
         grid-template-columns: 1fr;
     }
     
-    .article-title {
-        font-size: 24px;
-    }
-    
-    .news-hero-content h1 {
-        font-size: 28px;
-    }
-    
-    .pagination {
-        gap: 4px;
-    }
-    
-    .page-link {
-        padding: 6px 12px;
+    .article-stats {
         font-size: 12px;
+    }
+    
+    .share-buttons {
+        gap: 8px;
+    }
+    
+    .share-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
     }
 }
 </style>
+
+<script>
+// ===== ANIMATIONS ON SCROLL =====
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Calculate reading time
+    calculateReadingTime();
+    
+    // Load comments
+    loadComments({{ article.id }});
+});
+
+// ===== READING TIME =====
+function calculateReadingTime() {
+    const body = document.querySelector('.article-body');
+    if (!body) return;
+    
+    const text = body.textContent;
+    const wordCount = text.split(/\s+/).length;
+    const readingTime = Math.max(1, Math.round(wordCount / 200));
+    document.getElementById('readingTime').textContent = readingTime;
+}
+
+// ===== SHARE FUNCTIONS =====
+function getShareUrl() {
+    return window.location.href;
+}
+
+function getShareTitle() {
+    return "{{ article.title|escapejs }}";
+}
+
+function openShareModal() {
+    document.getElementById('shareModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeShareModal() {
+    document.getElementById('shareModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function shareToFacebook() {
+    const url = encodeURIComponent(getShareUrl());
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+    closeShareModal();
+}
+
+function shareToTwitter() {
+    const url = encodeURIComponent(getShareUrl());
+    const title = encodeURIComponent(getShareTitle());
+    window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
+    closeShareModal();
+}
+
+function shareToWhatsApp() {
+    const url = encodeURIComponent(getShareUrl());
+    const title = encodeURIComponent(getShareTitle());
+    window.open(`https://api.whatsapp.com/send?text=${title}%0A${url}`, '_blank', 'width=600,height=400');
+    closeShareModal();
+}
+
+function shareToLinkedIn() {
+    const url = encodeURIComponent(getShareUrl());
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+    closeShareModal();
+}
+
+function copyToClipboard() {
+    const url = getShareUrl();
+    navigator.clipboard.writeText(url).then(() => {
+        showNotification('Link copied to clipboard!', 'success');
+        closeShareModal();
+    }).catch(() => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showNotification('Link copied to clipboard!', 'success');
+        closeShareModal();
+    });
+}
+
+// Close share modal on outside click
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('shareModal');
+    if (e.target === modal) {
+        closeShareModal();
+    }
+});
+
+// Close share modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeShareModal();
+    }
+});
+
+// ===== LIKE FUNCTION =====
+function toggleLike(articleId) {
+    const btn = document.getElementById('likeBtn');
+    const icon = document.getElementById('likeIcon');
+    const count = document.getElementById('likeCount');
+    
+    const isLiked = btn.classList.contains('liked');
+    const currentCount = parseInt(count.textContent);
+    
+    // Optimistic update
+    if (isLiked) {
+        btn.classList.remove('liked');
+        icon.className = 'far fa-heart';
+        count.textContent = currentCount - 1;
+    } else {
+        btn.classList.add('liked');
+        icon.className = 'fas fa-heart';
+        count.textContent = currentCount + 1;
+    }
+    
+    fetch(`/api/like-article/${articleId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            count.textContent = data.likes;
+        }
+    })
+    .catch(() => {
+        // Revert on error
+        if (isLiked) {
+            btn.classList.add('liked');
+            icon.className = 'fas fa-heart';
+            count.textContent = currentCount;
+        } else {
+            btn.classList.remove('liked');
+            icon.className = 'far fa-heart';
+            count.textContent = currentCount;
+        }
+    });
+}
+
+// ===== BOOKMARK FUNCTION =====
+function toggleBookmark(articleId) {
+    const btn = document.getElementById('bookmarkBtn');
+    const icon = document.getElementById('bookmarkIcon');
+    
+    const isBookmarked = btn.classList.contains('bookmarked');
+    
+    // Optimistic update
+    if (isBookmarked) {
+        btn.classList.remove('bookmarked');
+        icon.className = 'far fa-bookmark';
+        showNotification('Removed from bookmarks', 'info');
+    } else {
+        btn.classList.add('bookmarked');
+        icon.className = 'fas fa-bookmark';
+        showNotification('Added to bookmarks!', 'success');
+    }
+    
+    fetch(`/api/bookmark-article/${articleId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    }).catch(() => {
+        // Revert on error
+        if (isBookmarked) {
+            btn.classList.add('bookmarked');
+            icon.className = 'fas fa-bookmark';
+        } else {
+            btn.classList.remove('bookmarked');
+            icon.className = 'far fa-bookmark';
+        }
+    });
+}
+
+// ===== COMMENTS =====
+function loadComments(articleId) {
+    const container = document.getElementById('commentsList');
+    
+    fetch(`/api/article-comments/${articleId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.comments && data.comments.length > 0) {
+                renderComments(data.comments);
+                document.getElementById('commentCountDisplay').textContent = data.comments.length;
+                document.getElementById('commentsCount').textContent = data.comments.length;
+            } else {
+                container.innerHTML = `
+                    <div class="no-comments">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(() => {
+            container.innerHTML = `
+                <div class="no-comments">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Could not load comments. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+function renderComments(comments) {
+    const container = document.getElementById('commentsList');
+    container.innerHTML = comments.map(comment => `
+        <div class="comment-item">
+            <div class="comment-avatar-small">${comment.author_name.charAt(0).toUpperCase()}</div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-author">${comment.author_name}</span>
+                    <span class="comment-date">${comment.created_at}</span>
+                </div>
+                <div class="comment-text">${comment.text}</div>
+                <div class="comment-actions">
+                    <button class="comment-action" onclick="likeComment(${comment.id})">
+                        <i class="far fa-heart"></i> <span id="commentLikeCount_${comment.id}">${comment.likes || 0}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function submitComment(event, articleId) {
+    event.preventDefault();
+    const textarea = document.getElementById('commentText');
+    const text = textarea.value.trim();
+    
+    if (!text) return;
+    
+    const btn = event.target.querySelector('.submit-comment-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+    
+    fetch(`/api/add-comment/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            article_id: articleId,
+            text: text
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            textarea.value = '';
+            showNotification('Comment posted successfully!', 'success');
+            loadComments(articleId);
+        } else {
+            showNotification(data.error || 'Failed to post comment.', 'error');
+        }
+    })
+    .catch(() => {
+        showNotification('Something went wrong. Please try again.', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
+    });
+}
+
+function likeComment(commentId) {
+    const likeCount = document.getElementById(`commentLikeCount_${commentId}`);
+    if (!likeCount) return;
+    
+    const currentCount = parseInt(likeCount.textContent);
+    likeCount.textContent = currentCount + 1;
+    
+    fetch(`/api/like-comment/${commentId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    }).catch(() => {
+        likeCount.textContent = currentCount;
+    });
+}
+
+// ===== EMOJI PICKER =====
+function toggleEmojiPicker() {
+    const picker = document.getElementById('emojiPicker');
+    picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+}
+
+function addEmoji(emoji) {
+    const textarea = document.getElementById('commentText');
+    textarea.value += emoji;
+    textarea.focus();
+    document.getElementById('emojiPicker').style.display = 'none';
+}
+
+// Close emoji picker on click outside
+document.addEventListener('click', function(e) {
+    const picker = document.getElementById('emojiPicker');
+    const btn = document.querySelector('.emoji-btn');
+    if (!picker.contains(e.target) && !btn.contains(e.target)) {
+        picker.style.display = 'none';
+    }
+});
+
+// ===== NOTIFICATION =====
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button onclick="this.closest('.notification').remove()" class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    if (!document.querySelector('#notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--card-bg, #1e1e1e);
+                border: 1px solid rgba(255, 107, 0, 0.2);
+                border-radius: 12px;
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                z-index: 99999;
+                min-width: 300px;
+                max-width: 500px;
+                animation: fadeInUp 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+            
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: var(--light, #fff);
+            }
+            
+            .notification-content i {
+                font-size: 20px;
+            }
+            
+            .notification-success .notification-content i {
+                color: #4caf50;
+            }
+            .notification-error .notification-content i {
+                color: #f44336;
+            }
+            .notification-info .notification-content i {
+                color: #2196f3;
+            }
+            
+            .notification-close {
+                background: transparent;
+                border: none;
+                color: var(--gray, #888);
+                cursor: pointer;
+                font-size: 16px;
+                padding: 4px;
+                transition: var(--transition);
+            }
+            
+            .notification-close:hover {
+                color: var(--light, #fff);
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100px)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// ===== CSRF TOKEN =====
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

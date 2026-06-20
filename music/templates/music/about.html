@@ -1,0 +1,598 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - MusicCenter UG{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="about-hero-content animate-slide-up">
+                <h1>About MusicCenter UG</h1>
+                <p>Empowering Uganda's music scene by connecting artists, fans, and the global community.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="container">
+            <div class="mission-grid">
+                <div class="mission-text animate-on-scroll">
+                    <span class="section-tag">Our Mission</span>
+                    <h2>Bringing Uganda's Sound to the World</h2>
+                    <p>MusicCenter UG is Uganda's premier digital music platform dedicated to showcasing the rich musical talent from the Pearl of Africa. We believe in the power of music to unite people, tell stories, and preserve culture.</p>
+                    <p>Our mission is to create a vibrant ecosystem where Ugandan artists can share their music, connect with fans, and build sustainable careers while giving listeners access to authentic local sounds.</p>
+                    <div class="mission-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">10K+</span>
+                            <span class="stat-label">Active Users</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">200+</span>
+                            <span class="stat-label">Artists</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">5K+</span>
+                            <span class="stat-label">Songs Streamed</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mission-image animate-on-scroll delay-1">
+                    <div class="image-placeholder">
+                        <i class="fas fa-music"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Values -->
+    <section class="values-section">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Our Values</span>
+                <h2>What We Stand For</h2>
+            </div>
+            <div class="values-grid">
+                <div class="value-card animate-on-scroll">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Passion</h3>
+                    <p>We are passionate about Ugandan music and dedicated to showcasing the incredible talent in our country.</p>
+                </div>
+                <div class="value-card animate-on-scroll delay-1">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>We believe in building a strong community of artists, fans, and music lovers who support each other.</p>
+                </div>
+                <div class="value-card animate-on-scroll delay-2">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Quality</h3>
+                    <p>We are committed to delivering the highest quality music experience for our users.</p>
+                </div>
+                <div class="value-card animate-on-scroll delay-3">
+                    <div class="value-icon">
+                        <i class="fas fa-globe-africa"></i>
+                    </div>
+                    <h3>Authenticity</h3>
+                    <p>We celebrate the authentic sounds of Uganda and preserve our rich musical heritage.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content animate-on-scroll">
+                <h2>Ready to Join the Music Center UG Community?</h2>
+                <p>Whether you're an artist looking to share your music or a fan wanting to discover new sounds, we welcome you!</p>
+                <div class="cta-buttons">
+                    <a href="{% url 'home' %}" class="btn-primary">Home</a>
+                    <a href="{% url 'discover' %}" class="btn-secondary">Explore Music</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+/* ===== ABOUT PAGE STYLES ===== */
+.about-page {
+    background: var(--dark, #121212);
+    min-height: 100vh;
+}
+
+/* ===== ABOUT HERO ===== */
+.about-hero {
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    padding: 80px 0 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-hero::before {
+    content: '♪';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    font-size: 300px;
+    opacity: 0.1;
+    transform: rotate(15deg);
+}
+
+.about-hero-content h1 {
+    font-size: 48px;
+    color: var(--light, #fff);
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.about-hero-content p {
+    font-size: 18px;
+    color: var(--light, #fff);
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== MISSION SECTION ===== */
+.mission-section {
+    padding: 80px 0;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.mission-text .section-tag {
+    display: inline-block;
+    background: rgba(255, 107, 0, 0.1);
+    color: #ff6b00;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.mission-text h2 {
+    font-size: 36px;
+    color: var(--light, #fff);
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.mission-text p {
+    color: var(--light, #e0e0e0);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.mission-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.stat-item {
+    text-align: center;
+    background: var(--card-bg, #1e1e1e);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: #ff6b00;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--gray, #888);
+}
+
+.mission-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-placeholder {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(204, 85, 0, 0.1));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    color: #ff6b00;
+    border: 2px solid rgba(255, 107, 0, 0.2);
+}
+
+/* ===== VALUES SECTION ===== */
+.values-section {
+    padding: 80px 0;
+    background: var(--card-bg, #1e1e1e);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.section-header .section-tag {
+    display: inline-block;
+    background: rgba(255, 107, 0, 0.1);
+    color: #ff6b00;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-size: 36px;
+    color: var(--light, #fff);
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.section-header p {
+    color: var(--gray, #888);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.value-card {
+    background: var(--dark, #121212);
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    transition: var(--transition);
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    border-color: #ff6b00;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.value-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 107, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 24px;
+    color: #ff6b00;
+}
+
+.value-card h3 {
+    color: var(--light, #fff);
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.value-card p {
+    color: var(--gray, #888);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ===== TEAM SECTION ===== */
+.team-section {
+    padding: 80px 0;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.team-member {
+    background: var(--card-bg, #1e1e1e);
+    padding: 30px 20px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    transition: var(--transition);
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+    border-color: #ff6b00;
+}
+
+.member-image {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--light, #fff);
+}
+
+.team-member h3 {
+    color: var(--light, #fff);
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.member-role {
+    color: #ff6b00;
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.team-member p {
+    color: var(--gray, #888);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials-section {
+    padding: 80px 0;
+    background: var(--card-bg, #1e1e1e);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.testimonial-card {
+    background: var(--dark, #121212);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 0, 0.1);
+    position: relative;
+}
+
+.testimonial-card i.fa-quote-left {
+    color: #ff6b00;
+    font-size: 24px;
+    opacity: 0.3;
+    margin-bottom: 12px;
+}
+
+.testimonial-card p {
+    color: var(--light, #e0e0e0);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.testimonial-author strong {
+    display: block;
+    color: var(--light, #fff);
+    font-size: 16px;
+}
+
+.testimonial-author span {
+    color: var(--gray, #888);
+    font-size: 13px;
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #ff6b00, #cc5500);
+}
+
+.cta-content {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.cta-content h2 {
+    font-size: 36px;
+    color: var(--light, #fff);
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.cta-content p {
+    color: var(--light, #fff);
+    opacity: 0.9;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: var(--light, #fff);
+    color: #ff6b00;
+    padding: 14px 32px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--light, #fff);
+    padding: 14px 32px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 2px solid var(--light, #fff);
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-slide-up.delay-1 { animation-delay: 0.2s; }
+.animate-slide-up.delay-2 { animation-delay: 0.4s; }
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+.animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+.animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .mission-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .mission-image {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-hero-content h1 {
+        font-size: 32px;
+    }
+    
+    .mission-text h2 {
+        font-size: 28px;
+    }
+    
+    .section-header h2 {
+        font-size: 28px;
+    }
+    
+    .mission-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .cta-content h2 {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-hero {
+        padding: 60px 0 40px;
+    }
+    
+    .about-hero-content h1 {
+        font-size: 24px;
+    }
+    
+    .mission-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

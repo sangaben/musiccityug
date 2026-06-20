@@ -8,6 +8,12 @@ urlpatterns = [
     path('genres/', views.genres, name='genres'),
     path('genre/<int:genre_id>/', views.genre_songs, name='genre_songs'),
     path('song/<int:song_id>/', views.song_detail, name='song_detail'),
+
+
+    path('about/', views.about_view, name='about'),
+    path('privacy/', views.privacy_view, name='privacy'),
+    path('terms/', views.terms_view, name='terms'),
+    path('contact/', views.contact_view, name='contact'),
     
     # Player endpoints
     path('play-song/<int:song_id>/', views.play_song, name='play_song'),
