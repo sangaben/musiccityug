@@ -188,7 +188,7 @@
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title animate-on-scroll">Top 10 Trending</h2>
-                <a href="{% url 'charts' %}" class="see-all">View More</a>
+               
             </div>
             <div class="charts-grid">
                 <div class="chart-card animate-on-scroll">
@@ -453,6 +453,10 @@
 
 {% block extra_css %}
 <style>
+    /* ============================================
+   HOME PAGE STYLES - COMPLETE
+   ============================================ */
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }
@@ -633,7 +637,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
 }
 .see-all:hover { color: var(--spotify-white); text-decoration: underline; }
 
-/* ===== FEATURED GRID ===== */
+/* ============================================
+   FEATURED GRID - NEW RELEASES
+   ============================================ */
 .featured-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -771,7 +777,7 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     box-shadow: 0 4px 20px rgba(255, 209, 0, 0.5);
 }
 
-/* ===== RESPONSIVE GRID ===== */
+/* ===== RESPONSIVE GRID - NEW RELEASES ===== */
 /* Desktop: 8 columns */
 @media (min-width: 1200px) {
     .featured-grid {
@@ -796,46 +802,45 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     }
 }
 
-/* Mobile: 3 columns with smaller images */
+/* Mobile: 3 columns */
 @media (max-width: 767px) {
     .featured-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+        gap: 10px;
     }
     
     .music-card-grid {
-        padding: 6px;
+        padding: 8px;
     }
     
     .music-card-grid .card-image {
         margin-bottom: 6px;
-        aspect-ratio: 1;
     }
     
     .music-card-grid .card-title {
-        font-size: 0.6rem;
+        font-size: 0.7rem;
         margin-bottom: 2px;
     }
     
     .music-card-grid .card-artists {
-        font-size: 0.5rem;
+        font-size: 0.6rem;
     }
     
     .music-card-grid .card-artists .artist-link {
-        font-size: 0.5rem;
+        font-size: 0.6rem;
     }
     
     .music-card-grid .card-artists .ft-text {
-        font-size: 0.5rem;
+        font-size: 0.6rem;
     }
     
     .music-card-grid .song-stats .stat-item {
-        font-size: 0.45rem;
+        font-size: 0.55rem;
         gap: 2px;
     }
     
     .music-card-grid .song-stats .stat-item i {
-        font-size: 0.4rem;
+        font-size: 0.5rem;
     }
     
     .music-card-grid .card-actions {
@@ -843,7 +848,61 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
         transform: translateY(0);
         bottom: 4px;
         right: 4px;
-        gap: 3px;
+        gap: 4px;
+    }
+    
+    .play-btn-card, .download-btn-card {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+    
+    .play-btn-card i, .download-btn-card i {
+        font-size: 0.6rem;
+    }
+    
+    .featured-indicator {
+        display: none;
+    }
+    
+    .original-artist-note {
+        display: none;
+    }
+    
+    .music-card-grid .card-content {
+        min-height: 45px;
+    }
+}
+
+/* Small mobile: 2 columns for very small screens */
+@media (max-width: 480px) {
+    .featured-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .music-card-grid {
+        padding: 6px;
+    }
+    
+    .music-card-grid .card-title {
+        font-size: 0.65rem;
+    }
+    
+    .music-card-grid .card-artists {
+        font-size: 0.55rem;
+    }
+    
+    .music-card-grid .card-artists .artist-link {
+        font-size: 0.55rem;
+    }
+    
+    .music-card-grid .card-artists .ft-text {
+        font-size: 0.55rem;
+    }
+    
+    .music-card-grid .song-stats .stat-item {
+        font-size: 0.5rem;
     }
     
     .play-btn-card, .download-btn-card {
@@ -856,21 +915,13 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
         font-size: 0.5rem;
     }
     
-    .featured-indicator {
-        display: none;
-    }
-    
-    .original-artist-note {
-        display: none;
-    }
-    
     .music-card-grid .card-content {
-        min-height: 40px;
+        min-height: 38px;
     }
 }
 
-/* Small mobile: 2 columns for very small screens */
-@media (max-width: 480px) {
+/* Extra small: 2 columns */
+@media (max-width: 360px) {
     .featured-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 6px;
@@ -895,7 +946,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     }
 }
 
-/* ===== LOAD MORE ===== */
+/* ============================================
+   LOAD MORE
+   ============================================ */
 .load-more-container {
     display: flex;
     flex-direction: column;
@@ -951,7 +1004,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     color: var(--spotify-light-gray);
 }
 
-/* ===== CHARTS - RESPONSIVE ===== */
+/* ============================================
+   CHARTS
+   ============================================ */
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1275,7 +1330,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     }
 }
 
-/* ===== SCROLLING SECTIONS ===== */
+/* ============================================
+   SCROLLING SECTIONS
+   ============================================ */
 .cards-scroll-container,
 .artists-scroll-container,
 .news-scroll-container {
@@ -1310,7 +1367,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     transform: translateY(-50%) scale(1.1);
 }
 
-/* ===== MUSIC CARDS (Old - keep for compatibility) ===== */
+/* ============================================
+   MUSIC CARDS (Old - keep for compatibility)
+   ============================================ */
 .music-card {
     background: var(--spotify-gray); border-radius: var(--card-radius);
     padding: 15px; transition: var(--transition); cursor: pointer;
@@ -1321,7 +1380,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
 
-/* ===== ARTIST CARDS ===== */
+/* ============================================
+   ARTIST CARDS
+   ============================================ */
 .artist-card {
     background: var(--spotify-gray); border-radius: var(--card-radius);
     padding: 15px; transition: var(--transition); cursor: pointer;
@@ -1355,7 +1416,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
 }
 .artist-type { color: var(--spotify-light-gray); font-size: 0.8rem; margin: 0; }
 
-/* ===== NEWS CARDS ===== */
+/* ============================================
+   NEWS CARDS
+   ============================================ */
 .news-card {
     background: var(--spotify-gray); border-radius: var(--card-radius);
     overflow: hidden; transition: var(--transition);
@@ -1401,7 +1464,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
 }
 .news-read-more:hover { color: #1ed760; text-decoration: underline; }
 
-/* ===== NEWS PAGINATION ===== */
+/* ============================================
+   NEWS PAGINATION
+   ============================================ */
 .news-pagination {
     display: flex; justify-content: center; gap: 8px;
     margin-top: 15px;
@@ -1413,7 +1478,9 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
 }
 .news-pagination .dot.active { background: var(--spotify-green); transform: scale(1.2); }
 
-/* ===== MUSIC PLAYER ===== */
+/* ============================================
+   MUSIC PLAYER
+   ============================================ */
 .music-player {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--spotify-gray); border-top: 1px solid rgba(255,255,255,0.1);
@@ -1483,11 +1550,14 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     background: var(--spotify-white); cursor: pointer;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ============================================
+   RESPONSIVE - GENERAL
+   ============================================ */
 @media (max-width: 1024px) {
     .hero-title { font-size: 2.8rem; }
     .hero-content { flex-direction: column; text-align: center; gap: 40px; }
 }
+
 @media (max-width: 768px) {
     .spotify-hero { padding: 80px 0 40px; }
     .hero-title { font-size: 2.2rem; }
@@ -1499,6 +1569,7 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     .player-container { flex-wrap: wrap; gap: 10px; }
     .player-progress { order: 3; flex: 1 0 100%; max-width: none; margin-top: 5px; }
 }
+
 @media (max-width: 480px) {
     .hero-title { font-size: 1.8rem; }
     .music-card { width: 150px; }
