@@ -162,7 +162,17 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+                    <div class="song-meta-info">
+                        {% if song.genre %}
+                        <span class="song-genre">{{ song.genre.name }}</span>
+                        {% endif %}
+                        <span class="song-duration">{{ song.formatted_duration }}</span>
+                        {% if song.featured_artists.exists %}
+                        <span class="featured-count-badge" title="{{ song.featured_artists.count }} featured artist{{ song.featured_artists.count|pluralize }}">
+                            <i class="fas fa-user-friends"></i> +{{ song.featured_artists.count }}
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <div class="song-stats">
