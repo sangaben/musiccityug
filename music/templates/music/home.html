@@ -85,8 +85,6 @@
                     </div>
                 </div>
             </div>
-            
-            </div>
         </div>
     </div>
 </section>
@@ -99,82 +97,90 @@
             <h2 class="section-title animate-on-scroll">New Releases</h2>
             <a href="{% url 'discover' %}" class="see-all">Show all</a>
         </div>
-        <div class="cards-scroll-container">
-            <div class="cards-scroll">
-                {% for song in featured_songs|slice:":15" %}
-                <div class="music-card animate-on-scroll" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})">
-                    <div class="card-image">
-                        {% if song.cover_image %}
-                        <img src="{{ song.cover_image.url }}" alt="{{ song.title }}">
-                        {% else %}
-                        <div class="default-cover">
-                            <i class="fas fa-music"></i>
-                        </div>
-                        {% endif %}
-                        <div class="card-actions">
-                            <button class="play-btn-card" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="download-btn-card" onclick="event.stopPropagation(); downloadSong({{ song.id }})">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
+        
+        <!-- Grid Layout for Featured Songs -->
+        <div class="featured-grid" id="featuredGrid">
+            {% for song in featured_songs|slice:":30" %}
+            <div class="music-card-grid animate-on-scroll" data-song-id="{{ song.id }}" data-plays="{{ song.plays }}" data-downloads="{{ song.downloads }}" onclick="playSongFromCard({{ song.id }})" data-index="{{ forloop.counter0 }}">
+                <div class="card-image">
+                    {% if song.cover_image %}
+                    <img src="{{ song.cover_image.url }}" alt="{{ song.title }}" loading="lazy">
+                    {% else %}
+                    <div class="default-cover">
+                        <i class="fas fa-music"></i>
                     </div>
-                    <div class="card-content">
-                        <h3 class="card-title">{{ song.title }}</h3>
-                        <div class="card-artists">
-                            <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
-                                {{ song.display_artist }}
-                            </a>
-                            {% with featured_artists=song.featured_artists.all %}
-                                {% if featured_artists %}
-                                    <span class="ft-text">ft.</span>
-                                    {% for artist in featured_artists %}
-                                        <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
-                                            {{ artist.name }}
-                                        </a>{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                    <span class="featured-indicator" title="{{ featured_artists|length }} featured artist{{ featured_artists|length|pluralize }}">
-                                        <i class="fas fa-user-friends"></i>
-                                        +{{ featured_artists|length }}
-                                    </span>
-                                {% endif %}
-                            {% endwith %}
+                    {% endif %}
+                    <div class="card-actions">
+                        <button class="play-btn-card" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="download-btn-card" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">{{ song.title }}</h3>
+                    <div class="card-artists">
+                        <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                            {{ song.display_artist }}
+                        </a>
+                        {% with featured_artists=song.featured_artists.all %}
+                            {% if featured_artists %}
+                                <span class="ft-text">ft.</span>
+                                {% for artist in featured_artists %}
+                                    <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                        {{ artist.name }}
+                                    </a>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                                <span class="featured-indicator" title="{{ featured_artists|length }} featured artist{{ featured_artists|length|pluralize }}">
+                                    <i class="fas fa-user-friends"></i>
+                                    +{{ featured_artists|length }}
+                                </span>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
+                    <div class="original-artist-note">
+                        <small class="original-artist">
+                            <i class="fas fa-info-circle"></i> 
+                            Original: {{ song.artist.name }}
+                        </small>
+                    </div>
+                    {% endif %}
+                    <div class="song-stats">
+                        <div class="stat-item" title="Plays">
+                            <i class="fas fa-play"></i>
+                            <span class="plays">{{ song.plays|intcomma }}</span>
                         </div>
-                        {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
-                        <div class="original-artist-note">
-                            <small class="original-artist">
-                                <i class="fas fa-info-circle"></i> 
-                                Original: {{ song.artist.name }}
-                            </small>
-                        </div>
-                        {% endif %}
-                        <div class="song-stats">
-                            <div class="stat-item" title="Plays">
-                                <i class="fas fa-play"></i>
-                                <span class="plays">{{ song.plays|intcomma }}</span>
-                            </div>
-                            <div class="stat-item" title="Downloads">
-                                <i class="fas fa-download"></i>
-                                <span class="downloads">{{ song.downloads|intcomma }}</span>
-                            </div>
+                        <div class="stat-item" title="Downloads">
+                            <i class="fas fa-download"></i>
+                            <span class="downloads">{{ song.downloads|intcomma }}</span>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                <div class="empty-state">
-                    <i class="fas fa-music"></i>
-                    <p>No songs available</p>
-                </div>
-                {% endfor %}
             </div>
-            <button class="scroll-btn scroll-left" onclick="scrollSection(this, -1)">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="scroll-btn scroll-right" onclick="scrollSection(this, 1)">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-music"></i>
+                <p>No songs available</p>
+            </div>
+            {% endfor %}
         </div>
+
+        <!-- Load More Button -->
+        {% if featured_songs|length > 24 %}
+        <div class="load-more-container" id="loadMoreContainer">
+            <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreSongs()">
+                <i class="fas fa-plus-circle"></i>
+                Load More Songs
+            </button>
+            <div class="load-progress" id="loadProgress">
+                <span class="loaded-count" id="loadedCount">24</span>
+                <span class="total-count"> / {{ featured_songs|length }} songs loaded</span>
+            </div>
+        </div>
+        {% endif %}
     </section>
     
     <div class="container">
@@ -247,7 +253,7 @@
                                 <button class="play-btn-small" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
                                     <i class="fas fa-play"></i>
                                 </button>
-                                <button class="download-btn-small" onclick="event.stopPropagation(); downloadSong({{ song.id }})">
+                                <button class="download-btn-small" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)">
                                     <i class="fas fa-download"></i>
                                 </button>
                             </div>
@@ -323,7 +329,7 @@
                                 <button class="play-btn-small" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
                                     <i class="fas fa-play"></i>
                                 </button>
-                                <button class="download-btn-small" onclick="event.stopPropagation(); downloadSong({{ song.id }})">
+                                <button class="download-btn-small" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)">
                                     <i class="fas fa-download"></i>
                                 </button>
                             </div>
@@ -666,6 +672,237 @@ body { background: var(--spotify-black); color: var(--spotify-white); font-famil
     font-weight: 600; font-size: 0.9rem; transition: var(--transition);
 }
 .see-all:hover { color: var(--spotify-white); text-decoration: underline; }
+
+
+/* ===== FEATURED GRID ===== */
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.music-card-grid {
+    background: var(--spotify-gray);
+    border-radius: var(--card-radius);
+    padding: 15px;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+
+.music-card-grid:hover {
+    background: #3e3e3e;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+.music-card-grid .card-image {
+    position: relative;
+    width: 100%;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 1;
+}
+
+.music-card-grid .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-card-grid .default-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--uganda-black), var(--uganda-red));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--spotify-white);
+    font-size: 2rem;
+}
+
+.music-card-grid .card-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: var(--transition);
+    display: flex;
+    gap: 6px;
+}
+
+.music-card-grid:hover .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.music-card-grid .card-content {
+    min-height: 70px;
+}
+
+.music-card-grid .card-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--spotify-white);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-card-grid .song-stats {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.music-card-grid .song-stats .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.75rem;
+    color: var(--spotify-light-gray);
+}
+
+/* ===== RESPONSIVE GRID ===== */
+/* Desktop: 8 columns */
+@media (min-width: 1200px) {
+    .featured-grid {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Tablet: 4 columns */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .featured-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+    
+    .music-card-grid .card-title {
+        font-size: 0.85rem;
+    }
+    
+    .music-card-grid .song-stats .stat-item {
+        font-size: 0.7rem;
+    }
+}
+
+/* Mobile: 3 columns */
+@media (max-width: 767px) {
+    .featured-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    
+    .music-card-grid {
+        padding: 10px;
+    }
+    
+    .music-card-grid .card-title {
+        font-size: 0.75rem;
+    }
+    
+    .music-card-grid .card-artists {
+        font-size: 0.7rem;
+    }
+    
+    .music-card-grid .song-stats .stat-item {
+        font-size: 0.65rem;
+    }
+    
+    .music-card-grid .card-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .play-btn-card, .download-btn-card {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+}
+
+/* Small mobile: 2 columns for very small screens */
+@media (max-width: 480px) {
+    .featured-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .music-card-grid {
+        padding: 8px;
+    }
+    
+    .music-card-grid .card-title {
+        font-size: 0.7rem;
+    }
+    
+    .play-btn-card, .download-btn-card {
+        width: 24px;
+        height: 24px;
+        font-size: 0.6rem;
+    }
+}
+
+/* ===== LOAD MORE ===== */
+.load-more-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.load-more-btn {
+    background: var(--spotify-gray);
+    color: var(--spotify-white);
+    border: 2px solid var(--spotify-green);
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.load-more-btn:hover {
+    background: var(--spotify-green);
+    color: var(--spotify-black);
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+}
+
+.load-more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.load-more-btn i {
+    font-size: 1.2rem;
+}
+
+.load-progress {
+    color: var(--spotify-light-gray);
+    font-size: 0.9rem;
+}
+
+.loaded-count {
+    color: var(--spotify-green);
+    font-weight: 600;
+}
+
+.total-count {
+    color: var(--spotify-light-gray);
+}
 
 /* ===== CHARTS ===== */
 .charts-grid {
@@ -1051,7 +1288,92 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeNewsTicker();
     initializeNewsPagination();
     initializeAutoScrollNews();
+    initializeLoadMore();
 });
+
+// ========== LOAD MORE FUNCTIONALITY ==========
+function initializeLoadMore() {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (!loadMoreBtn) return;
+    
+    const allCards = document.querySelectorAll('.music-card-grid');
+    const cardsPerPage = 24; // 8 columns x 3 rows
+    let currentVisible = cardsPerPage;
+    
+    // Hide cards beyond the first page
+    allCards.forEach((card, index) => {
+        if (index >= cardsPerPage) {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update progress
+    updateLoadProgress(currentVisible, allCards.length);
+    
+    // Store state
+    window.featuredLoadState = {
+        currentVisible: currentVisible,
+        cardsPerPage: cardsPerPage,
+        totalCards: allCards.length
+    };
+}
+
+function loadMoreSongs() {
+    const btn = document.getElementById('loadMoreBtn');
+    const state = window.featuredLoadState;
+    
+    if (!state) return;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    
+    // Simulate loading delay for smooth UX
+    setTimeout(() => {
+        const allCards = document.querySelectorAll('.music-card-grid');
+        const nextBatch = state.cardsPerPage;
+        let newVisible = Math.min(state.currentVisible + nextBatch, state.totalCards);
+        
+        // Show next batch of cards
+        for (let i = state.currentVisible; i < newVisible; i++) {
+            if (allCards[i]) {
+                allCards[i].style.display = 'block';
+                // Re-trigger animation
+                allCards[i].classList.remove('visible');
+                setTimeout(() => {
+                    allCards[i].classList.add('visible');
+                }, 50);
+            }
+        }
+        
+        state.currentVisible = newVisible;
+        
+        // Update progress
+        updateLoadProgress(newVisible, state.totalCards);
+        
+        // Check if all cards are loaded
+        if (newVisible >= state.totalCards) {
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> All Songs Loaded';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+        } else {
+            btn.innerHTML = '<i class="fas fa-plus-circle"></i> Load More Songs';
+            btn.disabled = false;
+        }
+        
+        // Update visible count
+        document.getElementById('loadedCount').textContent = newVisible;
+    }, 500);
+}
+
+function updateLoadProgress(loaded, total) {
+    const progressContainer = document.getElementById('loadProgress');
+    if (progressContainer) {
+        document.getElementById('loadedCount').textContent = loaded;
+    }
+}
+
+// Expose loadMoreSongs globally
+window.loadMoreSongs = loadMoreSongs;
 
 // ========== NEWS TICKER ROTATION ==========
 function initializeNewsTicker() {

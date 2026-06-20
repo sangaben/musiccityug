@@ -9,19 +9,27 @@
     <!-- Filter Controls Section -->
     <section class="filter-section" style="margin-bottom: 40px;">
         <div class="filter-controls">
-            <select id="genre-filter" onchange="filterSongs()">
-                <option value="">All Genres</option>
-                {% for genre in genres %}
-                <option value="{{ genre.name }}">{{ genre.name }}</option>
-                {% endfor %}
-            </select>
-            <select id="sort-by" onchange="sortSongs()">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="plays">Most Plays</option>
-                <option value="downloads">Most Downloads</option>
-                <option value="title">Title A-Z</option>
-            </select>
+            <div class="filter-left">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search songs, artists..." oninput="filterSongs()">
+                </div>
+            </div>
+            <div class="filter-right">
+                <select id="genre-filter" onchange="filterSongs()">
+                    <option value="">All Genres</option>
+                    {% for genre in genres %}
+                    <option value="{{ genre.name }}">{{ genre.name }}</option>
+                    {% endfor %}
+                </select>
+                <select id="sort-by" onchange="sortSongs()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="plays">Most Plays</option>
+                    <option value="downloads">Most Downloads</option>
+                    <option value="title">Title A-Z</option>
+                </select>
+            </div>
         </div>
     </section>
 
@@ -44,9 +52,73 @@
                 </div>
             </div>
         </div>
-   
 
-        <!-- Mdundo Style List View (Default View) -->
+        <!-- Grid View -->
+        <div id="grid-view-container" class="featured-grid" style="display: none;">
+            {% for song in songs %}
+            <div class="song-card" data-song-id="{{ song.id }}" 
+                 data-title="{{ song.title|lower }}" 
+                 data-artist="{{ song.get_display_artist_name|lower }}"
+                 data-genre="{% if song.genre %}{{ song.genre.name }}{% endif %}"
+                 data-plays="{{ song.plays }}"
+                 data-downloads="{{ song.downloads }}"
+                 data-upload-date="{{ song.upload_date|date:'Y-m-d' }}">
+                <div class="card-image" style="background-image: url('{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}')">
+                    <div class="play-overlay">
+                        <button class="play-btn-large" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h3 class="song-title-grid">{{ song.title }}</h3>
+                    <div class="song-artist-display">
+                        <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
+                            {{ song.display_artist }}
+                        </a>
+                        {% with featured_artists=song.featured_artists.all %}
+                            {% if featured_artists %}
+                                <span class="ft-text">ft.</span>
+                                {% for artist in featured_artists %}
+                                    <a href="{% url 'artist_detail' artist.id %}" class="artist-link featured-artist">
+                                        {{ artist.name }}
+                                    </a>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="song-stats-grid">
+                        <div class="stat-item">
+                            <i class="fas fa-play"></i>
+                            <span class="stat-count">{{ song.plays }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-download"></i>
+                            <span class="stat-count">{{ song.downloads }}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="play-btn" onclick="event.stopPropagation(); playSongFromCard({{ song.id }})">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="action-buttons">
+                            <button class="download-btn" onclick="event.stopPropagation(); downloadSong({{ song.id }}, this)">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-results" style="display: block; grid-column: 1 / -1;">
+                <i class="fas fa-music"></i>
+                <h3>No songs available</h3>
+                <p>Check back later for new songs</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View (Default) -->
         <div id="list-view-container" class="mdundo-song-list">
             {% for song in songs %}
             <div class="mdundo-song-item" data-song-id="{{ song.id }}" 
@@ -56,7 +128,6 @@
                  data-plays="{{ song.plays }}"
                  data-downloads="{{ song.downloads }}"
                  data-upload-date="{{ song.upload_date|date:'Y-m-d' }}">
-                <!-- Song Image -->
                 <div class="song-image">
                     <img src="{% if song.cover_image %}{{ song.cover_image.url }}{% else %}{% static 'images/default-cover.jpg' %}{% endif %}" 
                          alt="{{ song.title }}" 
@@ -64,18 +135,13 @@
                          loading="lazy">
                 </div>
                 
-                <!-- Song Details -->
                 <div class="song-details">
                     <div class="song-title-artist">
                         <h4 class="song-title">{{ song.title }}</h4>
-                        <!-- UPDATED: Display artists using display_artist_name field -->
                         <div class="song-artist">
-                            <!-- Display Artist Name (using display_artist_name if set) -->
                             <a href="{% url 'artist_detail' song.artist.id %}" class="artist-link primary-artist">
                                 {{ song.display_artist }}
                             </a>
-                            
-                            <!-- Featured Artists -->
                             {% with featured_artists=song.featured_artists.all %}
                                 {% if featured_artists %}
                                     <span class="ft-text">ft.</span>
@@ -87,8 +153,6 @@
                                 {% endif %}
                             {% endwith %}
                         </div>
-                        
-                        <!-- Display original artist name if different from display name -->
                         {% if song.display_artist_name and song.display_artist_name != song.artist.name %}
                         <div class="original-artist-note">
                             <small class="original-artist">
@@ -98,20 +162,9 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="song-meta-info">
-                        {% if song.genre %}
-                        <span class="song-genre">{{ song.genre.name }}</span>
-                        {% endif %}
-                        <span class="song-duration">{{ song.formatted_duration }}</span>
-                        {% if song.featured_artists.exists %}
-                        <span class="featured-count-badge" title="{{ song.featured_artists.count }} featured artist{{ song.featured_artists.count|pluralize }}">
-                            <i class="fas fa-user-friends"></i> +{{ song.featured_artists.count }}
-                        </span>
-                        {% endif %}
-                    </div>
+                    
                 </div>
                 
-                <!-- Song Stats -->
                 <div class="song-stats">
                     <div class="stat">
                         <i class="fas fa-play"></i>
@@ -123,7 +176,6 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="song-actions">
                     <button class="mdundo-play-btn" onclick="playSongFromCard({{ song.id }})" title="Play">
                         <i class="fas fa-play"></i>
@@ -131,7 +183,6 @@
                     <button class="mdundo-download-btn" onclick="downloadSong({{ song.id }}, this)" title="Download">
                         <i class="fas fa-download"></i>
                     </button>
-                  
                 </div>
             </div>
             {% empty %}
@@ -153,6 +204,33 @@
             <i class="fas fa-music"></i>
             <h3>No songs found</h3>
             <p>Try adjusting your search or filter criteria</p>
+        </div>
+
+        <!-- Enhanced Pagination -->
+        <div class="pagination-container" id="paginationContainer">
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPageBtn" onclick="changePage(-1)" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                
+                <div class="page-numbers" id="pageNumbers">
+                    <span class="page-number active" data-page="1" onclick="goToPage(1)">1</span>
+                    <span class="page-number" data-page="2" onclick="goToPage(2)">2</span>
+                    <span class="page-number" data-page="3" onclick="goToPage(3)">3</span>
+                    <span class="page-number" data-page="4" onclick="goToPage(4)">4</span>
+                    <span class="page-number" data-page="5" onclick="goToPage(5)">5</span>
+                </div>
+                
+                <button class="pagination-btn" id="nextPageBtn" onclick="changePage(1)">
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div class="pagination-info">
+                <span id="pageInfo">Showing 1-12 of {{ songs.count }} songs</span>
+            </div>
         </div>
     </section>
 
@@ -184,7 +262,11 @@
 
 {% block extra_css %}
 <style>
-/* Filter Section */
+    /* ============================================
+   DISCOVER PAGE STYLES
+   ============================================ */
+
+/* ===== FILTER SECTION ===== */
 .filter-section {
     background: var(--card-bg);
     padding: 25px 30px;
@@ -197,10 +279,56 @@
     display: flex;
     gap: 20px;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
-.filter-controls select {
+.filter-left {
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 15px;
+    color: var(--gray);
+    font-size: 14px;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: var(--light);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.search-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+.search-wrapper input::placeholder {
+    color: var(--gray);
+}
+
+.filter-right {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-right select {
     padding: 12px 20px;
     border-radius: 25px;
     border: 1px solid rgba(255,255,255,0.2);
@@ -212,15 +340,18 @@
     min-width: 150px;
 }
 
-.filter-controls select:focus {
+.filter-right select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
 
-/* ===== ARTIST LINKS STYLING ===== */
+.filter-right select option {
+    background: var(--card-bg);
+    color: var(--light);
+}
 
-/* Primary artist - White */
+/* ===== ARTIST LINKS ===== */
 .artist-link.primary-artist {
     color: var(--spotify-white);
     text-decoration: none;
@@ -234,7 +365,6 @@
     text-decoration: underline;
 }
 
-/* Featured artists - Orange */
 .artist-link.featured-artist {
     color: var(--uganda-yellow);
     text-decoration: none;
@@ -244,11 +374,10 @@
 }
 
 .artist-link.featured-artist:hover {
-    color: #ffdf4d; /* Lighter orange/yellow on hover */
+    color: #ffdf4d;
     text-decoration: underline;
 }
 
-/* "ft." text styling */
 .ft-text {
     color: var(--spotify-light-gray);
     font-size: 0.85rem;
@@ -256,7 +385,6 @@
     margin: 0 4px;
 }
 
-/* Original artist note */
 .original-artist-note {
     margin-top: 4px;
 }
@@ -270,28 +398,6 @@
     opacity: 0.7;
 }
 
-.original-artist i {
-    font-size: 0.7rem;
-}
-
-/* Featured indicator */
-.featured-indicator {
-    margin-left: 6px;
-    color: var(--spotify-light-gray);
-    font-size: 0.75rem;
-    background: rgba(255, 209, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-}
-
-.featured-indicator i {
-    font-size: 0.7rem;
-}
-
-/* Featured count badge */
 .featured-count-badge {
     background: rgba(255, 209, 0, 0.1);
     color: var(--uganda-yellow);
@@ -304,7 +410,7 @@
     gap: 4px;
 }
 
-/* Section Header */
+/* ===== SECTION HEADER ===== */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -366,7 +472,9 @@
     color: var(--light);
 }
 
-/* Mdundo Style List View */
+/* ============================================
+   LIST VIEW
+   ============================================ */
 .mdundo-song-list {
     background: var(--card-bg);
     border-radius: 15px;
@@ -383,7 +491,6 @@
     transition: var(--transition);
     cursor: pointer;
     gap: 20px;
-    position: relative;
 }
 
 .mdundo-song-item:last-child {
@@ -394,7 +501,6 @@
     background: rgba(255,255,255,0.05);
 }
 
-/* Song Image (Rectangular cover image) */
 .song-image {
     width: 60px;
     height: 60px;
@@ -403,9 +509,6 @@
     flex-shrink: 0;
     border: 2px solid var(--primary);
     background: rgba(255,255,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .song-image img {
@@ -414,7 +517,6 @@
     object-fit: cover;
 }
 
-/* Song Details */
 .song-details {
     flex: 1;
     min-width: 0;
@@ -453,11 +555,6 @@
     gap: 4px;
 }
 
-.song-artist .original-artist-note {
-    width: 100%;
-    margin-top: 2px;
-}
-
 .song-meta-info {
     display: flex;
     gap: 15px;
@@ -481,7 +578,7 @@
     font-weight: 500;
 }
 
-/* Song Stats - Always Visible */
+/* ===== SONG STATS ===== */
 .song-stats {
     display: flex;
     gap: 20px;
@@ -507,14 +604,15 @@
     text-align: right;
 }
 
-/* Action Buttons */
+/* ===== ACTION BUTTONS ===== */
 .song-actions {
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-.mdundo-play-btn, .mdundo-download-btn, .mdundo-like-btn {
+.mdundo-play-btn,
+.mdundo-download-btn {
     border: none;
     cursor: pointer;
     transition: var(--transition);
@@ -540,12 +638,6 @@
     box-shadow: 0 4px 15px rgba(253, 121, 168, 0.3);
 }
 
-.mdundo-like-btn {
-    background: rgba(255,255,255,0.1);
-    color: var(--gray);
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
 .mdundo-play-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
@@ -556,26 +648,62 @@
     box-shadow: 0 6px 20px rgba(253, 121, 168, 0.4);
 }
 
-.mdundo-like-btn:hover {
-    color: var(--secondary);
-    background: rgba(253, 121, 168, 0.1);
-    border-color: var(--secondary);
-}
-
-/* Grid View */
-.featured-grid {
+/* ============================================
+   GRID VIEW - RESPONSIVE COLUMNS
+   ============================================ */
+#grid-view-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 25px;
+    margin-bottom: 40px;
 }
 
+/* Desktop: 8 columns (1200px and above) */
+@media (min-width: 1200px) {
+    #grid-view-container {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Tablet: 6 columns (768px - 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+    #grid-view-container {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Mobile: 3 columns (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    #grid-view-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+}
+
+/* Small Mobile: 3 columns (360px - 479px) */
+@media (min-width: 360px) and (max-width: 479px) {
+    #grid-view-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+/* Extra Small: 2 columns (below 360px) */
+@media (max-width: 359px) {
+    #grid-view-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}
+
+/* ===== SONG CARD STYLES ===== */
 .song-card {
     background: var(--card-bg);
     border-radius: 15px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.1);
     transition: var(--transition);
-    backdrop-filter: blur(10px);
 }
 
 .song-card:hover {
@@ -633,7 +761,7 @@
     padding: 20px;
 }
 
-.card-content h3 {
+.song-title-grid {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 8px 0;
@@ -654,7 +782,7 @@
     gap: 4px;
 }
 
-.song-stats {
+.song-stats-grid {
     display: flex;
     gap: 15px;
     margin: 15px 0;
@@ -707,7 +835,7 @@
     gap: 8px;
 }
 
-.action-btn, .download-btn {
+.download-btn {
     color: var(--gray);
     background: none;
     border: none;
@@ -723,17 +851,363 @@
     height: 36px;
 }
 
-.action-btn:hover {
-    color: var(--secondary);
-    background: rgba(253, 121, 168, 0.1);
-}
-
 .download-btn:hover {
     color: var(--primary);
     background: rgba(108, 92, 231, 0.1);
 }
 
-/* Genres Section */
+/* ===== RESPONSIVE CARD SIZES ===== */
+/* Desktop card sizes */
+@media (min-width: 1200px) {
+    .card-image {
+        height: 200px;
+    }
+    
+    .song-title-grid {
+        font-size: 0.95rem;
+    }
+    
+    .song-artist-display {
+        font-size: 0.85rem;
+    }
+    
+    .stat-item {
+        font-size: 0.75rem;
+    }
+}
+
+/* Tablet card sizes */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .card-image {
+        height: 150px;
+    }
+    
+    .song-title-grid {
+        font-size: 0.85rem;
+    }
+    
+    .song-artist-display {
+        font-size: 0.75rem;
+    }
+    
+    .stat-item {
+        font-size: 0.7rem;
+    }
+    
+    .play-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .download-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+    }
+    
+    .play-btn-large {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+}
+
+/* Mobile card sizes (3 columns) */
+@media (min-width: 480px) and (max-width: 767px) {
+    .card-image {
+        height: 120px;
+    }
+    
+    .card-content {
+        padding: 12px;
+    }
+    
+    .song-title-grid {
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+    }
+    
+    .song-artist-display {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+    }
+    
+    .song-artist-display .artist-link {
+        font-size: 0.7rem;
+    }
+    
+    .song-artist-display .ft-text {
+        font-size: 0.7rem;
+    }
+    
+    .song-stats-grid {
+        margin: 8px 0;
+        padding: 6px 0;
+        gap: 10px;
+    }
+    
+    .stat-item {
+        font-size: 0.65rem;
+        gap: 3px;
+    }
+    
+    .stat-item i {
+        font-size: 8px;
+    }
+    
+    .card-actions {
+        margin-top: 8px;
+    }
+    
+    .play-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+    
+    .download-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+        padding: 4px;
+    }
+    
+    .play-btn-large {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile card sizes */
+@media (min-width: 360px) and (max-width: 479px) {
+    .card-image {
+        height: 100px;
+    }
+    
+    .card-content {
+        padding: 10px;
+    }
+    
+    .song-title-grid {
+        font-size: 0.65rem;
+        margin-bottom: 3px;
+    }
+    
+    .song-artist-display {
+        font-size: 0.6rem;
+        margin-bottom: 6px;
+        gap: 2px;
+    }
+    
+    .song-artist-display .artist-link {
+        font-size: 0.6rem;
+    }
+    
+    .song-artist-display .ft-text {
+        font-size: 0.6rem;
+    }
+    
+    .song-stats-grid {
+        margin: 6px 0;
+        padding: 4px 0;
+        gap: 8px;
+    }
+    
+    .stat-item {
+        font-size: 0.55rem;
+        gap: 2px;
+    }
+    
+    .stat-item i {
+        font-size: 7px;
+    }
+    
+    .card-actions {
+        margin-top: 6px;
+    }
+    
+    .play-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 9px;
+    }
+    
+    .download-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+        padding: 3px;
+    }
+    
+    .play-btn-large {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+}
+
+/* Extra Small Mobile card sizes */
+@media (max-width: 359px) {
+    .card-image {
+        height: 90px;
+    }
+    
+    .card-content {
+        padding: 8px;
+    }
+    
+    .song-title-grid {
+        font-size: 0.6rem;
+        margin-bottom: 2px;
+    }
+    
+    .song-artist-display {
+        font-size: 0.55rem;
+        margin-bottom: 4px;
+        gap: 2px;
+    }
+    
+    .song-artist-display .artist-link {
+        font-size: 0.55rem;
+    }
+    
+    .song-artist-display .ft-text {
+        font-size: 0.55rem;
+    }
+    
+    .song-stats-grid {
+        margin: 4px 0;
+        padding: 3px 0;
+        gap: 6px;
+    }
+    
+    .stat-item {
+        font-size: 0.5rem;
+        gap: 2px;
+    }
+    
+    .stat-item i {
+        font-size: 6px;
+    }
+    
+    .card-actions {
+        margin-top: 4px;
+    }
+    
+    .play-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 8px;
+    }
+    
+    .download-btn {
+        width: 18px;
+        height: 18px;
+        font-size: 8px;
+        padding: 2px;
+    }
+    
+    .play-btn-large {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.pagination-container {
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: var(--light);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-btn i {
+    font-size: 12px;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.page-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--gray);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.page-number:hover:not(.active) {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.page-number.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.pagination-info {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--gray);
+    font-size: 14px;
+}
+
+/* ============================================
+   GENRES SECTION
+   ============================================ */
 .genres-section {
     margin-top: 80px;
 }
@@ -790,6 +1264,10 @@
     margin-top: 8px;
 }
 
+.genre-link {
+    text-decoration: none;
+}
+
 .no-genres {
     grid-column: 1 / -1;
     text-align: center;
@@ -807,8 +1285,11 @@
     color: var(--gray);
 }
 
-/* Loading and No Results */
-.loading-container, .no-results {
+/* ============================================
+   LOADING & NO RESULTS
+   ============================================ */
+.loading-container,
+.no-results {
     text-align: center;
     padding: 60px 20px;
     display: none;
@@ -840,25 +1321,36 @@
     color: var(--gray);
 }
 
-/* Animations */
+/* ============================================
+   ANIMATIONS
+   ============================================ */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-/* Mobile Responsive Design */
-@media (max-width: 768px) {
+/* ============================================
+   GENERAL RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 1024px) {
     .filter-controls {
         flex-direction: column;
         gap: 15px;
         align-items: stretch;
     }
     
-    .filter-controls select {
+    .filter-right {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .filter-right select {
         width: 100%;
         min-width: auto;
     }
-    
+}
+
+@media (max-width: 768px) {
     .section-header {
         flex-direction: column;
         align-items: flex-start;
@@ -870,11 +1362,11 @@
         justify-content: space-between;
     }
     
-    /* Mobile Mdundo List View */
+    /* List view mobile adjustments */
     .mdundo-song-item {
         padding: 12px 15px;
         gap: 15px;
-        position: relative;
+        flex-wrap: wrap;
     }
     
     .song-image {
@@ -882,57 +1374,39 @@
         height: 50px;
     }
     
-    .song-title {
-        font-size: 15px;
-    }
-    
-    .song-artist {
-        font-size: 13px;
-    }
-    
-    /* Show stats on mobile but make them compact */
     .song-stats {
-        display: flex !important;
-        gap: 15px;
         margin: 0 15px;
     }
     
     .stat {
         font-size: 11px;
-        gap: 4px;
-    }
-    
-    .stat i {
-        font-size: 10px;
-    }
-    
-    .stat-count {
-        min-width: auto;
-        font-size: 10px;
-    }
-    
-    .song-actions {
-        gap: 8px;
     }
     
     .mdundo-play-btn,
-    .mdundo-download-btn,
-    .mdundo-like-btn {
+    .mdundo-download-btn {
         width: 36px;
         height: 36px;
         font-size: 13px;
         padding: 8px;
     }
     
-    /* Adjust artist display for mobile */
-    .song-artist {
-        flex-wrap: wrap;
+    /* Pagination mobile adjustments */
+    .pagination-controls {
+        gap: 10px;
     }
     
-    .original-artist {
-        font-size: 0.7rem;
+    .page-number {
+        width: 35px;
+        height: 35px;
+        font-size: 12px;
     }
     
+    .pagination-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+    
+    /* Genres mobile adjustments */
     .genres-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 15px;
@@ -944,6 +1418,7 @@
         padding: 20px;
     }
     
+    /* List view small mobile */
     .mdundo-song-item {
         padding: 10px 12px;
         gap: 12px;
@@ -952,11 +1427,6 @@
     .song-image {
         width: 45px;
         height: 45px;
-    }
-    
-    .song-details {
-        flex: 1;
-        min-width: 150px;
     }
     
     .song-title {
@@ -979,40 +1449,41 @@
     
     .stat {
         font-size: 10px;
-        gap: 3px;
     }
     
     .stat i {
         font-size: 9px;
     }
     
-    .stat-count {
-        font-size: 9px;
-    }
-    
-    .song-actions {
-        gap: 6px;
-    }
-    
     .mdundo-play-btn,
-    .mdundo-download-btn,
-    .mdundo-like-btn {
+    .mdundo-download-btn {
         width: 32px;
         height: 32px;
         font-size: 12px;
         padding: 6px;
     }
     
-    /* Adjust artist links for very small screens */
-    .artist-link.primary-artist,
-    .artist-link.featured-artist {
-        font-size: 0.75rem;
+    /* Pagination small mobile */
+    .pagination-controls {
+        gap: 8px;
     }
     
-    .ft-text {
-        font-size: 0.75rem;
+    .page-number {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
     }
     
+    .pagination-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    
+    .pagination-btn i {
+        font-size: 10px;
+    }
+    
+    /* Genres small mobile */
     .genres-grid {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 15px;
@@ -1029,13 +1500,10 @@
         font-size: 12px;
     }
     
+    /* List view extra small */
     .mdundo-song-item {
         gap: 10px;
         padding: 8px 10px;
-    }
-    
-    .song-details {
-        min-width: 120px;
     }
     
     .song-image {
@@ -1052,68 +1520,25 @@
         font-size: 9px;
     }
     
-    .stat-count {
-        font-size: 9px;
-    }
-    
-    .song-actions {
-        gap: 5px;
-    }
-    
     .mdundo-play-btn,
-    .mdundo-download-btn,
-    .mdundo-like-btn {
+    .mdundo-download-btn {
         width: 30px;
         height: 30px;
         font-size: 11px;
         padding: 5px;
     }
-}
-
-/* Extra Small Devices */
-@media (max-width: 320px) {
-    .mdundo-song-item {
-        padding: 6px 8px;
-        gap: 8px;
+    
+    /* Genres extra small */
+    .genre-card {
+        padding: 20px 15px;
     }
     
-    .song-image {
-        width: 40px;
-        height: 40px;
+    .genre-name {
+        font-size: 14px;
     }
     
-    .song-title {
-        font-size: 13px;
-    }
-    
-    .song-artist {
-        font-size: 11px;
-    }
-    
-    .song-stats {
-        gap: 8px;
-        margin: 0 6px;
-    }
-    
-    .stat {
-        font-size: 8px;
-    }
-    
-    .stat-count {
-        font-size: 8px;
-    }
-    
-    .song-actions {
-        gap: 4px;
-    }
-    
-    .mdundo-play-btn,
-    .mdundo-download-btn,
-    .mdundo-like-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 10px;
-        padding: 4px;
+    .genre-count {
+        font-size: 12px;
     }
 }
 </style>
@@ -1121,30 +1546,28 @@
 
 {% block extra_js %}
 <script>
-// Global variable to track if play has been counted for current song
+// ===== GLOBAL VARIABLES =====
 window.playCountedForSong = {};
 window.currentSongId = null;
+window.currentPage = 1;
+const ITEMS_PER_PAGE = 12;
 
-// Initialize the discover page
+// ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
     initializeDiscoverPlaylist();
+    setupPagination();
     updateResultsCount();
     setupSearchIntegration();
     ensureMobileStatsVisibility();
-    
-    // Also update on window resize
     window.addEventListener('resize', ensureMobileStatsVisibility);
 });
 
-// Ensure stats are always visible on mobile
 function ensureMobileStatsVisibility() {
-    const statsElements = document.querySelectorAll('.song-stats');
-    statsElements.forEach(stats => {
+    document.querySelectorAll('.song-stats').forEach(stats => {
         stats.style.display = 'flex';
     });
 }
 
-// Setup integration with base.html search bar
 function setupSearchIntegration() {
     const baseSearchInput = document.getElementById('search-input');
     if (baseSearchInput) {
@@ -1165,7 +1588,7 @@ function setupSearchIntegration() {
     }
 }
 
-// Initialize playlist with discover songs for the base.html player
+// ===== INITIALIZE PLAYLIST =====
 function initializeDiscoverPlaylist() {
     const discoverSongs = [
         {% for song in songs %}
@@ -1194,328 +1617,120 @@ function initializeDiscoverPlaylist() {
         {% endfor %}
     ];
     
-    // Store the discover playlist globally for the base player to use
     window.discoverPlaylist = discoverSongs;
 }
 
-// ========== UPDATED: Play song from card using the base.html player ==========
-function playSongFromCard(songId) {
-    // Get the song data from our discover playlist
-    const song = window.discoverPlaylist?.find(s => s.id === songId);
+// ===== PAGINATION =====
+function setupPagination() {
+    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     
-    if (song && typeof window.playSong === 'function') {
-        // Set current song ID
-        window.currentSongId = songId;
-        
-        // Reset play tracking for this song
-        window.playCountedForSong[songId] = false;
-        
-        // Use the base.html player function
-        window.playSong(song, window.discoverPlaylist, window.discoverPlaylist.findIndex(s => s.id === songId));
-        
-        // Update the UI play count immediately
-        updateSongPlayCount(songId);
-    } else {
-        console.error('Song not found or player not available');
-    }
+    // Show only first page initially
+    showPage(1);
+    updatePaginationButtons(1, totalPages);
 }
 
-// ========== Track song play in the database ==========
-function trackSongPlay(songId) {
-    console.log(`🎵 Tracking play for song ID: ${songId}`);
+function showPage(page) {
+    const items = document.querySelectorAll('.mdundo-song-item, .song-card');
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
     
-    // Don't track if already counted
-    if (window.playCountedForSong[songId]) {
-        console.log(`⏭️ Play already counted for song ${songId}, skipping`);
-        return;
-    }
-    
-    // Mark as counted immediately to prevent duplicates
-    window.playCountedForSong[songId] = true;
-    
-    // Use the track-play endpoint (POST)
-    fetch(`/api/track-play/${songId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => {
-        if (response.status === 403) {
-            // Premium content restriction
-            return response.json().then(data => {
-                console.log('Premium content restriction:', data);
-                if (data.error) {
-                    showNotification(data.error, 'error');
-                }
-                // Reset since play was blocked
-                window.playCountedForSong[songId] = false;
-                return null;
-            });
+    items.forEach((item, index) => {
+        // Check if item is visible (not filtered out)
+        const isVisible = item.style.display !== 'none';
+        if (isVisible) {
+            item.style.display = index >= start && index < end ? '' : 'none';
         }
-        
-        if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        
-        return response.json();
-    })
-    .then(data => {
-        if (data) {
-            console.log('Play tracked successfully:', data);
-            
-            // Update the UI with the new play count
-            if (data.success && data.new_plays !== undefined) {
-                updatePlayCountInUI(songId, data.new_plays);
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error tracking play:', error);
-        // Reset since tracking failed
-        window.playCountedForSong[songId] = false;
-        
-        // Try fallback endpoint
-        fetch(`/api/track-anonymous-play/${songId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.plays !== undefined) {
-                updatePlayCountInUI(songId, data.plays);
-            }
-        })
-        .catch(fallbackError => {
-            console.error('Fallback also failed:', fallbackError);
-        });
-    });
-}
-
-// ========== Update play count in the UI ==========
-function updatePlayCountInUI(songId, newPlayCount) {
-    console.log(`📈 Updating UI for song ${songId} to ${newPlayCount} plays`);
-    
-    // Find all elements with this song ID and update their play count
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    
-    songCards.forEach(card => {
-        // Update plays data attribute
-        card.setAttribute('data-plays', newPlayCount);
-        
-        // Find play count elements inside this card
-        const playElements = card.querySelectorAll('.stat-count, .plays-count');
-        playElements.forEach(element => {
-            // Format number with commas
-            const formattedPlays = new Intl.NumberFormat().format(newPlayCount);
-            element.textContent = formattedPlays;
-        });
     });
     
-    // Also update the global discover playlist data
-    if (window.discoverPlaylist) {
-        const songIndex = window.discoverPlaylist.findIndex(s => s.id === songId);
-        if (songIndex !== -1) {
-            window.discoverPlaylist[songIndex].plays = newPlayCount;
-        }
+    // Update page info
+    const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+    const totalVisible = visibleItems.length;
+    const showingEnd = Math.min(end, totalVisible);
+    const showingStart = totalVisible > 0 ? start + 1 : 0;
+    
+    document.getElementById('pageInfo').textContent = 
+        totalVisible > 0 ? `Showing ${showingStart}-${showingEnd} of ${totalVisible} songs` : 'No songs found';
+    
+    window.currentPage = page;
+}
+
+function changePage(delta) {
+    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const newPage = Math.max(1, Math.min(totalPages, window.currentPage + delta));
+    
+    if (newPage !== window.currentPage) {
+        showPage(newPage);
+        updatePaginationButtons(newPage, totalPages);
     }
 }
 
-// ========== Update a specific song's play count ==========
-function updateSongPlayCount(songId) {
-    // First, increment the local count immediately for better UX
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
+function goToPage(page) {
+    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     
-    songCards.forEach(card => {
-        const currentPlays = parseInt(card.getAttribute('data-plays') || '0');
-        const newPlays = currentPlays + 1;
-        
-        // Update data attribute
-        card.setAttribute('data-plays', newPlays);
-        
-        // Update UI immediately
-        const playElements = card.querySelectorAll('.stat-count, .plays-count');
-        playElements.forEach(element => {
-            const formattedPlays = new Intl.NumberFormat().format(newPlays);
-            element.textContent = formattedPlays;
-        });
-    });
-    
-    // Then track in database
-    trackSongPlay(songId);
-}
-
-// ========== Update a specific song's download count ==========
-function updateSongDownloadCount(songId) {
-    const songCards = document.querySelectorAll(`[data-song-id="${songId}"]`);
-    
-    songCards.forEach(card => {
-        const currentDownloads = parseInt(card.getAttribute('data-downloads') || '0');
-        const newDownloads = currentDownloads + 1;
-        
-        // Update data attribute
-        card.setAttribute('data-downloads', newDownloads);
-        
-        // Update UI
-        const downloadElements = card.querySelectorAll('.stat-count, .downloads-count');
-        downloadElements.forEach(element => {
-            const formattedDownloads = new Intl.NumberFormat().format(newDownloads);
-            element.textContent = formattedDownloads;
-        });
-    });
-}
-
-// ========== Download song function ==========
-function downloadSong(songId, buttonElement = null) {
-    // Show loading state if button provided
-    if (buttonElement) {
-        const originalHTML = buttonElement.innerHTML;
-        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        buttonElement.disabled = true;
-    }
-    
-    // Update download count in UI immediately
-    updateSongDownloadCount(songId);
-    
-    // Open download in new tab (this will trigger the Django view)
-    window.open(`/download-song/${songId}/`, '_blank');
-    
-    // Track download analytics
-    fetch('/api/track-download/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            song_id: songId,
-            song_title: getSongTitle(songId),
-            artist_name: getDisplayArtistName(songId),
-            original_artist_name: getOriginalArtistName(songId)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Download tracked:', data);
-    })
-    .catch(error => {
-        console.error('Error tracking download:', error);
-    });
-    
-    // Restore button state if button provided
-    if (buttonElement) {
-        setTimeout(() => {
-            buttonElement.innerHTML = '<i class="fas fa-download"></i>';
-            buttonElement.disabled = false;
-        }, 1000);
+    if (page >= 1 && page <= totalPages) {
+        showPage(page);
+        updatePaginationButtons(page, totalPages);
     }
 }
 
-// Helper function to get song title from data attributes
-function getSongTitle(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const titleElement = card.querySelector('.song-title, h3');
-        return titleElement ? titleElement.textContent.trim() : 'Unknown Song';
+function updatePaginationButtons(currentPage, totalPages) {
+    // Update page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    
+    if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
     }
-    return 'Unknown Song';
-}
-
-// Helper function to get display artist name from data attributes
-function getDisplayArtistName(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const artistElement = card.querySelector('.song-artist .artist-link.primary-artist, .song-artist-display .artist-link.primary-artist');
-        return artistElement ? artistElement.textContent.trim() : 'Unknown Artist';
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const span = document.createElement('span');
+        span.className = `page-number${i === currentPage ? ' active' : ''}`;
+        span.dataset.page = i;
+        span.textContent = i;
+        span.onclick = () => goToPage(i);
+        pageNumbers.appendChild(span);
     }
-    return 'Unknown Artist';
+    
+    // Update prev/next buttons
+    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
 }
 
-// Helper function to get original artist name from data attributes
-function getOriginalArtistName(songId) {
-    const card = document.querySelector(`[data-song-id="${songId}"]`);
-    if (card) {
-        const originalNote = card.querySelector('.original-artist');
-        if (originalNote) {
-            // Extract original artist name from the note
-            const text = originalNote.textContent.trim();
-            const match = text.match(/Original:\s*(.+)/);
-            return match ? match[1].trim() : 'Unknown Artist';
-        }
-    }
-    return 'Unknown Artist';
-}
-
-// Like song function
-function likeSong(songId, buttonElement) {
-    fetch(`/like-song/${songId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Update heart icon
-            const heartIcon = buttonElement.querySelector('i');
-            if (data.action === 'liked') {
-                heartIcon.className = 'fas fa-heart';
-                heartIcon.style.color = 'var(--primary)';
-                buttonElement.title = 'Remove from Liked Songs';
-                showNotification(data.message, 'success');
-            } else {
-                heartIcon.className = 'far fa-heart';
-                heartIcon.style.color = '';
-                buttonElement.title = 'Add to Liked Songs';
-                showNotification(data.message, 'success');
-            }
-        } else {
-            showNotification(data.message || 'Error updating like status', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Error updating like status', 'error');
-    });
-}
-
-// Filter songs based on search and genre
+// ===== FILTER SONGS =====
 function filterSongs() {
-    const baseSearchInput = document.getElementById('search-input');
-    const searchTerm = baseSearchInput ? baseSearchInput.value.toLowerCase() : '';
+    const searchInput = document.getElementById('search-input');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     const genreFilter = document.getElementById('genre-filter').value;
     
-    const gridSongs = document.querySelectorAll('.featured-grid .song-card');
+    const gridSongs = document.querySelectorAll('#grid-view-container .song-card');
     const listSongs = document.querySelectorAll('.mdundo-song-list .mdundo-song-item');
     
     let visibleCount = 0;
+    const allSongs = [...gridSongs, ...listSongs];
     
-    [gridSongs, listSongs].forEach(songList => {
-        songList.forEach(song => {
-            const title = song.dataset.title;
-            const artist = song.dataset.artist;
-            const genre = song.dataset.genre;
-            
-            const matchesSearch = !searchTerm || 
-                                 title.includes(searchTerm) || 
-                                 artist.includes(searchTerm);
-            const matchesGenre = !genreFilter || genre === genreFilter;
-            
-            if (matchesSearch && matchesGenre) {
-                song.style.display = song.classList.contains('mdundo-song-item') ? 'flex' : 'block';
-                visibleCount++;
-            } else {
-                song.style.display = 'none';
-            }
-        });
+    allSongs.forEach(song => {
+        const title = song.dataset.title || '';
+        const artist = song.dataset.artist || '';
+        const genre = song.dataset.genre || '';
+        
+        const matchesSearch = !searchTerm || 
+                             title.includes(searchTerm) || 
+                             artist.includes(searchTerm);
+        const matchesGenre = !genreFilter || genre === genreFilter;
+        
+        if (matchesSearch && matchesGenre) {
+            song.style.display = song.classList.contains('mdundo-song-item') ? 'flex' : 'block';
+            visibleCount++;
+        } else {
+            song.style.display = 'none';
+        }
     });
     
     updateResultsCount(visibleCount);
@@ -1525,16 +1740,20 @@ function filterSongs() {
         noResults.style.display = 'block';
     } else {
         noResults.style.display = 'none';
+        // Reset pagination with filtered items
+        const totalPages = Math.ceil(visibleCount / ITEMS_PER_PAGE);
+        showPage(1);
+        updatePaginationButtons(1, totalPages);
     }
 }
 
-// Sort songs based on selected criteria
+// ===== SORT SONGS =====
 function sortSongs() {
     const sortBy = document.getElementById('sort-by').value;
-    const gridContainer = document.querySelector('.featured-grid');
+    const gridContainer = document.querySelector('#grid-view-container');
     const listContainer = document.getElementById('list-view-container');
     
-    const gridSongs = Array.from(document.querySelectorAll('.featured-grid .song-card'));
+    const gridSongs = Array.from(document.querySelectorAll('#grid-view-container .song-card'));
     const listSongs = Array.from(document.querySelectorAll('.mdundo-song-list .mdundo-song-item'));
     
     const sortFunction = (a, b) => {
@@ -1559,11 +1778,17 @@ function sortSongs() {
     
     gridSongs.forEach(song => gridContainer.appendChild(song));
     listSongs.forEach(song => listContainer.appendChild(song));
+    
+    // Re-apply pagination after sorting
+    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    showPage(1);
+    updatePaginationButtons(1, totalPages);
 }
 
-// Toggle between grid and list view
+// ===== TOGGLE VIEW =====
 function toggleView(viewType) {
-    const gridView = document.querySelector('.featured-grid');
+    const gridView = document.getElementById('grid-view-container');
     const listView = document.getElementById('list-view-container');
     const gridBtn = document.getElementById('grid-view');
     const listBtn = document.getElementById('list-view');
@@ -1579,20 +1804,150 @@ function toggleView(viewType) {
         gridBtn.classList.remove('active');
         listBtn.classList.add('active');
     }
+    
+    // Re-apply pagination for the new view
+    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    showPage(1);
+    updatePaginationButtons(1, totalPages);
 }
 
-// Update results count
+// ===== UPDATE RESULTS COUNT =====
 function updateResultsCount(count = null) {
     const resultsCount = document.getElementById('results-count');
     if (count !== null) {
         resultsCount.textContent = `${count} songs`;
     } else {
-        const totalSongs = document.querySelectorAll('.mdundo-song-list .mdundo-song-item').length;
+        const totalSongs = document.querySelectorAll('.mdundo-song-item, .song-card').length;
         resultsCount.textContent = `${totalSongs} songs`;
     }
 }
 
-// Utility function to get CSRF token (from base.html)
+// ===== PLAY FUNCTIONS =====
+function playSongFromCard(songId) {
+    const song = window.discoverPlaylist?.find(s => s.id === songId);
+    
+    if (song && typeof window.playSong === 'function') {
+        window.currentSongId = songId;
+        window.playCountedForSong[songId] = false;
+        window.playSong(song, window.discoverPlaylist, window.discoverPlaylist.findIndex(s => s.id === songId));
+        updateSongPlayCount(songId);
+    } else {
+        console.error('Song not found or player not available');
+    }
+}
+
+function trackSongPlay(songId) {
+    if (window.playCountedForSong[songId]) return;
+    window.playCountedForSong[songId] = true;
+    
+    fetch(`/api/track-play/${songId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (response.status === 403) {
+            return response.json().then(data => {
+                window.playCountedForSong[songId] = false;
+                if (data.error) showNotification(data.error, 'error');
+                return null;
+            });
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.success && data.new_plays !== undefined) {
+            updatePlayCountInUI(songId, data.new_plays);
+        }
+    })
+    .catch(() => {
+        window.playCountedForSong[songId] = false;
+        fetch(`/api/track-anonymous-play/${songId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.plays !== undefined) {
+                updatePlayCountInUI(songId, data.plays);
+            }
+        })
+        .catch(() => {});
+    });
+}
+
+function updatePlayCountInUI(songId, newPlayCount) {
+    document.querySelectorAll(`[data-song-id="${songId}"]`).forEach(card => {
+        card.setAttribute('data-plays', newPlayCount);
+        card.querySelectorAll('.stat-count, .plays-count').forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newPlayCount);
+        });
+    });
+    
+    if (window.discoverPlaylist) {
+        const songIndex = window.discoverPlaylist.findIndex(s => s.id === songId);
+        if (songIndex !== -1) window.discoverPlaylist[songIndex].plays = newPlayCount;
+    }
+}
+
+function updateSongPlayCount(songId) {
+    document.querySelectorAll(`[data-song-id="${songId}"]`).forEach(card => {
+        const currentPlays = parseInt(card.getAttribute('data-plays') || '0');
+        const newPlays = currentPlays + 1;
+        card.setAttribute('data-plays', newPlays);
+        card.querySelectorAll('.stat-count, .plays-count').forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newPlays);
+        });
+    });
+    trackSongPlay(songId);
+}
+
+// ===== DOWNLOAD FUNCTION =====
+function downloadSong(songId, buttonElement = null) {
+    if (buttonElement) {
+        const originalHTML = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        buttonElement.disabled = true;
+        setTimeout(() => {
+            buttonElement.innerHTML = originalHTML;
+            buttonElement.disabled = false;
+        }, 2000);
+    }
+    
+    updateSongDownloadCount(songId);
+    window.open(`/download-song/${songId}/`, '_blank');
+    
+    fetch('/api/track-download/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ song_id: songId })
+    }).catch(() => {});
+}
+
+function updateSongDownloadCount(songId) {
+    document.querySelectorAll(`[data-song-id="${songId}"]`).forEach(card => {
+        const currentDownloads = parseInt(card.getAttribute('data-downloads') || '0');
+        const newDownloads = currentDownloads + 1;
+        card.setAttribute('data-downloads', newDownloads);
+        card.querySelectorAll('.stat-count, .downloads-count').forEach(el => {
+            el.textContent = new Intl.NumberFormat().format(newDownloads);
+        });
+    });
+}
+
+// ===== UTILITY FUNCTIONS =====
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -1608,43 +1963,30 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Show notification (compatible with base.html)
 function showNotification(message, type = 'info') {
-    // Try to use base.html notification system first
     if (typeof window.showMessage === 'function') {
         window.showMessage(message, type);
-    } 
-    // Fallback to simple notification
-    else {
+    } else {
         const notification = document.createElement('div');
         notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
+            position: fixed; top: 20px; right: 20px; padding: 12px 20px;
+            border-radius: 8px; color: white; font-weight: 500; z-index: 10000;
             background: ${type === 'success' ? 'var(--primary)' : type === 'error' ? '#dc3545' : '#17a2b8'};
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         `;
         notification.textContent = message;
-        
         document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        setTimeout(() => notification.remove(), 3000);
     }
 }
 
-// Make functions globally available for base.html integration
+// ===== GLOBAL EXPOSURE =====
 window.playSongFromCard = playSongFromCard;
 window.downloadSong = downloadSong;
-window.likeSong = likeSong;
 window.filterSongs = filterSongs;
 window.sortSongs = sortSongs;
 window.toggleView = toggleView;
+window.changePage = changePage;
+window.goToPage = goToPage;
 </script>
 {% endblock %}
