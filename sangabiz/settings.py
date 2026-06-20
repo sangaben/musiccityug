@@ -220,25 +220,17 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# --------------------------------------------------
-# Logging
-# --------------------------------------------------
-LOGS_DIR = BASE_DIR / "logs"
-LOGS_DIR.mkdir(exist_ok=True)
-
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "file": {
-            "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": LOGS_DIR / "django_errors.log",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
         },
-        "console": {"class": "logging.StreamHandler"},
     },
-    "loggers": {
-        "django": {"handlers": ["file", "console"], "level": "ERROR"},
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     },
 }
 # --------------------------------------------------
