@@ -1556,7 +1556,7 @@
 
 {% block extra_js %}
 <script>
-// ===== GLOBAL VARIABLES =====
+    // ===== GLOBAL VARIABLES =====
 window.playCountedForSong = {};
 window.currentSongId = null;
 window.currentPage = 1;
@@ -1565,11 +1565,15 @@ const ITEMS_PER_PAGE = 12;
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
     initializeDiscoverPlaylist();
-    setupPagination();
     updateResultsCount();
     setupSearchIntegration();
     ensureMobileStatsVisibility();
     window.addEventListener('resize', ensureMobileStatsVisibility);
+    
+    // Initialize pagination AFTER everything is loaded
+    setTimeout(function() {
+        setupPagination();
+    }, 100);
 });
 
 function ensureMobileStatsVisibility() {
@@ -1632,7 +1636,17 @@ function initializeDiscoverPlaylist() {
 
 // ===== PAGINATION =====
 function setupPagination() {
-    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    // Get all list items and grid items that are visible
+    const listItems = document.querySelectorAll('.mdundo-song-item');
+    const gridItems = document.querySelectorAll('.song-card');
+    const allItems = [...listItems, ...gridItems];
+    
+    // Make sure all items are visible initially
+    allItems.forEach(item => {
+        item.style.display = '';
+    });
+    
+    const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     
     // Show only first page initially
@@ -1641,32 +1655,57 @@ function setupPagination() {
 }
 
 function showPage(page) {
-    const items = document.querySelectorAll('.mdundo-song-item, .song-card');
+    const listItems = document.querySelectorAll('.mdundo-song-item');
+    const gridItems = document.querySelectorAll('.song-card');
+    const allItems = [...listItems, ...gridItems];
+    
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
     
-    items.forEach((item, index) => {
-        // Check if item is visible (not filtered out)
-        const isVisible = item.style.display !== 'none';
-        if (isVisible) {
-            item.style.display = index >= start && index < end ? '' : 'none';
+    // First, make all items visible
+    allItems.forEach(item => {
+        item.style.display = '';
+    });
+    
+    // Then hide items outside the current page
+    allItems.forEach((item, index) => {
+        // Check if item is filtered out (hidden by filter)
+        const isFilteredOut = item.style.display === 'none';
+        if (!isFilteredOut) {
+            if (index < start || index >= end) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = item.classList.contains('mdundo-song-item') ? 'flex' : 'block';
+            }
         }
     });
     
     // Update page info
-    const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+    const visibleItems = allItems.filter(item => {
+        const isVisible = item.style.display !== 'none';
+        const isFilteredOut = item.style.display === 'none';
+        return isVisible && !isFilteredOut;
+    });
+    
     const totalVisible = visibleItems.length;
     const showingEnd = Math.min(end, totalVisible);
     const showingStart = totalVisible > 0 ? start + 1 : 0;
     
-    document.getElementById('pageInfo').textContent = 
-        totalVisible > 0 ? `Showing ${showingStart}-${showingEnd} of ${totalVisible} songs` : 'No songs found';
+    const pageInfo = document.getElementById('pageInfo');
+    if (pageInfo) {
+        pageInfo.textContent = totalVisible > 0 ? 
+            `Showing ${showingStart}-${showingEnd} of ${totalVisible} songs` : 
+            'No songs found';
+    }
     
     window.currentPage = page;
 }
 
 function changePage(delta) {
-    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const listItems = document.querySelectorAll('.mdundo-song-item');
+    const gridItems = document.querySelectorAll('.song-card');
+    const allItems = [...listItems, ...gridItems];
+    const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     const newPage = Math.max(1, Math.min(totalPages, window.currentPage + delta));
     
@@ -1677,7 +1716,10 @@ function changePage(delta) {
 }
 
 function goToPage(page) {
-    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+    const listItems = document.querySelectorAll('.mdundo-song-item');
+    const gridItems = document.querySelectorAll('.song-card');
+    const allItems = [...listItems, ...gridItems];
+    const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     
     if (page >= 1 && page <= totalPages) {
@@ -1689,6 +1731,8 @@ function goToPage(page) {
 function updatePaginationButtons(currentPage, totalPages) {
     // Update page numbers
     const pageNumbers = document.getElementById('pageNumbers');
+    if (!pageNumbers) return;
+    
     pageNumbers.innerHTML = '';
     
     const maxVisible = 5;
@@ -1709,8 +1753,10 @@ function updatePaginationButtons(currentPage, totalPages) {
     }
     
     // Update prev/next buttons
-    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
 }
 
 // ===== FILTER SONGS =====
@@ -1746,14 +1792,16 @@ function filterSongs() {
     updateResultsCount(visibleCount);
     
     const noResults = document.getElementById('no-results');
-    if (visibleCount === 0) {
-        noResults.style.display = 'block';
-    } else {
-        noResults.style.display = 'none';
-        // Reset pagination with filtered items
-        const totalPages = Math.ceil(visibleCount / ITEMS_PER_PAGE);
-        showPage(1);
-        updatePaginationButtons(1, totalPages);
+    if (noResults) {
+        if (visibleCount === 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+            // Reset pagination with filtered items
+            const totalPages = Math.ceil(visibleCount / ITEMS_PER_PAGE);
+            showPage(1);
+            updatePaginationButtons(1, totalPages);
+        }
     }
 }
 
@@ -1790,8 +1838,8 @@ function sortSongs() {
     listSongs.forEach(song => listContainer.appendChild(song));
     
     // Re-apply pagination after sorting
-    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const allItems = [...gridSongs, ...listSongs];
+    const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE);
     showPage(1);
     updatePaginationButtons(1, totalPages);
 }
@@ -1804,20 +1852,22 @@ function toggleView(viewType) {
     const listBtn = document.getElementById('list-view');
     
     if (viewType === 'grid') {
-        gridView.style.display = 'grid';
-        listView.style.display = 'none';
-        gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
+        if (gridView) gridView.style.display = 'grid';
+        if (listView) listView.style.display = 'none';
+        if (gridBtn) gridBtn.classList.add('active');
+        if (listBtn) listBtn.classList.remove('active');
     } else {
-        gridView.style.display = 'none';
-        listView.style.display = 'block';
-        gridBtn.classList.remove('active');
-        listBtn.classList.add('active');
+        if (gridView) gridView.style.display = 'none';
+        if (listView) listView.style.display = 'block';
+        if (gridBtn) gridBtn.classList.remove('active');
+        if (listBtn) listBtn.classList.add('active');
     }
     
     // Re-apply pagination for the new view
-    const totalItems = document.querySelectorAll('.mdundo-song-item, .song-card').length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const listItems = document.querySelectorAll('.mdundo-song-item');
+    const gridItems = document.querySelectorAll('.song-card');
+    const allItems = [...listItems, ...gridItems];
+    const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE);
     showPage(1);
     updatePaginationButtons(1, totalPages);
 }
@@ -1825,11 +1875,13 @@ function toggleView(viewType) {
 // ===== UPDATE RESULTS COUNT =====
 function updateResultsCount(count = null) {
     const resultsCount = document.getElementById('results-count');
-    if (count !== null) {
-        resultsCount.textContent = `${count} songs`;
-    } else {
-        const totalSongs = document.querySelectorAll('.mdundo-song-item, .song-card').length;
-        resultsCount.textContent = `${totalSongs} songs`;
+    if (resultsCount) {
+        if (count !== null) {
+            resultsCount.textContent = `${count} songs`;
+        } else {
+            const totalSongs = document.querySelectorAll('.mdundo-song-item, .song-card').length;
+            resultsCount.textContent = `${totalSongs} songs`;
+        }
     }
 }
 
